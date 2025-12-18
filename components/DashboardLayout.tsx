@@ -1,0 +1,99 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
+import { CRMSidebar } from './crm-sidebar';
+import { CRMHeader } from './crm-header';
+import { SidebarProvider } from '@/components/ui/sidebar';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'super_admin' | 'manager' | 'staff';
+}
+
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // Check user authentication
+    const checkAuth = () => {
+      try {
+        const userData = localStorage.getItem('crm_user');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        } else {
+          // Redirect to login if no user data
+          router.push('/login');
+        }
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        router.push('/login');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  const handleThemeToggle = () => {
+    if (theme === 'dark') {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+  };
+
+  // Prevent hydration mismatch
+  const isDarkMode = mounted ? theme === 'dark' : false;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect to login
+  }
+
+  return (
+    <SidebarProvider defaultOpen={user.role !== 'manager'}>
+      <div className="flex h-screen overflow-hidden bg-background">
+        <CRMSidebar user={user} />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <CRMHeader
+            user={user}
+            onThemeToggle={handleThemeToggle}
+            isDarkMode={isDarkMode}
+          />
+          <main className="flex-1 overflow-hidden">
+            <div className="flex h-full flex-col">
+              <div className="flex-1 overflow-auto">
+                {children}
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}

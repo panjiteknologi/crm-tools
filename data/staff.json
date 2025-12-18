@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "name": "Mercy",
+    "email": "mercy@company.com",
+    "targetYearly": 100,
+    "completedThisYear": 45
+  },
+  {
+    "id": "2",
+    "name": "Dhea",
+    "email": "dhea@company.com",
+    "targetYearly": 100,
+    "completedThisYear": 38
+  }
+]

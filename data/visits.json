@@ -1,0 +1,690 @@
+{
+  "2025-01-01": [
+    {
+      "id": "1",
+      "clientName": "PT. Maju Jaya",
+      "date": "2025-01-01",
+      "time": "09:00",
+      "location": "Jakarta Pusat",
+      "status": "lanjut",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "notes": "Deal berhasil - Produk A",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Budi Santoso",
+      "phone": "0812-3456-7890"
+    },
+    {
+      "id": "2",
+      "clientName": "CV. Sukses Mandiri",
+      "date": "2025-01-01",
+      "time": "14:00",
+      "location": "Jakarta Selatan",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Siti Nurhaliza",
+      "phone": "0813-4567-8901"
+    }
+  ],
+  "2025-01-03": [
+    {
+      "id": "3",
+      "clientName": "PT. Teknologi Indonesia",
+      "date": "2025-01-03",
+      "time": "10:00",
+      "location": "Jakarta Utara",
+      "status": "lanjut",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Ahmad Wijaya",
+      "phone": "0814-5678-9012"
+    }
+  ],
+  "2025-01-06": [
+    {
+      "id": "4",
+      "clientName": "PT. Global Trading",
+      "date": "2025-01-06",
+      "time": "13:00",
+      "location": "Tangerang",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 4200000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Robert Tan",
+      "phone": "0815-6789-0123"
+    }
+  ],
+  "2025-01-08": [
+    {
+      "id": "5",
+      "clientName": "CV. Karya Utama",
+      "date": "2025-01-08",
+      "time": "15:30",
+      "location": "Depok",
+      "status": "lanjut",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Dewi Lestari",
+      "phone": "0816-7890-1234"
+    }
+  ],
+  "2025-01-10": [
+    {
+      "id": "6",
+      "clientName": "PT. Inovasi Digital",
+      "date": "2025-01-10",
+      "time": "11:00",
+      "location": "Bekasi",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Andi Pratama",
+      "phone": "0817-8901-2345"
+    }
+  ],
+  "2025-01-14": [
+    {
+      "id": "8",
+      "clientName": "PT. Sentosa Abadi",
+      "date": "2025-01-14",
+      "time": "14:30",
+      "location": "Jakarta Timur",
+      "status": "loss",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "contactPerson": "Lina Wijaya"
+    }
+  ],
+  "2025-01-15": [
+    {
+      "id": "9",
+      "clientName": "CV. Berkat Jaya",
+      "date": "2025-01-15",
+      "time": "10:30",
+      "location": "Bogor",
+      "status": "loss",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "contactPerson": "Fajar Santoso"
+    }
+  ],
+  "2025-01-17": [
+    {
+      "id": "10",
+      "clientName": "PT. Mitra Sejati",
+      "date": "2025-01-17",
+      "time": "13:00",
+      "location": "Tangerang Selatan",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Rizki Rahman",
+      "phone": "0818-9012-3456"
+    }
+  ],
+  "2025-08-01": [
+    {
+      "id": "aug25-1",
+      "clientName": "PT. Teknologi Canggih",
+      "date": "2025-08-01",
+      "time": "09:00",
+      "location": "Jakarta Pusat",
+      "status": "lanjut",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 15000000,
+      "notes": "Package Gold - Large deal",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Ricky Halim",
+      "phone": "0812-1111-2222"
+    },
+    {
+      "id": "aug25-2",
+      "clientName": "CV. Digital Solution",
+      "date": "2025-08-01",
+      "time": "14:00",
+      "location": "Jakarta Selatan",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 8500000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Andi Wijaya",
+      "phone": "0813-3333-4444"
+    }
+  ],
+  "2025-08-05": [
+    {
+      "id": "aug25-3",
+      "clientName": "PT. Inovasi Nusantara",
+      "date": "2025-08-05",
+      "time": "10:30",
+      "location": "Tangerang",
+      "status": "loss",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 2000000,
+      "notes": "Lost deal - Small consolation",
+      "contactPerson": "Michael Chen"
+    }
+  ],
+  "2025-08-11": [
+    {
+      "id": "aug25-4",
+      "clientName": "CV. Maju Bersama",
+      "date": "2025-08-11",
+      "time": "13:00",
+      "location": "Bekasi",
+      "status": "suspend",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 5000000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Lisa Permatasari",
+      "phone": "0816-9999-0000"
+    }
+  ],
+  "2025-08-15": [
+    {
+      "id": "aug25-5",
+      "clientName": "PT. Global Mandiri",
+      "date": "2025-08-15",
+      "time": "11:00",
+      "location": "Depok",
+      "status": "lanjut",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 12000000,
+      "notes": "Premium Package - Good deal",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "David Kusuma",
+      "phone": "0815-7777-8888"
+    }
+  ],
+  "2025-08-20": [
+    {
+      "id": "aug25-6",
+      "clientName": "CV. Cahaya Baru",
+      "date": "2025-08-20",
+      "time": "15:30",
+      "location": "Bogor",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 7500000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Siti Rahayu",
+      "phone": "0816-9999-0000"
+    }
+  ],
+  "2025-08-25": [
+    {
+      "id": "aug25-7",
+      "clientName": "PT. Maju Jaya",
+      "date": "2025-08-25",
+      "time": "10:00",
+      "location": "Jakarta Utara",
+      "status": "loss",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 3500000,
+      "notes": "Lost deal - Small consolation",
+      "contactPerson": "Ahmad Fauzi",
+      "phone": "0814-5678-9012"
+    }
+  ],
+  "2025-08-29": [
+    {
+      "id": "task-10",
+      "clientName": "PT. Abadi Jaya",
+      "date": "2025-08-29",
+      "time": "11:30",
+      "location": "Jakarta Timur",
+      "status": "task",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "notes": "Product demo scheduled - Awaiting confirmation",
+      "contactPerson": "Reza Fahlevi",
+      "phone": "0819-7777-6666"
+    }
+  ],
+  "2025-11-04": [
+    {
+      "id": "nov-1",
+      "clientName": "PT. Mega Perkasa",
+      "date": "2025-11-04",
+      "time": "09:00",
+      "location": "Jakarta Pusat",
+      "status": "lanjut",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 4500000,
+      "notes": "Deal berhasil - Produk Premium",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Hendra Wijaya",
+      "phone": "0812-3456-7890"
+    },
+    {
+      "id": "nov-2",
+      "clientName": "CV. Sejahtera Bersama",
+      "date": "2025-11-04",
+      "time": "10:30",
+      "location": "Jakarta Selatan",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 3200000,
+      "notes": "Follow up bulan depan",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Siti Aminah",
+      "phone": "0813-4567-8901"
+    }
+  ],
+  "2025-11-05": [
+    {
+      "id": "nov25-2",
+      "clientName": "CV. Cahaya Mentari",
+      "date": "2025-11-05",
+      "time": "14:00",
+      "location": "Bekasi",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 9000000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Indah Purnama",
+      "phone": "0823-4567-8901"
+    }
+  ],
+  "2025-11-10": [
+    {
+      "id": "nov25-3",
+      "clientName": "PT. Elang Jaya",
+      "date": "2025-11-10",
+      "time": "11:00",
+      "location": "Bogor",
+      "status": "loss",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 1500000,
+      "notes": "Lost deal - Minor consolation",
+      "contactPerson": "Ricky Hermawan"
+    }
+  ],
+  "2025-11-11": [
+    {
+      "id": "nov-5",
+      "clientName": "CV. Karya Sukses",
+      "date": "2025-11-11",
+      "time": "09:30",
+      "location": "Depok",
+      "status": "lanjut",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 5800000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Diana Putri",
+      "phone": "0815-6789-0123"
+    }
+  ],
+  "2025-11-12": [
+    {
+      "id": "nov-6",
+      "clientName": "PT. Digital Nusantara",
+      "date": "2025-11-12",
+      "time": "13:30",
+      "location": "Bekasi",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 4200000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Budi Santoso",
+      "phone": "0816-7890-1234"
+    }
+  ],
+  "2025-11-13": [
+    {
+      "id": "task-3",
+      "clientName": "PT. Karya Bersama",
+      "date": "2025-11-13",
+      "time": "11:00",
+      "location": "Jakarta Barat",
+      "status": "task",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "notes": "Waiting for budget approval - Schedule follow up",
+      "contactPerson": "Andi Kusuma",
+      "phone": "0815-5555-6666"
+    }
+  ],
+  "2025-11-14": [
+    {
+      "id": "nov25-4",
+      "clientName": "CV. Bintang Timur",
+      "date": "2025-11-14",
+      "time": "13:30",
+      "location": "Jakarta Barat",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 11000000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Faisal Rahman",
+      "phone": "0824-5678-9012"
+    }
+  ],
+  "2025-11-19": [
+    {
+      "id": "nov-9",
+      "clientName": "PT. Inovasi Teknologi",
+      "date": "2025-11-19",
+      "time": "14:30",
+      "location": "Bogor",
+      "status": "lanjut",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 5200000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Andi Rahman",
+      "phone": "0818-9012-3456"
+    }
+  ],
+  "2025-11-20": [
+    {
+      "id": "nov25-5",
+      "clientName": "PT. Prima Sentosa",
+      "date": "2025-11-20",
+      "time": "10:00",
+      "location": "Depok",
+      "status": "suspend",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 6000000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Diana Kartika",
+      "phone": "0825-6789-0123"
+    }
+  ],
+  "2025-11-21": [
+    {
+      "id": "nov-10",
+      "clientName": "PT. Harapan Baru",
+      "date": "2025-11-21",
+      "time": "11:30",
+      "location": "Tangerang Selatan",
+      "status": "loss",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 1200000,
+      "contactPerson": "Lisa Permata"
+    }
+  ],
+  "2025-11-25": [
+    {
+      "id": "nov25-6",
+      "clientName": "CV. Mitra Bersama",
+      "date": "2025-11-25",
+      "time": "15:00",
+      "location": "Jakarta Timur",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 13500000,
+      "notes": "Platinum Package - Excellent deal",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Bobby Hartanto",
+      "phone": "0826-7890-1234"
+    }
+  ],
+  "2025-11-27": [
+    {
+      "id": "task-4",
+      "clientName": "CV. Jaya Makmur",
+      "date": "2025-11-27",
+      "time": "15:30",
+      "location": "Depok",
+      "status": "task",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "notes": "Initial meeting completed - Awaiting client decision",
+      "contactPerson": "Rina Setiawan",
+      "phone": "0813-7777-8888"
+    }
+  ],
+  "2025-11-28": [
+    {
+      "id": "nov-14",
+      "clientName": "PT. Nusantara Sejahtera",
+      "date": "2025-11-28",
+      "time": "10:30",
+      "location": "Tangerang",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 5400000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Reza Fahlevi",
+      "phone": "0821-2345-6789"
+    },
+    {
+      "id": "nov-13",
+      "clientName": "CV. Mandiri Jaya",
+      "date": "2025-11-28",
+      "time": "15:30",
+      "location": "Jakarta Selatan",
+      "status": "loss",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 800000,
+      "contactPerson": "Maya Sari"
+    }
+  ],
+  "2025-12-01": [
+    {
+      "id": "dec25-1",
+      "clientName": "PT. Digital Indonesia",
+      "date": "2025-12-01",
+      "time": "09:00",
+      "location": "Jakarta Pusat",
+      "status": "lanjut",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 9500000,
+      "notes": "Kick off meeting Q4 2025",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Ricky Halim",
+      "phone": "0812-1111-2222"
+    }
+  ],
+  "2025-12-02": [
+    {
+      "id": "dec25-2",
+      "clientName": "CV. Teknologi Maju",
+      "date": "2025-12-02",
+      "time": "13:30",
+      "location": "Jakarta Selatan",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 6800000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Andi Wijaya",
+      "phone": "0813-3333-4444"
+    }
+  ],
+  "2025-12-05": [
+    {
+      "id": "dec25-5",
+      "clientName": "PT. Fortune Nusantara",
+      "date": "2025-12-05",
+      "time": "11:00",
+      "location": "Depok",
+      "status": "suspend",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 4500000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "David Kusuma",
+      "phone": "0815-7777-8888"
+    }
+  ],
+  "2025-12-08": [
+    {
+      "id": "dec25-6",
+      "clientName": "CV. Cahaya Baru",
+      "date": "2025-12-08",
+      "time": "09:30",
+      "location": "Bogor",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 7800000,
+      "notes": "Deal berhasil - Paket Premium",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Siti Rahayu",
+      "phone": "0816-9999-0000"
+    }
+  ],
+  "2025-12-09": [
+    {
+      "id": "dec-4",
+      "clientName": "CV. Bintang Timur",
+      "date": "2025-12-09",
+      "time": "13:30",
+      "location": "Jakarta Barat",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Faisal Rahman",
+      "phone": "0824-5678-9012"
+    }
+  ],
+  "2025-12-12": [
+    {
+      "id": "dec25-9",
+      "clientName": "PT. Investama Global",
+      "date": "2025-12-12",
+      "time": "10:30",
+      "location": "Tangerang Selatan",
+      "status": "lanjut",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 11500000,
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Ahmad Fauzi",
+      "phone": "0818-3333-4444"
+    }
+  ],
+  "2025-12-15": [
+    {
+      "id": "dec25-10",
+      "clientName": "CV. Berkah Jaya",
+      "date": "2025-12-15",
+      "time": "14:00",
+      "location": "Jakarta Utara",
+      "status": "lanjut",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 8500000,
+      "notes": "Renewal kontrak tahunan",
+      "photoUrl": "/images/visit.jpeg",
+      "contactPerson": "Rina Wijaya",
+      "phone": "0819-5555-6666"
+    }
+  ],
+    "2025-12-29": [
+    {
+      "id": "task-8",
+      "clientName": "CV. Barokah Jaya",
+      "date": "2025-12-29",
+      "time": "13:00",
+      "location": "Bekasi",
+      "status": "task",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "notes": "Demo completed - Client considering options",
+      "contactPerson": "Ahmad Fauzi",
+      "phone": "0817-2222-3333"
+    }
+  ],
+  "2025-12-18": [
+    {
+      "id": "dec25-13",
+      "clientName": "PT. Nusantara Makmur",
+      "date": "2025-12-18",
+      "time": "13:30",
+      "location": "Bogor",
+      "status": "loss",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 1500000,
+      "contactPerson": "Yudi Pratama"
+    }
+  ],
+  "2025-12-19": [
+    {
+      "id": "dec25-14",
+      "clientName": "CV. Jaya Perkasa",
+      "date": "2025-12-19",
+      "time": "10:00",
+      "location": "Jakarta Pusat",
+      "status": "loss",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 2800000,
+      "contactPerson": "Indah Permata"
+    },
+    {
+      "id": "task-7",
+      "clientName": "PT. Global Vision",
+      "date": "2025-12-19",
+      "time": "14:00",
+      "location": "Jakarta Utara",
+      "status": "task",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "notes": "Technical review scheduled - Awaiting final approval",
+      "contactPerson": "Michael Chen",
+      "phone": "0816-3333-4444"
+    }
+  ],
+  "2025-12-24": [
+    {
+      "id": "dec25-17",
+      "clientName": "PT. Elite Group",
+      "date": "2025-12-24",
+      "time": "09:30",
+      "location": "Depok",
+      "status": "loss",
+      "staffId": "1",
+      "staffName": "Mercy",
+      "salesAmount": 900000,
+      "notes": "Final review tahunan",
+      "contactPerson": "Kevin Wijaya"
+    }
+  ],
+  "2025-12-26": [
+    {
+      "id": "dec25-18",
+      "clientName": "CV. Prima Jaya",
+      "date": "2025-12-26",
+      "time": "15:00",
+      "location": "Bekasi",
+      "status": "loss",
+      "staffId": "2",
+      "staffName": "Dhea",
+      "salesAmount": 1800000,
+      "contactPerson": "Andi Kusuma"
+    }
+  ]
+}

@@ -1,0 +1,1546 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Calendar, ChevronLeft, ChevronRight, MapPin, Users, CheckCircle, Clock, AlertCircle, TrendingUp, Target, Search, Camera, X, User, Filter, ArrowLeft, ArrowRight } from 'lucide-react';
+import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, CardAction } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { ChartAreaInteractive } from '@/components/chart-area-interactive';
+import mockStaffData from '@/data/staff.json';
+import mockVisitDataRaw from '@/data/visits.json';
+
+interface Staff {
+  id: string;
+  name: string;
+  email: string;
+  targetYearly: number;
+  completedThisYear: number;
+}
+
+interface VisitTask {
+  id: string;
+  clientName: string;
+  date: string;
+  time: string;
+  location: string;
+  status: 'lanjut' | 'loss' | 'suspend' | 'task';
+  staffId: string;
+  staffName: string;
+  salesAmount?: number;
+  notes?: string;
+  photoUrl?: string;
+  contactPerson?: string;
+  phone?: string;
+}
+
+interface DateRange {
+  startMonth: number;
+  startYear: number;
+  endMonth: number;
+  endYear: number;
+}
+
+// Cast imported JSON data to proper types
+const mockStaff: Staff[] = mockStaffData as Staff[];
+const mockVisitData: { [key: string]: VisitTask[] } = mockVisitDataRaw as { [key: string]: VisitTask[] };
+
+export default function Dashboard() {
+  const [user, setUser] = useState<{role: string, name: string} | null>(null);
+  const [currentDate, setCurrentDate] = useState(new Date(2025, 11, 17)); // December 17, 2025 (current date)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedStaff, setSelectedStaff] = useState<string>('all');
+  const [selectedYear, setSelectedYear] = useState<number>(2025);
+  const [selectedVisit, setSelectedVisit] = useState<VisitTask | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
+  // Date range filter states
+  const currentYear = new Date().getFullYear();
+  const [dateRange, setDateRange] = useState<DateRange>({
+    startMonth: 0, // January
+    startYear: 2025,
+    endMonth: 11, // December
+    endYear: 2025
+  });
+  const [showDateRangeFilter, setShowDateRangeFilter] = useState(false);
+
+  // Helper functions
+  const getMonthNames = () => {
+    return [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+  };
+
+  const getYears = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear - 2; i <= currentYear + 2; i++) {
+      years.push(i);
+    }
+    return years;
+  };
+
+  const getMonths = () => [
+    { value: 0, label: 'Januari' },
+    { value: 1, label: 'Februari' },
+    { value: 2, label: 'Maret' },
+    { value: 3, label: 'April' },
+    { value: 4, label: 'Mei' },
+    { value: 5, label: 'Juni' },
+    { value: 6, label: 'Juli' },
+    { value: 7, label: 'Agustus' },
+    { value: 8, label: 'September' },
+    { value: 9, label: 'Oktober' },
+    { value: 10, label: 'November' },
+    { value: 11, label: 'Desember' }
+  ];
+
+  // Update date range when From month changes
+  const handleFromMonthChange = (month: number) => {
+    setDateRange(prev => ({
+      ...prev,
+      startMonth: month,
+      startYear: selectedYear
+    }));
+  };
+
+  // Update date range when To month changes
+  const handleToMonthChange = (month: number) => {
+    setDateRange(prev => ({
+      ...prev,
+      endMonth: month,
+      endYear: selectedYear
+    }));
+  };
+
+  // Update date range when year changes
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year);
+    setDateRange(prev => ({
+      startMonth: prev.startMonth,
+      startYear: year,
+      endMonth: prev.endMonth,
+      endYear: year
+    }));
+  };
+
+  // Generate calendar days based on selected date range
+  const generateCalendarDays = () => {
+    const days = [];
+
+    // Create date range from selected filters
+    const rangeStart = new Date(dateRange.startYear, dateRange.startMonth, 1);
+    const rangeEnd = new Date(dateRange.endYear, dateRange.endMonth + 1, 0);
+
+    // Generate all days in the selected date range
+    const currentDate = new Date(rangeStart);
+    while (currentDate <= rangeEnd) {
+      days.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Limit to maximum 60 days for display purposes
+    if (days.length > 60) {
+      return days.slice(0, 60);
+    }
+
+    return days;
+  };
+
+  // Generate calendar months for multi-month view
+  const generateCalendarMonths = () => {
+    const months = [];
+    const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const monthShortNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    // Generate all months within the selected date range
+    const startDate = new Date(dateRange.startYear, dateRange.startMonth, 1);
+    const endDate = new Date(dateRange.endYear, dateRange.endMonth, 1);
+
+    const currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const monthIndex = currentDate.getMonth();
+      const year = currentDate.getFullYear();
+
+      months.push({
+        date: new Date(currentDate),
+        monthIndex,
+        year,
+        monthName: monthNames[monthIndex],
+        monthShort: monthShortNames[monthIndex]
+      });
+
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+
+    return months;
+  };
+
+  // Filter calendar days based on date range
+  const getFilteredCalendarDays = () => {
+    const calendarDays = generateCalendarDays();
+
+    // Always return calendar days, even if outside date range
+    // The tasks will be filtered separately
+    return calendarDays;
+  };
+
+  const handleViewPhoto = () => {
+    setShowPhotoModal(true);
+  };
+
+  const handleDownloadPhoto = () => {
+    if (selectedVisit?.photoUrl) {
+      const link = document.createElement('a');
+      link.href = selectedVisit.photoUrl;
+      link.download = `visit-${selectedVisit.clientName}-${selectedVisit.date}.jpg`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  useEffect(() => {
+    try {
+      const userData = localStorage.getItem('crm_user');
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        setUser({
+          role: parsedUser.role,
+          name: parsedUser.name
+        });
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  }, []);
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+
+  const getTasksForDateAndStaff = (date: Date, staffId: string) => {
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const tasks = mockVisitData[dateStr] || [];
+
+    // Filter by date range
+    const rangeStart = new Date(dateRange.startYear, dateRange.startMonth, 1);
+    const rangeEnd = new Date(dateRange.endYear, dateRange.endMonth + 1, 0);
+
+    const filteredTasks = tasks.filter(task => {
+      const [year, month, day] = task.date.split('-').map(Number);
+      const taskDate = new Date(year, month - 1, day);
+      return taskDate >= rangeStart && taskDate <= rangeEnd;
+    });
+
+    // Apply status filter
+    const statusFilteredTasks = filteredTasks.filter(task => {
+      if (selectedStatus === 'all') return true;
+      if (selectedStatus === 'visited') return task.status === 'lanjut' || task.status === 'loss' || task.status === 'suspend';
+      return task.status === selectedStatus;
+    });
+
+    if (staffId === 'all') {
+      return statusFilteredTasks;
+    }
+
+    return statusFilteredTasks.filter(task => task.staffId === staffId);
+  };
+
+  // Get tasks for month and staff
+  const getTasksForMonthAndStaff = (monthIndex: number, year: number, staffId: string) => {
+    const monthTasks: VisitTask[] = [];
+
+    // Iterate through all visit data
+    Object.entries(mockVisitData).forEach(([dateStr, tasks]) => {
+      const [taskYear, taskMonth, day] = dateStr.split('-').map(Number);
+      const taskDate = new Date(taskYear, taskMonth - 1, day);
+
+      // Check if task is in the selected month and year
+      if (taskDate.getFullYear() === year && taskDate.getMonth() === monthIndex) {
+        const staffFilteredTasks = staffId === 'all' ? tasks : tasks.filter(task => task.staffId === staffId);
+
+        // Apply status filter
+        const statusFilteredTasks = staffFilteredTasks.filter(task => {
+          if (selectedStatus === 'all') return true;
+          if (selectedStatus === 'visited') return task.status === 'lanjut' || task.status === 'loss' || task.status === 'suspend';
+          return task.status === selectedStatus;
+        });
+
+        monthTasks.push(...statusFilteredTasks);
+      }
+    });
+
+    return monthTasks;
+  };
+
+  const getTaskStatusColor = (status: VisitTask['status']) => {
+    switch (status) {
+      case 'lanjut': return 'bg-green-500';
+      case 'loss': return 'bg-red-500';
+      case 'suspend': return 'bg-yellow-500';
+      case 'task': return 'bg-gray-400';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getCompletionRate = (staff: Staff) => {
+    return Math.round((staff.completedThisYear / staff.targetYearly) * 100);
+  };
+
+  // Dynamic functions based on selected status
+  const getStatusLabel = () => {
+    switch (selectedStatus) {
+      case 'all': return 'Visited';
+      case 'visited': return 'Visited';
+      case 'task': return 'To Do';
+      case 'lanjut': return 'Lanjut';
+      case 'loss': return 'Loss';
+      case 'suspend': return 'Suspend';
+      default: return 'Visited';
+    }
+  };
+
+  const getStatusCount = () => {
+    const { totalVisits } = calculateTotals();
+    return totalVisits;
+  };
+
+  const getStatusPercentage = () => {
+    const { totalVisits } = calculateTotals();
+    const totalTarget = selectedStaff === 'all'
+      ? mockStaff.slice(0, 2).reduce((sum, staff) => sum + staff.targetYearly, 0)
+      : mockStaff.find(staff => staff.id === selectedStaff)?.targetYearly || 0;
+
+    return totalTarget > 0 ? Math.round((totalVisits / totalTarget) * 100) : 0;
+  };
+
+  const getStatusTotalAmount = () => {
+    let totalAmount = 0;
+    const rangeStart = new Date(dateRange.startYear, dateRange.startMonth, 1);
+    const rangeEnd = new Date(dateRange.endYear, dateRange.endMonth + 1, 0);
+
+    Object.entries(mockVisitData).forEach(([dateStr, tasks]) => {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const taskDate = new Date(year, month - 1, day);
+
+      if (taskDate >= rangeStart && taskDate <= rangeEnd) {
+        const staffFilteredTasks = selectedStaff === 'all'
+          ? tasks
+          : tasks.filter(task => task.staffId === selectedStaff);
+
+        const filteredTasks = staffFilteredTasks.filter(task => {
+          if (selectedStatus === 'all') return task.status === 'lanjut' || task.status === 'loss' || task.status === 'suspend';
+          if (selectedStatus === 'visited') return task.status === 'lanjut' || task.status === 'loss' || task.status === 'suspend';
+          return task.status === selectedStatus;
+        });
+
+        filteredTasks.forEach(task => {
+          totalAmount += task.salesAmount || 0;
+        });
+      }
+    });
+
+    return totalAmount;
+  };
+
+  const getTaskIcon = (status: VisitTask['status']) => {
+    switch (status) {
+      case 'lanjut': return '✓';
+      case 'loss': return '✗';
+      case 'suspend': return '✓'; // Keep checkmark but with orange background
+      case 'task': return <div className="w-4 h-4 border-2 border-dashed border-blue-400 rounded-full mx-auto animate-pulse"></div>;
+      default: return '?';
+    }
+  };
+
+  const handleCellClick = (date: Date, staffId: string) => {
+    setSelectedDate(date);
+    const tasks = getTasksForDateAndStaff(date, staffId);
+    if (tasks.length > 0) {
+      setSelectedVisit(tasks[0]);
+      setShowDetailModal(true);
+    }
+  };
+
+  // Determine if we should show monthly calendar (more than 1 month) or daily calendar (1 month)
+  const isMultiMonthView = dateRange.endMonth > dateRange.startMonth || dateRange.endYear > dateRange.startYear;
+
+  // Generate appropriate calendar data
+  const calendarDays = isMultiMonthView ? [] : getFilteredCalendarDays();
+  const calendarMonths = isMultiMonthView ? generateCalendarMonths() : [];
+
+  const filteredStaff = selectedStaff === 'all'
+    ? mockStaff.slice(0, 2) // Tampilkan hanya Mercy & Dhea untuk demo
+    : mockStaff.filter(staff => staff.id === selectedStaff);
+
+  
+  // Calculate totals for selected staff(s) using date range
+  const calculateTotals = () => {
+    let totalVisits = 0;
+    let completedVisits = 0;
+    let suspendVisits = 0;
+    let lossVisits = 0;
+
+    // Calculate date range for filtering
+    const rangeStart = new Date(dateRange.startYear, dateRange.startMonth, 1);
+    const rangeEnd = new Date(dateRange.endYear, dateRange.endMonth + 1, 0);
+
+    // Iterate through all visit data and filter by date range
+    Object.entries(mockVisitData).forEach(([dateStr, tasks]) => {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const taskDate = new Date(year, month - 1, day);
+
+      // Check if task date is within the selected date range
+      if (taskDate >= rangeStart && taskDate <= rangeEnd) {
+        const staffFilteredTasks = selectedStaff === 'all'
+          ? tasks
+          : tasks.filter(task => task.staffId === selectedStaff);
+
+        // Apply status filter
+        const filteredTasks = staffFilteredTasks.filter(task => {
+          if (selectedStatus === 'all') return true;
+          if (selectedStatus === 'visited') return task.status === 'lanjut' || task.status === 'loss' || task.status === 'suspend';
+          return task.status === selectedStatus;
+        });
+
+        totalVisits += filteredTasks.length;
+        completedVisits += filteredTasks.filter(t => t.status === 'lanjut').length;
+        suspendVisits += filteredTasks.filter(t => t.status === 'suspend').length;
+        lossVisits += filteredTasks.filter(t => t.status === 'loss').length;
+      }
+    });
+
+    return { totalVisits, completedVisits, suspendVisits, lossVisits };
+  };
+
+  const { totalVisits, completedVisits, suspendVisits, lossVisits } = calculateTotals();
+  const completionRate = totalVisits > 0 ? Math.round((completedVisits / totalVisits) * 100) : 0;
+
+  return (
+    <>
+      <div className="space-y-6 py-8">
+
+
+        {/* Shadcn UI Filter Section */}
+        {user.role !== 'staff' && (
+          <div className="px-4 lg:px-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Filter className="h-5 w-5" />
+                  Filters
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Team Member Cards and Recent Visits Table */}
+                <div className="mb-6">
+                  <label className="text-sm font-medium mb-4 block">Filter by Team Member</label>
+                  <div className="flex items-center gap-3 mb-4">
+                    <Button
+                      variant={selectedStaff === "all" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedStaff("all")}
+                      className="flex items-center gap-2"
+                    >
+                      <Users className="h-4 w-4" />
+                      All Team Members
+                    </Button>
+
+                    {/* Month Range Filter */}
+                    <div className="flex items-center gap-2">
+                      {/* Status Filter */}
+                      <div className="flex items-center gap-1">
+                        <label className="text-sm font-medium">Status:</label>
+                        <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value)}>
+                          <SelectTrigger className="w-28">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="visited">VISITED</SelectItem>
+                            <SelectItem value="task">TO DO</SelectItem>
+                            <SelectItem value="lanjut">LANJUT</SelectItem>
+                            <SelectItem value="loss">LOSS</SelectItem>
+                            <SelectItem value="suspend">SUSPEND</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 ml-auto">
+                      <div className="flex items-center gap-1">
+                        <label className="text-sm font-medium">From:</label>
+                        <Select value={dateRange.startMonth.toString()} onValueChange={(value) => handleFromMonthChange(Number(value))}>
+                          <SelectTrigger className="w-28">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getMonths().map(month => (
+                              <SelectItem key={month.value} value={month.value.toString()}>
+                                {month.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <label className="text-sm font-medium">To:</label>
+                        <Select value={dateRange.endMonth.toString()} onValueChange={(value) => handleToMonthChange(Number(value))}>
+                          <SelectTrigger className="w-28">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getMonths().map(month => (
+                              <SelectItem key={month.value} value={month.value.toString()}>
+                                {month.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex items-center gap-2 ml-2">
+                        <label className="text-sm font-medium">Year:</label>
+                        <Select value={selectedYear.toString()} onValueChange={(value) => handleYearChange(Number(value))}>
+                          <SelectTrigger className="w-24">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getYears().map(year => (
+                              <SelectItem key={year} value={year.toString()}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+                    {/* Team Member Cards */}
+                    <div className="lg:col-span-2">
+                      <div className="grid grid-cols-1 gap-4">
+                        {mockStaff.slice(0, 2).map(staff => {
+                          const staffPhoto = staff.name === 'Mercy' ? '/images/mercy.jpeg' :
+                                           staff.name === 'Dhea' ? '/images/dhea.jpeg' :
+                                           '/images/visit.jpeg';
+                          // Calculate completion rate based on selected date range and staff tasks
+                          // Get tasks for this staff based on selected date range
+                          const rangeStart = new Date(dateRange.startYear, dateRange.startMonth, 1);
+                          const rangeEnd = new Date(dateRange.endYear, dateRange.endMonth + 1, 0);
+                          const staffTasks: VisitTask[] = [];
+
+                          // Get tasks for selected date range
+                          Object.entries(mockVisitData).forEach(([date, tasks]) => {
+                            tasks.forEach(task => {
+                              if (task.staffId === staff.id) {
+                                const [year, month, day] = date.split('-').map(Number);
+                                const taskDate = new Date(year, month - 1, day);
+                                if (taskDate >= rangeStart && taskDate <= rangeEnd) {
+                                  staffTasks.push(task);
+                                }
+                              }
+                            });
+                          });
+
+                          // Dynamic calculation based on selected status
+                          const getFilteredCount = () => {
+                            if (selectedStatus === 'all' || selectedStatus === 'visited') {
+                              return staffTasks.filter(task => task.status === 'lanjut' || task.status === 'loss' || task.status === 'suspend').length;
+                            }
+                            return staffTasks.filter(task => task.status === selectedStatus).length;
+                          };
+
+                          const completedInRange = getFilteredCount();
+                          const completionRate = staffTasks.length > 0 ? Math.round((completedInRange / staffTasks.length) * 100) : 0;
+
+                          return (
+                            <Card
+                              key={staff.id}
+                              className={`cursor-pointer transition-all duration-300 hover:shadow-lg ${
+                                selectedStaff === staff.id
+                                  ? 'ring-2 ring-primary bg-primary/5'
+                                  : 'hover:bg-accent/50'
+                              }`}
+                              onClick={() => setSelectedStaff(staff.id)}
+                            >
+                              <CardContent className="p-4">
+                                <div className="flex items-center space-x-3 mb-3">
+                                  <div className="relative">
+                                    <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center">
+                                      <img
+                                        src={staffPhoto}
+                                        alt={staff.name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                          e.currentTarget.src = "/images/visit.jpeg";
+                                        }}
+                                      />
+                                    </div>
+                                    {selectedStaff === staff.id && (
+                                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                                        <CheckCircle className="h-3 w-3 text-white" />
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-sm truncate">{staff.name}</h4>
+                                    <p className="text-xs text-muted-foreground truncate">{staff.email}</p>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                  {/* Progress Bar */}
+                                  <div>
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="text-xs text-muted-foreground">
+                                        {dateRange.startMonth === dateRange.endMonth && dateRange.startYear === dateRange.endYear
+                                          ? `${getMonthNames()[dateRange.startMonth]} Progress`
+                                          : `${getMonthNames()[dateRange.startMonth].slice(0, 3)}-${getMonthNames()[dateRange.endMonth].slice(0, 3)} Progress`
+                                        }
+                                      </span>
+                                      <span className="text-xs font-medium">{completionRate}%</span>
+                                    </div>
+                                    <div className="w-full bg-secondary rounded-full h-2">
+                                      <div
+                                        className="bg-primary rounded-full h-2 transition-all duration-500"
+                                        style={{ width: `${completionRate}%` }}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Stats Grid */}
+                                  <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                      <p className="text-muted-foreground">Target</p>
+                                      <p className="font-semibold">{staff.targetYearly}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-muted-foreground">Persentase</p>
+                                      <p className="font-semibold text-green-600">{staff.targetYearly > 0 ? Math.round((completedInRange / staff.targetYearly) * 100) : 0}%</p>
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                      <p className="text-muted-foreground">Loss</p>
+                                      <p className="font-semibold text-red-600">{staffTasks.filter(task => task.status === 'loss').length}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-muted-foreground">Suspend</p>
+                                      <p className="font-semibold text-orange-600">{staffTasks.filter(task => task.status === 'suspend').length}</p>
+                                    </div>
+                                  </div>
+
+                                  </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                   
+
+                    <div className="lg:col-span-8">
+                      <ChartAreaInteractive
+                        selectedStaff={selectedStaff}
+                        selectedYear={selectedYear}
+                        selectedStatus={selectedStatus}
+                        allVisitData={mockVisitData}
+                        dateRange={dateRange}
+                      />
+                    </div>
+
+                  </div>
+                </div>
+
+                </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Modern CRM Stats Cards */}
+        <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 xl:grid-cols-4">
+          <Card className="@container/card">
+            <CardHeader>
+              <CardDescription>TARGET</CardDescription>
+              <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+                {mockStaff.reduce((sum, staff) => sum + staff.targetYearly, 0)}
+              </CardTitle>
+              <CardAction>
+                <Badge variant="outline" className="text-green-600">
+                  <IconTrendingUp className="size-4" />
+                  +12.5%
+                </Badge>
+              </CardAction>
+            </CardHeader>
+            <CardFooter className="flex-col items-start gap-1.5 text-sm">
+              <div className="line-clamp-1 flex gap-2 font-medium text-green-600">
+                Trending up this month <IconTrendingUp className="size-4" />
+              </div>
+              <div className="text-muted-foreground">
+                Total client visits for this period
+              </div>
+            </CardFooter>
+          </Card>
+
+          <Card className="@container/card">
+            <CardHeader>
+              <CardDescription>SUSPEND </CardDescription>
+              <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+                {suspendVisits}
+              </CardTitle>
+              <CardAction>
+                <Badge variant="outline" className="text-blue-600">
+                  <IconTrendingUp className="size-4" />
+                  +8.2%
+                </Badge>
+              </CardAction>
+            </CardHeader>
+            <CardFooter className="flex-col items-start gap-1.5 text-sm">
+              <div className="line-clamp-1 flex gap-2 font-medium text-blue-600">
+                Pending follow-up <IconTrendingUp className="size-4" />
+              </div>
+              <div className="text-muted-foreground">
+                Client visits pending completion
+              </div>
+            </CardFooter>
+          </Card>
+
+          <Card className="@container/card">
+            <CardHeader>
+              <CardDescription>LOSS </CardDescription>
+              <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+                {lossVisits}
+              </CardTitle>
+              <CardAction>
+                <Badge variant="outline" className="text-orange-600">
+                  <IconTrendingDown className="size-4" />
+                  -2.1%
+                </Badge>
+              </CardAction>
+            </CardHeader>
+            <CardFooter className="flex-col items-start gap-1.5 text-sm">
+              <div className="line-clamp-1 flex gap-2 font-medium text-orange-600">
+                Lost opportunities <IconTrendingDown className="size-4" />
+              </div>
+              <div className="text-muted-foreground">
+                Client visits that resulted in loss
+              </div>
+            </CardFooter>
+          </Card>
+
+          <Card className="@container/card">
+            <CardHeader>
+              <CardDescription>{getStatusLabel().toUpperCase()}</CardDescription>
+              <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+                {selectedStatus === 'all' ? getStatusCount() : getStatusPercentage()}%
+              </CardTitle>
+              <CardAction>
+                <Badge variant="outline" className="text-green-600">
+                  <IconTrendingUp className="size-4" />
+                  +4.5%
+                </Badge>
+              </CardAction>
+            </CardHeader>
+            <CardFooter className="flex-col items-start gap-1.5 text-sm">
+              <div className="line-clamp-1 flex gap-2 font-medium text-green-600">
+                {selectedStatus === 'all' ? 'Total visits' : `${getStatusLabel()} completion rate`} <IconTrendingUp className="size-4" />
+              </div>
+              <div className="text-muted-foreground">
+                {selectedStatus === 'all'
+                  ? `${getStatusCount()} total visits`
+                  : `${getStatusCount()} of ${selectedStaff === 'all'
+                      ? mockStaff.slice(0, 2).reduce((sum, staff) => sum + staff.targetYearly, 0)
+                      : mockStaff.find(staff => staff.id === selectedStaff)?.targetYearly || 0} target`
+                }
+              </div>
+            </CardFooter>
+          </Card>
+        </div>
+
+        {/* Shadcn UI Calendar Section */}
+        <div className="px-4 lg:px-6">
+          <Card>
+            <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Calendar className="h-6 w-6" />
+                <div>
+                  <CardTitle>Timeline Analytics</CardTitle>
+                  <CardDescription>
+                    {getMonthNames()[dateRange.startMonth].slice(0, 3)} {dateRange.startYear} - {getMonthNames()[dateRange.endMonth].slice(0, 3)} {dateRange.endYear}
+                  </CardDescription>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="px-3 py-1 border rounded-md">
+                  <span className="text-sm font-medium">
+                    {calendarDays.length} days displayed
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full overflow-x-auto">
+              {/* Monthly Calendar View */}
+              {isMultiMonthView && (
+                <Table className="w-full" style={{ width: '100%', tableLayout: 'auto' }}>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[80px] py-1">
+                        <div className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          Staff
+                        </div>
+                      </TableHead>
+                      {calendarMonths.map((month) => {
+                        const isCurrentMonth = month.monthIndex === new Date().getMonth() && month.year === new Date().getFullYear();
+
+                        return (
+                          <TableHead
+                            key={`${month.year}-${month.monthIndex}`}
+                            className={`text-center py-0.5 px-0.5 min-w-[60px] ${isCurrentMonth ? 'bg-blue-100' : ''}`}
+                            style={{ width: `${100/(calendarMonths.length + 3)}%` }}
+                          >
+                            <div className={`font-semibold ${isCurrentMonth ? 'text-sm text-blue-600' : 'text-sm'}`}>
+                              {month.monthShort}
+                            </div>
+                            <div className="text-[10px] leading-none">
+                              {month.year}
+                            </div>
+                            {isCurrentMonth && (
+                              <Badge variant="secondary" className="text-[8px] px-1 py-0.5 mt-0.5">
+                                ★
+                              </Badge>
+                            )}
+                          </TableHead>
+                        );
+                      })}
+                      <TableHead className="text-center min-w-[50px] py-1 text-sm font-semibold" style={{ width: `${100/(calendarMonths.length + 4)}%` }}>Target</TableHead>
+                      <TableHead className="text-center min-w-[50px] py-1 text-sm font-semibold" style={{ width: `${100/(calendarMonths.length + 4)}%` }}>Persentase</TableHead>
+                      <TableHead className="text-center min-w-[70px] py-1 text-sm font-semibold" style={{ width: `${100/(calendarMonths.length + 4)}%` }}>Total Uang</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredStaff.map((staff, staffIndex) => (
+                      <TableRow key={staff.id}>
+                        <TableCell className="font-medium py-1 px-1">
+                          <div className="flex items-center gap-2">
+                            <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center">
+                              <User className="h-3 w-3 text-blue-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-semibold text-xs truncate">{staff.name}</div>
+                              <div className="text-[9px] text-muted-foreground leading-none">
+                                {staff.completedThisYear}/{staff.targetYearly}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        {calendarMonths.map((month, monthIndex) => {
+                          const tasks = getTasksForMonthAndStaff(month.monthIndex, month.year, staff.id);
+                          const hasTask = tasks.length > 0;
+                          const isCurrentMonth = month.monthIndex === new Date().getMonth() && month.year === new Date().getFullYear();
+
+                          // Calculate filtered tasks based on selected status
+                          const getFilteredTaskCount = (taskList: any[]) => {
+                            if (selectedStatus === 'all' || selectedStatus === 'visited') {
+                              return taskList.filter(task => task.status === 'lanjut' || task.status === 'loss' || task.status === 'suspend').length;
+                            }
+                            return taskList.filter(task => task.status === selectedStatus).length;
+                          };
+
+                          const filteredTaskCount = getFilteredTaskCount(tasks);
+                          const hasFilteredTask = filteredTaskCount > 0;
+
+                          return (
+                            <TableCell
+                              key={`${staff.id}-${month.year}-${month.monthIndex}`}
+                              className={`text-center cursor-pointer hover:bg-muted/50 py-1 px-1 border border-border ${isCurrentMonth ? 'border-blue-400 bg-blue-50/30' : ''}`}
+                              style={{ width: `${100/(calendarMonths.length + 4)}%` }}
+                              onClick={() => hasTask && handleCellClick(new Date(month.year, month.monthIndex, 1), staff.id)}
+                            >
+                              {hasFilteredTask ? (
+                                <div className="text-xs font-semibold">
+                                  {filteredTaskCount}
+                                </div>
+                              ) : (
+                                <div className="text-xs text-gray-400">-</div>
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                        <TableCell className="text-center py-1 px-1" style={{ width: `${100/(calendarMonths.length + 4)}%` }}>
+                          <div className="font-bold text-sm">
+                            {(() => {
+                              let totalFilteredVisits = 0;
+                              calendarMonths.forEach(month => {
+                                const tasks = getTasksForMonthAndStaff(month.monthIndex, month.year, staff.id);
+
+                                // Apply status filter
+                                if (selectedStatus === 'all' || selectedStatus === 'visited') {
+                                  totalFilteredVisits += tasks.filter(task => task.status === 'lanjut' || task.status === 'loss' || task.status === 'suspend').length;
+                                } else {
+                                  totalFilteredVisits += tasks.filter(task => task.status === selectedStatus).length;
+                                }
+                              });
+                              return totalFilteredVisits;
+                            })()}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center py-1 px-1" style={{ width: `${100/(calendarMonths.length + 4)}%` }}>
+                          <div className="font-bold text-sm">
+                            {(() => {
+                              let totalFilteredVisits = 0;
+                              let totalTasks = 0;
+                              calendarMonths.forEach(month => {
+                                const tasks = getTasksForMonthAndStaff(month.monthIndex, month.year, staff.id);
+                                totalTasks += tasks.length;
+
+                                // Apply status filter
+                                if (selectedStatus === 'all' || selectedStatus === 'visited') {
+                                  totalFilteredVisits += tasks.filter(task => task.status === 'lanjut' || task.status === 'loss' || task.status === 'suspend').length;
+                                } else {
+                                  totalFilteredVisits += tasks.filter(task => task.status === selectedStatus).length;
+                                }
+                              });
+
+                              const percentage = totalTasks > 0 ? Math.round((totalFilteredVisits / totalTasks) * 100) : 0;
+                              return `${percentage}%`;
+                            })()}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center py-1 px-1" style={{ width: `${100/(calendarMonths.length + 4)}%` }}>
+                          <div className="font-bold text-xs">
+                            {(() => {
+                              let totalAmount = 0;
+                              calendarMonths.forEach(month => {
+                                const tasks = getTasksForMonthAndStaff(month.monthIndex, month.year, staff.id);
+
+                                // Apply status filter and sum amounts
+                                const filteredTasks = tasks.filter(task => {
+                                  if (selectedStatus === 'all' || selectedStatus === 'visited') {
+                                    return task.status === 'lanjut' || task.status === 'loss' || task.status === 'suspend';
+                                  }
+                                  return task.status === selectedStatus;
+                                });
+
+                                filteredTasks.forEach(task => {
+                                  totalAmount += task.salesAmount || 0;
+                                });
+                              });
+
+                              // Format as Indonesian Rupiah
+                              return new Intl.NumberFormat('id-ID', {
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                              }).format(totalAmount);
+                            })()}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+
+              {/* Daily Calendar View */}
+              {!isMultiMonthView && (
+                <Table className="w-full" style={{ width: '100%', tableLayout: 'auto' }}>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[80px] py-1">
+                        <div className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          Staff
+                        </div>
+                      </TableHead>
+                      {calendarDays.map((date, index) => {
+                        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                        const isToday = date.toDateString() === new Date().toDateString();
+
+                        const rangeStart = new Date(dateRange.startYear, dateRange.startMonth, 1);
+                        const rangeEnd = new Date(dateRange.endYear, dateRange.endMonth + 1, 0);
+                        const isOutsideRange = date < rangeStart || date > rangeEnd;
+
+                        return (
+                          <TableHead
+                            key={date.toISOString()}
+                            className={`text-center py-0.5 px-0.5 min-w-[25px] ${isOutsideRange ? 'opacity-60' : ''} ${isWeekend ? 'bg-red-200/50' : ''}`}
+                            style={{ width: `${100/(calendarDays.length + 3)}%` }}
+                          >
+                            <div className={`font-semibold ${isToday ? 'text-sm text-blue-600' : 'text-sm'}`}>
+                              {date.getDate()}
+                            </div>
+                            <div className="text-[10px] leading-none">
+                              {date.toLocaleDateString('id-ID', { weekday: 'short' }).slice(0, 1)}
+                            </div>
+                            {isToday && (
+                              <Badge variant="secondary" className="text-[8px] px-1 py-0.5 mt-0.5">
+                                ★
+                              </Badge>
+                            )}
+                          </TableHead>
+                        );
+                      })}
+                      <TableHead className="text-center min-w-[50px] py-1 text-sm font-semibold" style={{ width: `${100/(calendarDays.length + 3)}%` }}>Total</TableHead>
+                      <TableHead className="text-center min-w-[50px] py-1 text-sm font-semibold" style={{ width: `${100/(calendarDays.length + 3)}%` }}>Lanjut</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                <TableBody>
+                  {filteredStaff.map((staff, staffIndex) => (
+                    <TableRow key={staff.id}>
+                      <TableCell className="font-medium py-1 px-1">
+                        <div className="flex items-center gap-2">
+                          <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center">
+                            <User className="h-3 w-3 text-blue-600" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-semibold text-xs truncate">{staff.name}</div>
+                            <div className="text-[9px] text-muted-foreground leading-none">
+                              {staff.completedThisYear}/{staff.targetYearly}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      {calendarDays.map((date, dayIndex) => {
+                        const tasks = getTasksForDateAndStaff(date, staff.id);
+                        const hasTask = tasks.length > 0;
+                        const isToday = date.toDateString() === new Date().toDateString();
+                        const isDiagonal = staffIndex === dayIndex;
+
+                        const rangeStart = new Date(dateRange.startYear, dateRange.startMonth, 1);
+                        const rangeEnd = new Date(dateRange.endYear, dateRange.endMonth + 1, 0);
+                        const isOutsideRange = date < rangeStart || date > rangeEnd;
+
+                        return (
+                          <TableCell
+                            key={date.toISOString()}
+                            className={`text-center cursor-pointer hover:bg-muted/50 py-1 px-1 border border-border ${isOutsideRange ? 'opacity-40' : ''} ${isToday ? 'border-blue-400 bg-blue-50/30' : ''} ${date.getDay() === 0 || date.getDay() === 6 ? 'bg-red-200/50' : ''}`}
+                            style={{ width: `${100/(calendarDays.length + 3)}%` }}
+                            onClick={() => hasTask && !isOutsideRange && handleCellClick(date, staff.id)}
+                          >
+                            {hasTask ? (
+                              <div className="flex justify-center">
+                                {(() => {
+                                  const icon = getTaskIcon(tasks[0].status);
+                                  if (tasks[0].status === 'task') {
+                                    return icon; // Return the animated border circle directly
+                                  }
+                                  return (
+                                    <div className={`w-3.5 h-3.5 ${getTaskStatusColor(tasks[0].status)} rounded-full flex items-center justify-center text-white text-[8px] font-bold`}>
+                                      {icon}
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            ) : isDiagonal ? (
+                              <div className="w-4 h-4 border-2 border-dashed border-blue-400 rounded-full mx-auto animate-pulse"></div>
+                            ) : null}
+                          </TableCell>
+                        );
+                      })}
+                      <TableCell className="text-center py-1 px-1" style={{ width: `${100/(calendarDays.length + 3)}%` }}>
+                        <div className="font-bold text-sm">
+                          {(() => {
+                            let totalVisits = 0;
+                            calendarDays.forEach(date => {
+                              const tasks = getTasksForDateAndStaff(date, staff.id);
+                              totalVisits += tasks.length;
+                            });
+                            return totalVisits;
+                          })()}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center py-1 px-1" style={{ width: `${100/(calendarDays.length + 3)}%` }}>
+                        <div className="flex flex-col items-center">
+                          <div className="font-bold text-sm">
+                            {(() => {
+                              let totalVisits = 0;
+                              let completedVisits = 0;
+                              calendarDays.forEach(date => {
+                                const tasks = getTasksForDateAndStaff(date, staff.id);
+                                totalVisits += tasks.length;
+                                completedVisits += tasks.filter(t => t.status === 'lanjut').length;
+                              });
+                              const percentage = totalVisits > 0 ? Math.round((completedVisits / totalVisits) * 100) : 0;
+                              return `${percentage}%`;
+                            })()}
+                          </div>
+                          <div className="w-full bg-muted rounded-full h-1.5 mt-1">
+                            {(() => {
+                              let totalVisits = 0;
+                              let completedVisits = 0;
+                              calendarDays.forEach(date => {
+                                const tasks = getTasksForDateAndStaff(date, staff.id);
+                                totalVisits += tasks.length;
+                                completedVisits += tasks.filter(t => t.status === 'lanjut').length;
+                              });
+                              const percentage = totalVisits > 0 ? Math.round((completedVisits / totalVisits) * 100) : 0;
+                              return (
+                                <div
+                                  className="bg-green-500 h-1.5 rounded-full transition-all duration-500"
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              )}
+            </div>
+
+            {/* Timeline Info */}
+            <div className="flex justify-between items-center mt-4 p-3 bg-muted/30 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-3 w-3 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  {isMultiMonthView
+                    ? `Showing monthly view for ${calendarMonths.length} month${calendarMonths.length > 1 ? 's' : ''}`
+                    : `Showing daily view for ${calendarDays.length} day${calendarDays.length > 1 ? 's' : ''}`
+                  }
+                </span>
+              </div>
+              <div className="flex items-center">
+                <Badge variant="secondary" className="text-xs">
+                  {isMultiMonthView
+                    ? `${calendarMonths.filter(month => getTasksForMonthAndStaff(month.monthIndex, month.year, selectedStaff).length > 0).length} Active Months`
+                    : `${calendarDays.filter(date => getTasksForDateAndStaff(date, selectedStaff).length > 0).length} Active Days`
+                  }
+                </Badge>
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center justify-center space-x-4 mt-3 p-3 bg-muted/20 rounded-lg">
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-xs font-medium">LANJUT</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span className="text-xs font-medium">LOSS</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <span className="text-xs font-medium">SUSPEND</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 border-[1.5px] border-dashed border-blue-400 rounded-full animate-pulse"></div>
+                <span className="text-xs font-medium">TASK</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        </div>
+
+        {/* Interactive Chart Component */}
+         {/* Recent Visits Table */}
+         <div className="px-4 lg:px-6">
+          <div className="">
+            <Card>
+              <CardHeader className="pb-0">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Detail Target Visits
+                  </CardTitle>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search client or staff..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 w-64"
+                    />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="max-h-[425px] overflow-y-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-background">
+                      <TableRow>
+                        <TableHead className="text-xs font-medium w-12 text-center">No</TableHead>
+                        <TableHead className="text-xs font-medium">PIC CRM</TableHead>
+                        <TableHead className="text-xs font-medium">Client</TableHead>
+                        <TableHead className="text-xs font-medium">Tgl</TableHead>
+                        <TableHead className="text-xs font-medium">Status</TableHead>
+                        <TableHead className="text-xs font-medium text-right">Nilai Kontrak</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(() => {
+                        const recentVisits: VisitTask[] = [];
+
+                        // Get visits within date range
+                        const rangeStart = new Date(dateRange.startYear, dateRange.startMonth, 1);
+                        const rangeEnd = new Date(dateRange.endYear, dateRange.endMonth + 1, 0);
+
+
+                        Object.entries(mockVisitData).forEach(([dateStr, visits]) => {
+                          const [year, month, day] = dateStr.split('-').map(Number);
+                          const taskDate = new Date(year, month - 1, day);
+
+                          if (taskDate >= rangeStart && taskDate <= rangeEnd) {
+                            const filteredVisits = selectedStaff === 'all'
+                              ? visits
+                              : visits.filter(visit => visit.staffId === selectedStaff);
+
+                            // Apply status filter
+                            const statusFilteredVisits = filteredVisits.filter(visit => {
+                              if (selectedStatus === 'all') return true;
+                              if (selectedStatus === 'visited') return visit.status === 'lanjut' || visit.status === 'loss' || visit.status === 'suspend';
+                              return visit.status === selectedStatus;
+                            });
+
+                            // Apply search filter
+                            const searchedVisits = statusFilteredVisits.filter(visit =>
+                              searchTerm === '' ||
+                              visit.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              visit.staffName.toLowerCase().includes(searchTerm.toLowerCase())
+                            );
+
+                            recentVisits.push(...searchedVisits);
+                          }
+                        });
+
+                        // Sort by date (most recent first) and display all
+                        recentVisits.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                        const displayVisits = recentVisits;
+
+                        return (
+                          <>
+                            {displayVisits.map((visit, index) => (
+                          <TableRow key={visit.id} className="hover:bg-muted/50 cursor-pointer">
+                            <TableCell className="text-xs font-medium text-center w-12">{index + 1}</TableCell>
+                            <TableCell className="text-xs font-medium">{visit.staffName}</TableCell>
+                            <TableCell className="text-xs">{visit.clientName}</TableCell>
+                            <TableCell className="text-xs">
+                              {(() => {
+                                const [year, month, day] = visit.date.split('-').map(Number);
+                                const date = new Date(year, month - 1, day);
+                                return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                              })()}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              <Badge
+                                variant="outline"
+                                className={`text-xs px-1.5 py-0.5 ${
+                                  visit.status === 'lanjut' ? 'border-green-500 text-green-700 bg-green-50' :
+                                  visit.status === 'loss' ? 'border-red-500 text-red-700 bg-red-50' :
+                                  visit.status === 'suspend' ? 'border-yellow-500 text-yellow-700 bg-yellow-50' :
+                                  'border-blue-500 text-blue-700 bg-blue-50'
+                                }`}
+                              >
+                                {visit.status === 'task' ? 'TO DO' :
+                                  visit.status === 'lanjut' ? 'LANJUT' :
+                                  visit.status === 'loss' ? 'LOSS' :
+                                  visit.status === 'suspend' ? 'SUSPEND' :
+                                  visit.status.toUpperCase()}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-xs text-right font-medium">
+                              {visit.salesAmount
+                                ? `Rp ${visit.salesAmount.toLocaleString('id-ID')}`
+                                : '-'}
+                            </TableCell>
+                          </TableRow>
+                            ))}
+                          </>
+                        );
+                      })()}
+                    </TableBody>
+                    <TableFooter>
+                      <TableRow className="bg-muted/50 font-semibold">
+                        <TableCell colSpan={5} className="text-xs text-right">
+                          Total Nilai Kontrak:
+                        </TableCell>
+                        <TableCell className="text-xs text-right font-bold text-green-600">
+                          Rp {(() => {
+                            const recentVisits: VisitTask[] = [];
+                            const rangeStart = new Date(dateRange.startYear, dateRange.startMonth, 1);
+                            const rangeEnd = new Date(dateRange.endYear, dateRange.endMonth + 1, 0);
+
+                            Object.entries(mockVisitData).forEach(([dateStr, visits]) => {
+                              const [year, month, day] = dateStr.split('-').map(Number);
+                              const taskDate = new Date(year, month - 1, day);
+
+                              if (taskDate >= rangeStart && taskDate <= rangeEnd) {
+                                const filteredVisits = selectedStaff === 'all'
+                                  ? visits
+                                  : visits.filter(visit => visit.staffId === selectedStaff);
+
+                                // Apply status filter
+                                const statusFilteredVisits = filteredVisits.filter(visit => {
+                                  if (selectedStatus === 'all') return true;
+                                  if (selectedStatus === 'visited') return visit.status === 'lanjut' || visit.status === 'loss' || visit.status === 'suspend';
+                                  return visit.status === selectedStatus;
+                                });
+
+                                // Apply search filter
+                                const searchedVisits = statusFilteredVisits.filter(visit =>
+                                  searchTerm === '' ||
+                                  visit.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                  visit.staffName.toLowerCase().includes(searchTerm.toLowerCase())
+                                );
+
+                                recentVisits.push(...searchedVisits);
+                              }
+                            });
+
+                            recentVisits.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                            const totalContractValue = recentVisits.reduce((sum, visit) => sum + (visit.salesAmount || 0), 0);
+                            return totalContractValue.toLocaleString('id-ID');
+                          })()}
+                        </TableCell>
+                      </TableRow>
+                    </TableFooter>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+         </div>
+
+      </div>
+
+      {/* Shadcn UI Dialog Modal */}
+      <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
+        <DialogContent
+          className="max-h-[95vh] overflow-y-auto"
+          style={{
+            width: '90vw',
+            maxWidth: '1400px',
+            minWidth: '1200px'
+          }}
+        >
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <Calendar className="h-6 w-6" />
+              <div>
+                <DialogTitle>Visit Details</DialogTitle>
+                <DialogDescription>
+                  Complete information about this visit
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {selectedVisit && (
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-2">
+              {/* Visit Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Visit Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Client</label>
+                    <p className="text-lg font-semibold">{selectedVisit.clientName}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Staff</label>
+                    <p className="text-lg font-semibold">{selectedVisit.staffName}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Date & Time</label>
+                    <p className="text-lg font-semibold">
+                      {(() => {
+                      const [year, month, day] = selectedVisit.date.split('-').map(Number);
+                      const date = new Date(year, month - 1, day);
+                      return date.toLocaleDateString('id-ID', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      });
+                    })()} at {selectedVisit.time} WIB
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Status</label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className={`w-3 h-3 ${getTaskStatusColor(selectedVisit.status)} rounded-full`}></div>
+                      <Badge variant={selectedVisit.status === 'lanjut' ? 'default' : 'secondary'}>
+                        {selectedVisit.status === 'lanjut' ? 'LANJUT' : selectedVisit.status === 'loss' ? 'LOSS' : 'SUSPEND'}
+                      </Badge>
+                    </div>
+                  </div>
+                  {selectedVisit.salesAmount && (
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Sales Amount</label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <TrendingUp className="h-4 w-4 text-green-600" />
+                        <span className="text-lg font-semibold text-green-600">
+                          Rp {selectedVisit.salesAmount.toLocaleString('id-ID')}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Location</label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span>{selectedVisit.location}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Contact & Photo */}
+              <div className="space-y-6">
+                {/* Contact Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Contact Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {selectedVisit.contactPerson && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Contact Person</label>
+                        <p className="text-lg font-semibold">{selectedVisit.contactPerson}</p>
+                      </div>
+                    )}
+                    {selectedVisit.phone && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                        <p className="text-lg font-semibold">{selectedVisit.phone}</p>
+                      </div>
+                    )}
+                    {selectedVisit.notes && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Notes</label>
+                        <p className="text-sm">{selectedVisit.notes}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Photo Section */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Camera className="h-5 w-5" />
+                      Visit Photo
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {selectedVisit.photoUrl ? (
+                      <div className="space-y-4">
+                        <div className="overflow-hidden rounded-lg">
+                          <img
+                            src={selectedVisit.photoUrl}
+                            alt="Visit documentation"
+                            className="w-full h-64 object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src = "/images/visit.jpeg";
+                            }}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button className="flex-1" onClick={handleViewPhoto}>
+                            <Camera className="h-4 w-4 mr-2" />
+                            View Photo
+                          </Button>
+                          <Button variant="outline" onClick={handleDownloadPhoto}>
+                            Download
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                        <Camera className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">No photo uploaded yet</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Photo View Modal */}
+      <Dialog open={showPhotoModal} onOpenChange={setShowPhotoModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Visit Photo</DialogTitle>
+            <DialogDescription>
+              View full-size photo from the visit
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4">
+            {selectedVisit?.photoUrl ? (
+              <>
+                <div className="w-full max-w-3xl">
+                  <img
+                    src={selectedVisit.photoUrl}
+                    alt={`Visit photo for ${selectedVisit.clientName}`}
+                    className="w-full h-auto rounded-lg border shadow-lg"
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/visit.jpeg";
+                    }}
+                  />
+                </div>
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {selectedVisit.clientName} - {selectedVisit.date}
+                  </p>
+                  <div className="flex gap-2 justify-center">
+                    <Button onClick={handleDownloadPhoto}>
+                      <Camera className="h-4 w-4 mr-2" />
+                      Download Photo
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowPhotoModal(false)}>
+                      Close
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <Camera className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No photo available</p>
+                <Button variant="outline" onClick={() => setShowPhotoModal(false)} className="mt-4">
+                  Close
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
