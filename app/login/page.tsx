@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, User, Lock, Briefcase, Shield } from 'lucide-react';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 
 interface LoginFormData {
   email: string;
@@ -10,45 +12,17 @@ interface LoginFormData {
 }
 
 interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   role: 'super_admin' | 'manager' | 'staff';
   staffId?: string;
 }
 
-// Mock user database - ini akan diganti dengan Convex nanti
-const mockUsers: User[] = [
-  {
-    id: 'super_admin1',
-    name: 'Super Admin',
-    email: 'admin@crm.com',
-    role: 'super_admin'
-  },
-  {
-    id: 'manager1',
-    name: 'Diara',
-    email: 'diara@crm.com',
-    role: 'manager'
-  },
-  {
-    id: 'staff1',
-    name: 'Mercy',
-    email: 'mercy@crm.com',
-    role: 'staff',
-    staffId: '1'
-  },
-  {
-    id: 'staff2',
-    name: 'Dhea',
-    email: 'dhea@crm.com',
-    role: 'staff',
-    staffId: '2'
-  }
-];
 
 export default function LoginPage() {
   const router = useRouter();
+  const login = useMutation(api.auth.login);
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''
@@ -57,23 +31,16 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const authenticateUser = (email: string, password: string): User | null => {
-    // Mock authentication - semua password adalah "password"
-    if (password !== 'password') return null;
-
-    return mockUsers.find(user => user.email === email) || null;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      // Simulasi delay untuk loading
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const user = authenticateUser(formData.email, formData.password);
+      const user = await login({
+        email: formData.email,
+        password: formData.password
+      });
 
       if (user) {
         // Save user data to localStorage (dalam production akan menggunakan secure session)
@@ -81,11 +48,9 @@ export default function LoginPage() {
 
         // Redirect ke dashboard berdasarkan role
         router.push('/dashboard');
-      } else {
-        setError('Email atau password salah');
       }
-    } catch (err) {
-      setError('Terjadi kesalahan. Silakan coba lagi.');
+    } catch (err: any) {
+      setError(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }
@@ -216,20 +181,25 @@ export default function LoginPage() {
               <div className="space-y-2 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-blue-700">Super Admin:</span>
-                  <span className="font-mono text-blue-800">admin@crm.com / password</span>
+                  <span className="font-mono text-blue-800">admin@tsicertification.co.id / password</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-blue-700">Manager (Diara):</span>
-                  <span className="font-mono text-blue-800">diara@crm.com / password</span>
+                  <span className="font-mono text-blue-800">diara@tsicertification.co.id / password</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-blue-700">Staff (Mercy):</span>
-                  <span className="font-mono text-blue-800">mercy@crm.com / password</span>
+                  <span className="font-mono text-blue-800">mercy@tsicertification.co.id / password</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-blue-700">Staff (Dhea):</span>
-                  <span className="font-mono text-blue-800">dhea@crm.com / password</span>
+                  <span className="font-mono text-blue-800">dhea@tsicertification.co.id / password</span>
                 </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-blue-200">
+                <p className="text-xs text-blue-600">
+                  🔒 Passwords are securely hashed with custom hash function
+                </p>
               </div>
             </div>
 

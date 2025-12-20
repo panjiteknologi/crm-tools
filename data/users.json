@@ -1,14 +1,14 @@
 [
   {
     "id": "admin1",
-    "email": "admin@crm.com",
+    "email": "admin@tsicertification.co.id",
     "password": "admin123",
     "name": "Administrator",
     "role": "admin"
   },
   {
     "id": "mercy1",
-    "email": "mercy@crm.com",
+    "email": "mercy@tsicertification.co.id",
     "password": "mercy123",
     "name": "Mercy",
     "role": "staff",
@@ -16,7 +16,7 @@
   },
   {
     "id": "dhea1",
-    "email": "dhea@crm.com",
+    "email": "dhea@tsicertification.co.id",
     "password": "dhea123",
     "name": "Dhea",
     "role": "staff",
