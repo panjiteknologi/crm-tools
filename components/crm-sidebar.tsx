@@ -47,7 +47,7 @@ const getNavigationItems = (role: string) => {
         icon: IconActivity,
       },
       {
-        title: "My Visits",
+        title: "My Targets",
         url: "/dashboard/my-visits",
         icon: IconCalendar,
       }

@@ -206,7 +206,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <IconCalendar className="mr-2 h-4 w-4" />
-                My Visits
+                My Targets
               </Button>
               {(user.role === 'super_admin' || user.role === 'manager') && (
                 <>

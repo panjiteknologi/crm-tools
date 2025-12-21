@@ -173,7 +173,7 @@ const mockVisitTasks: VisitTask[] = [
 
 export default function MyVisitsPage() {
   const [user, setUser] = useState<User | null>(null);
-  const [tasks, setTasks] = useState<VisitTask[]>(mockVisitTasks);
+  const [tasks, setTasks] = useState<VisitTask[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -201,7 +201,7 @@ export default function MyVisitsPage() {
 
   const targetsData = useQuery(api.targets.getTargets, user?._id ? { userId: user._id as any } : {});
   const convexTargets: ConvexTarget[] = Array.isArray(targetsData) ? targetsData : [];
-  const isLoadingTargets = false;
+  const isLoadingTargets = targetsData === undefined;
 
   const convertConvexToVisitTask = (convexTarget: ConvexTarget): VisitTask => {
     return {
@@ -275,9 +275,10 @@ export default function MyVisitsPage() {
     localStorage.setItem('darkMode', newDarkMode.toString());
   };
 
-  const allTasks = convexTargets && convexTargets.length > 0
+  // Use convex data if loaded, otherwise use empty array (no mock data flicker)
+  const allTasks = convexTargets && convexTargets.length > 0 && !isLoadingTargets
     ? convexTargets.map(convertConvexToVisitTask)
-    : tasks;
+    : [];
 
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
@@ -736,7 +737,7 @@ export default function MyVisitsPage() {
   const isUsingConvexData = convexTargets && convexTargets.length > 0;
 
   return (
-    <div className="h-screen bg-background p-3 sm:p-4 space-y-3 overflow-hidden flex flex-col" style={{ maxHeight: "-webkit-fill-available" }}>
+    <div className="min-h-screen bg-background p-3 sm:p-4 space-y-3 flex flex-col" style={{ height: "100vh", maxHeight: "-webkit-fill-available" }}>
       {/* Header Section - Professional Design */}
       <CardTarget className="shadow-sm border-border/50 bg-gradient-to-r from-card to-card/50">
         <CardHeader className="py-4 px-4 sm:py-4 sm:px-6">
@@ -946,7 +947,7 @@ export default function MyVisitsPage() {
       </div>
 
       {/* Main Content - Responsive Layout */}
-      <div className="flex flex-col lg:flex-row gap-3 flex-1 min-h-0">
+      <div className="flex flex-col lg:flex-row gap-3 flex-1 overflow-hidden">
         {/* Calendar Section - Professional Design */}
         <CardTarget className="flex flex-col lg:flex-1 lg:min-h-0 shadow-sm border-border/50 bg-gradient-to-br from-card to-card/50">
           <CardHeader className="pb-2 px-3 pt-2 flex-shrink-0 border-b">
@@ -977,18 +978,19 @@ export default function MyVisitsPage() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="flex-1 overflow-hidden p-4 min-h-0">
-            {/* Calendar Grid - Responsive */}
-            <div className="grid grid-cols-7 gap-1 text-center mb-2">
-              {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => (
-                <div key={day} className="text-xs font-bold text-muted-foreground uppercase tracking-wide py-2">
-                  {day}
-                </div>
-              ))}
-            </div>
+          <CardContent className="flex-1 overflow-hidden p-4 lg:min-h-0 flex flex-col">
+            <div className="flex-1 overflow-y-auto">
+              {/* Calendar Grid - Responsive */}
+              <div className="grid grid-cols-7 gap-1 text-center mb-2 sticky top-0 bg-background z-10">
+                {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => (
+                  <div key={day} className="text-xs font-bold text-muted-foreground uppercase tracking-wide py-2">
+                    {day}
+                  </div>
+                ))}
+              </div>
 
-            {/* Calendar Days - Responsive */}
-            <div className="grid grid-cols-7 gap-3">
+              {/* Calendar Days - Responsive */}
+              <div className="grid grid-cols-7 gap-3">
               {calendarDays.map((day, index) => (
                 <div
                   key={index}
@@ -1023,15 +1025,19 @@ export default function MyVisitsPage() {
 
                   {/* Tasks - Show dots on mobile, full on desktop */}
                   <div className="space-y-0.5 sm:space-y-1">
-                    {/* Mobile: Show dots */}
+                    {/* Mobile: Show clickable dots */}
                     <div className="sm:hidden flex gap-0.5 flex-wrap">
                       {day.tasks.slice(0, 3).map((task, taskIndex) => (
                         <div
                           key={taskIndex}
-                          className={`w-1.5 h-1.5 rounded-full ${
+                          className={`w-1.5 h-1.5 rounded-full cursor-pointer hover:scale-125 transition-transform ${
                             task.status === 'completed' ? 'bg-emerald-500' : 'bg-blue-500'
                           }`}
-                          title={task.clientName}
+                          title={`${task.clientName} - Klik untuk edit`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditTask(task);
+                          }}
                         />
                       ))}
                     </div>
@@ -1114,6 +1120,7 @@ export default function MyVisitsPage() {
                 </div>
               </div>
             )}
+          </div>
           </CardContent>
         </CardTarget>
 
@@ -1171,11 +1178,11 @@ export default function MyVisitsPage() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="flex-1 overflow-y-auto p-2 min-h-0">
-            <div className="space-y-2">
+          <CardContent className="flex-1 overflow-hidden p-2 lg:min-h-0">
+            <div className="h-full flex flex-col">
               {/* Search and Filter - One Line Layout */}
               {(!selectedDate || !showAllData) && (
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 pb-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-3 w-3 sm:h-4 sm:w-4" />
                     <Input
@@ -1209,7 +1216,7 @@ export default function MyVisitsPage() {
               )}
 
               {/* Tasks List - Responsive Cards */}
-              <div className="space-y-1">
+              <div className="flex-1 overflow-y-auto space-y-1 pr-1">
                 {isLoadingTargets ? (
                   <div className="text-center py-8 sm:py-12">
                     <div className="animate-spin h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-3 sm:mb-4 border-4 border-primary border-t-transparent rounded-full"></div>
@@ -1238,7 +1245,7 @@ export default function MyVisitsPage() {
                               />
                             )}
                           </div>
-                          
+
                           {/* Details */}
                           <div className="space-y-1 text-xs sm:text-sm text-muted-foreground">
                             <div className="flex items-center gap-1.5">
