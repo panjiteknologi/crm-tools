@@ -19,6 +19,66 @@ const customStyles = `
     animation: fadeInSlide 0.4s ease-out;
   }
 
+  @keyframes slideInFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .slide-in-left {
+    animation: slideInFromLeft 0.6s ease-out forwards;
+  }
+
+  @keyframes slideInFromRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .slide-in-right {
+    animation: slideInFromRight 0.6s ease-out forwards;
+  }
+
+  @keyframes slideInFromBottom {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .slide-in-bottom {
+    animation: slideInFromBottom 0.5s ease-out forwards;
+  }
+
+  @keyframes slideInFromTop {
+    from {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .slide-in-top {
+    animation: slideInFromTop 0.5s ease-out forwards;
+  }
+
   @keyframes numberChange {
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }
@@ -27,6 +87,37 @@ const customStyles = `
 
   .number-change {
     animation: numberChange 0.3s ease-in-out;
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
+  }
+
+  /* Stagger delays for animations */
+  .delay-100 { animation-delay: 0.1s; }
+  .delay-200 { animation-delay: 0.2s; }
+  .delay-300 { animation-delay: 0.3s; }
+  .delay-400 { animation-delay: 0.4s; }
+  .delay-500 { animation-delay: 0.5s; }
+  .delay-600 { animation-delay: 0.6s; }
+  .delay-700 { animation-delay: 0.7s; }
+  .delay-800 { animation-delay: 0.8s; }
+
+  /* Initial hidden state */
+  .animate-on-mount {
+    opacity: 0;
+    animation-fill-mode: forwards;
   }
 `;
 import { useQuery, useMutation } from 'convex/react';
@@ -116,6 +207,7 @@ export default function ManagerDashboard() {
   const [selectedChartType, setSelectedChartType] = useState<string>('area');
   const [showMoneyBreakdownModal, setShowMoneyBreakdownModal] = useState(false);
   const [moneyBreakdownData, setMoneyBreakdownData] = useState<{staffName: string, visits: VisitTask[]}[]>([]);
+  const [animationsReady, setAnimationsReady] = useState(false);
 
   // Convex data fetching
   const allUsers = useQuery(api.auth.getAllUsers);
@@ -437,6 +529,16 @@ export default function ManagerDashboard() {
     }
   }, [allUsers, user]);
 
+  // Trigger animations when data is loaded
+  useEffect(() => {
+    if (user && targets && allUsers) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        setAnimationsReady(true);
+      }, 100);
+    }
+  }, [user, targets, allUsers]);
+
   if (!user || !targets || !allUsers) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -711,6 +813,102 @@ export default function ManagerDashboard() {
       {/* Custom Animation Styles */}
       <style dangerouslySetInnerHTML={{ __html: customStyles }} />
 
+      {/* Futuristic Background */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        {/* Animated Grid Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+
+        {/* Floating Data Visualization Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Large Area Chart Background */}
+          <div className="absolute top-10 left-10 w-96 h-64 opacity-10 animate-pulse" style={{animationDelay: '3s'}}>
+            <svg viewBox="0 0 400 250" className="w-full h-full">
+              <defs>
+                <linearGradient id="bgChart1" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.4"/>
+                  <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.1"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,180 Q100,120 200,140 T400,100 L400,250 L0,250 Z" fill="url(#bgChart1)"/>
+              <path d="M0,180 Q100,120 200,140 T400,100" stroke="#3B82F6" strokeWidth="1" fill="none" opacity="0.3"/>
+            </svg>
+          </div>
+
+          {/* Bar Chart Background */}
+          <div className="absolute top-40 right-20 w-80 h-60 opacity-10 animate-pulse" style={{animationDelay: '5s'}}>
+            <svg viewBox="0 0 320 200" className="w-full h-full">
+              <defs>
+                <linearGradient id="bgChart2" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#10B981" stopOpacity="0.4"/>
+                  <stop offset="100%" stopColor="#10B981" stopOpacity="0.1"/>
+                </linearGradient>
+              </defs>
+              <rect x="20" y="100" width="40" height="60" fill="url(#bgChart2)"/>
+              <rect x="70" y="60" width="40" height="100" fill="url(#bgChart2)"/>
+              <rect x="120" y="80" width="40" height="80" fill="url(#bgChart2)"/>
+              <rect x="170" y="40" width="40" height="120" fill="url(#bgChart2)"/>
+              <rect x="220" y="70" width="40" height="90" fill="url(#bgChart2)"/>
+              <rect x="270" y="90" width="40" height="70" fill="url(#bgChart2)"/>
+            </svg>
+          </div>
+
+          {/* Pie Chart Background */}
+          <div className="absolute bottom-20 left-32 w-64 h-64 opacity-10 animate-pulse" style={{animationDelay: '2s'}}>
+            <svg viewBox="0 0 250 250" className="w-full h-full">
+              <defs>
+                <radialGradient id="bgChart3" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.4"/>
+                  <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.1"/>
+                </radialGradient>
+              </defs>
+              <circle cx="125" cy="125" r="80" fill="url(#bgChart3)"/>
+              <path d="M125,45 L185,125 L125,205 Z" fill="rgba(255,255,255,0.2)"/>
+              <circle cx="125" cy="125" r="40" fill="rgba(255,255,255,0.3)"/>
+            </svg>
+          </div>
+
+          {/* Line Graph Background */}
+          <div className="absolute bottom-40 right-40 w-96 h-48 opacity-10 animate-pulse" style={{animationDelay: '4s'}}>
+            <svg viewBox="0 0 400 200" className="w-full h-full">
+              <defs>
+                <linearGradient id="bgChart4" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.4"/>
+                  <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.1"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,160 Q80,100 160,120 T320,80 L320,200 L0,200 Z" fill="url(#bgChart4)"/>
+              <path d="M0,160 Q80,100 160,120 T320,80" stroke="#F59E0B" strokeWidth="1" fill="none" opacity="0.3"/>
+            </svg>
+          </div>
+
+          {/* Animated Particles */}
+          <div className="absolute inset-0">
+            {[...Array(30)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-1 h-1 bg-blue-400/20 rounded-full"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animation: `pulse ${3 + Math.random() * 4}s infinite ease-in-out`,
+                  animationDelay: `${Math.random() * 5}s`
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Floating Orbs */}
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/10 rounded-full blur-sm animate-ping" style={{animationDuration: '4s'}}></div>
+          <div className="absolute top-3/4 right-1/3 w-3 h-3 bg-purple-400/10 rounded-full blur-sm animate-ping" style={{animationDuration: '6s', animationDelay: '2s'}}></div>
+          <div className="absolute top-1/2 right-1/4 w-2 h-2 bg-teal-400/10 rounded-full blur-sm animate-ping" style={{animationDuration: '5s', animationDelay: '1s'}}></div>
+          <div className="absolute bottom-1/3 left-1/3 w-4 h-4 bg-green-400/8 rounded-full blur-sm animate-ping" style={{animationDuration: '7s', animationDelay: '3s'}}></div>
+        </div>
+
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-blue-900/5 via-transparent to-purple-900/5"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-teal-900/3 via-transparent to-indigo-900/3" style={{animation: 'pulse 8s infinite ease-in-out'}}></div>
+      </div>
+
       {/* Header with User Info */}
       <div className="border-b bg-background sticky top-0 z-50">
         <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
@@ -759,7 +957,7 @@ export default function ManagerDashboard() {
         <div className="hidden lg:block lg:w-80 flex-shrink-0">
           <div className="sticky top-24 space-y-6">
             {/* Filter Card */}
-            <Card>
+            <Card className={`${animationsReady ? 'animate-on-mount slide-in-left' : ''}`}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Filter className="h-5 w-5" />
@@ -896,7 +1094,7 @@ export default function ManagerDashboard() {
 
         {/* MOBILE FILTERS */}
         <div className="lg:hidden px-0">
-          <Card>
+          <Card className={`${animationsReady ? 'animate-on-mount slide-in-top' : ''}`}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm">
                 <Filter className="h-4 w-4" />
@@ -951,7 +1149,7 @@ export default function ManagerDashboard() {
               {/* Staff Performance Card - Show only when staff is selected */}
               {selectedStaff !== "all" && staffData.find(staff => staff._id === selectedStaff) && (
                 <div className="lg:col-span-2">
-                    <Card className='min-h-[445px]'>
+                    <Card className={`min-h-[445px] ${animationsReady ? 'animate-on-mount slide-in-left delay-200' : ''}`}>
                     <CardContent>
                       {(() => {
                         const selectedStaffData = staffData.find(staff => staff._id === selectedStaff);
@@ -1097,7 +1295,7 @@ export default function ManagerDashboard() {
                 </div>
               )}
               {/* Chart */}
-              <div className={`${selectedStaff !== "all" && staffData.find(staff => staff._id === selectedStaff) ? "lg:col-span-10" : "lg:col-span-12"} h-full`}>
+              <div className={`${selectedStaff !== "all" && staffData.find(staff => staff._id === selectedStaff) ? "lg:col-span-10" : "lg:col-span-12"} h-full ${animationsReady ? 'animate-on-mount slide-in-right delay-300' : ''}`}>
                 <ChartAreaInteractive
                   selectedStaff={selectedStaff}
                   selectedYear={selectedYear}
@@ -1115,7 +1313,7 @@ export default function ManagerDashboard() {
           {/* Modern CRM Stats Cards */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4 transition-all duration-300 ease-in-out" key={`${selectedStaff}-${selectedStatus}-${selectedYear}-${dateRange.startMonth}-${dateRange.endMonth}`}>
           {/* Target Card - Total data from Convex table with progress bar */}
-          <Card className="@container/card transition-all duration-300 ease-in-out hover:shadow-lg transform hover:-translate-y-1">
+          <Card className={`@container/card transition-all duration-300 ease-in-out hover:shadow-lg transform hover:-translate-y-1 ${animationsReady ? 'animate-on-mount slide-in-bottom delay-100' : ''}`}>
             <CardHeader className="pb-2 sm:pb-4">
               <CardDescription className="text-xs sm:text-sm">TARGET</CardDescription>
               <CardTitle className="text-xl sm:text-2xl font-semibold tabular-nums @[250px]/card:text-3xl transition-all duration-300 ease-in-out">
@@ -1220,7 +1418,7 @@ export default function ManagerDashboard() {
             </CardFooter>
           </Card>
 
-          <Card className="@container/card transition-all duration-300 ease-in-out hover:shadow-lg transform hover:-translate-y-1">
+          <Card className={`@container/card transition-all duration-300 ease-in-out hover:shadow-lg transform hover:-translate-y-1 ${animationsReady ? 'animate-on-mount slide-in-bottom delay-200' : ''}`}>
             <CardHeader className="pb-2 sm:pb-4">
               <CardDescription className="text-xs sm:text-sm">LANJUT</CardDescription>
               <CardTitle className="text-xl sm:text-2xl font-semibold tabular-nums @[250px]/card:text-3xl transition-all duration-300 ease-in-out">
@@ -1265,7 +1463,7 @@ export default function ManagerDashboard() {
             </CardFooter>
           </Card>
 
-          <Card className="@container/card transition-all duration-300 ease-in-out hover:shadow-lg transform hover:-translate-y-1">
+          <Card className={`@container/card transition-all duration-300 ease-in-out hover:shadow-lg transform hover:-translate-y-1 ${animationsReady ? 'animate-on-mount slide-in-bottom delay-300' : ''}`}>
             <CardHeader className="pb-2 sm:pb-4">
               <CardDescription className="text-xs sm:text-sm">LOSS</CardDescription>
               <CardTitle className="text-xl sm:text-2xl font-semibold tabular-nums @[250px]/card:text-3xl transition-all duration-300 ease-in-out">
@@ -1292,7 +1490,7 @@ export default function ManagerDashboard() {
             </CardFooter>
           </Card>
           
-           <Card className="@container/card transition-all duration-300 ease-in-out hover:shadow-lg transform hover:-translate-y-1">
+           <Card className={`@container/card transition-all duration-300 ease-in-out hover:shadow-lg transform hover:-translate-y-1 ${animationsReady ? 'animate-on-mount slide-in-bottom delay-400' : ''}`}>
             <CardHeader className="pb-2 sm:pb-4">
               <CardDescription className="text-xs sm:text-sm">SUSPEND</CardDescription>
               <CardTitle className="text-xl sm:text-2xl font-semibold tabular-nums @[250px]/card:text-3xl transition-all duration-300 ease-in-out">
@@ -1322,7 +1520,7 @@ export default function ManagerDashboard() {
         </div>
 
         {/* Shadcn UI Calendar Section - Only show for admin or with controls for staff */}
-        <div className="transition-all duration-300 ease-in-out" key={`calendar-${selectedStaff}-${selectedStatus}-${selectedYear}`}>
+        <div className={`transition-all duration-300 ease-in-out ${animationsReady ? 'animate-on-mount slide-in-top delay-500' : ''}`} key={`calendar-${selectedStaff}-${selectedStatus}-${selectedYear}`}>
           <Card>
             <CardHeader className="pb-3 sm:pb-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1702,7 +1900,7 @@ export default function ManagerDashboard() {
 
         {/* Interactive Chart Component */}
          {/* Recent Visits Table */}
-         <div className="transition-all duration-300 ease-in-out" key={`table-${selectedStaff}-${selectedStatus}-${selectedYear}`}>
+         <div className={`transition-all duration-300 ease-in-out ${animationsReady ? 'animate-on-mount slide-in-bottom delay-600' : ''}`} key={`table-${selectedStaff}-${selectedStatus}-${selectedYear}`}>
           <div className="">
             <Card>
               <CardHeader className="pb-3 sm:pb-4">
