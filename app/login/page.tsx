@@ -76,11 +76,11 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-tl from-blue-600/10 via-transparent to-purple-600/10 animate-pulse"></div>
         <div className="absolute inset-0 bg-gradient-to-br from-teal-600/5 via-transparent to-indigo-600/5" style={{animation: 'pulse 4s infinite ease-in-out reverse'}}></div>
 
-        {/* Floating Charts Background */}
+        {/* Floating Charts Background - Hidden on mobile for better performance */}
         {mounted && (
           <>
             {/* Large Area Chart */}
-            <div className="absolute top-20 left-20 w-80 h-60 opacity-20 animate-pulse" style={{animationDelay: '2s'}}>
+            <div className="hidden sm:block absolute top-20 left-20 w-64 h-48 lg:w-80 lg:h-60 opacity-20 animate-pulse" style={{animationDelay: '2s'}}>
               <svg viewBox="0 0 300 200" className="w-full h-full">
                 <defs>
                   <linearGradient id="chart1" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -94,7 +94,7 @@ export default function LoginPage() {
             </div>
 
             {/* Floating CRM Dashboard */}
-            <div className="absolute top-40 right-20 w-80 h-60 opacity-20 animate-pulse" style={{animationDelay: '3s'}}>
+            <div className="hidden sm:block absolute top-40 right-20 w-64 h-48 lg:w-80 lg:h-60 opacity-20 animate-pulse" style={{animationDelay: '3s'}}>
               <svg viewBox="0 0 300 200" className="w-full h-full">
                 <defs>
                   <linearGradient id="chart2" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -123,7 +123,7 @@ export default function LoginPage() {
             </div>
 
             {/* Pie Chart */}
-            <div className="absolute bottom-20 left-40 w-80 h-60 opacity-20 animate-pulse" style={{animationDelay: '1s'}}>
+            <div className="hidden sm:block absolute bottom-20 left-40 w-64 h-48 lg:w-80 lg:h-60 opacity-20 animate-pulse" style={{animationDelay: '1s'}}>
               <svg viewBox="0 0 300 200" className="w-full h-full">
                 <defs>
                   <linearGradient id="chart3" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -138,7 +138,7 @@ export default function LoginPage() {
             </div>
 
             {/* Additional Floating Elements */}
-            <div className="absolute bottom-40 right-40 w-40 h-40 opacity-15 animate-bounce" style={{animationDelay: '2.5s'}}>
+            <div className="hidden md:block absolute bottom-40 right-40 w-40 h-40 opacity-15 animate-bounce" style={{animationDelay: '2.5s'}}>
               <svg viewBox="0 0 160 160" className="w-full h-full">
                 <defs>
                   <radialGradient id="radial" cx="50%" cy="50%" r="50%">
@@ -153,9 +153,9 @@ export default function LoginPage() {
           </>
         )}
 
-        {/* Animated Particles */}
+        {/* Animated Particles - Reduced on mobile for performance */}
         <div className="absolute inset-0">
-          {[...Array(50)].map((_, i) => (
+          {[...Array(typeof window !== 'undefined' && window.innerWidth < 640 ? 15 : 50)].map((_, i) => (
             <div
               key={i}
               className="absolute w-1 h-1 bg-white/30 rounded-full animate-pulse"
@@ -171,14 +171,22 @@ export default function LoginPage() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-3 sm:p-4 lg:p-6">
         <div className="w-full max-w-6xl">
-          <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-800 rounded-3xl shadow-2xl overflow-hidden">
+          <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-800 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden">
             <div className="lg:flex">
               {/* Left Panel - Futuristic Info */}
-              <div className="lg:w-1/2 bg-gradient-to-br from-blue-900/40 via-purple-900/40 to-teal-900/40 p-8 lg:p-12 text-white relative overflow-hidden">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.05)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.05)_50%,rgba(255,255,255,0.05)_75%,transparent_75%,transparent_100%)] bg-[size:20px_20px]"></div>
+              <div className="hidden lg:block lg:w-1/2 bg-gradient-to-br from-blue-900/40 via-purple-900/40 to-teal-900/40 p-8 lg:p-12 text-white relative overflow-hidden">
+                {/* Smooth Gradient Orbs Background */}
+                <div className="absolute inset-0">
+                  {/* Large glowing orbs */}
+                  <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
+                  <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl"></div>
+
+                  {/* Animated gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/10 via-transparent to-purple-600/10 animate-pulse"></div>
+                </div>
 
                 {/* Animated Background Elements */}
                 <div className="absolute inset-0">
@@ -353,31 +361,47 @@ export default function LoginPage() {
               </div>
 
               {/* Right Panel - Login Form */}
-              <div className="lg:w-1/2 p-8 lg:p-12">
+              <div className="w-full lg:w-1/2 p-5 sm:p-6 lg:p-12">
                 <div className="max-w-md mx-auto">
-                  <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">Welcome Back</h2>
-                  <p className="text-gray-400 mb-8">Access your advanced analytics dashboard</p>
+                  {/* Mobile Logo - Only visible on small screens */}
+                  <div className="lg:hidden mb-6 flex flex-col items-center">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 via-purple-600 to-teal-500 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/25 relative overflow-hidden mb-3">
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent animate-pulse"></div>
+                      <Globe className="w-7 h-7 text-white relative z-10" />
+                    </div>
+                    <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-teal-400">
+                      CRM Tools
+                    </h1>
+                    <p className="text-gray-400 text-sm mt-1">Advanced Analytics Dashboard</p>
+                  </div>
+
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 text-center lg:text-left">
+                    Welcome Back
+                  </h2>
+                  <p className="text-gray-400 mb-6 sm:mb-8 text-sm sm:text-base text-center lg:text-left">
+                    Access your advanced analytics dashboard
+                  </p>
 
                   {error && (
-                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+                    <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs sm:text-sm">
                       {error}
                     </div>
                   )}
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                     {/* Email */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                         Email Address
                       </label>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-5" />
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4 sm:size-5" />
                         <input
                           type="email"
                           required
                           value={formData.email}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
-                          className="pl-10 w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all text-white placeholder:text-gray-500 backdrop-blur"
+                          className="pl-10 w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all text-white placeholder:text-gray-500 backdrop-blur text-sm"
                           placeholder="email@company.com"
                         />
                       </div>
@@ -385,17 +409,17 @@ export default function LoginPage() {
 
                     {/* Password */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                         Password
                       </label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-5" />
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4 sm:size-5" />
                         <input
                           type={showPassword ? "text" : "password"}
                           required
                           value={formData.password}
                           onChange={(e) => setFormData({...formData, password: e.target.value})}
-                          className="pl-10 pr-10 w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all text-white placeholder:text-gray-500 backdrop-blur"
+                          className="pl-10 pr-10 w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all text-white placeholder:text-gray-500 backdrop-blur text-sm"
                           placeholder="••••••••"
                         />
                         <button
@@ -403,7 +427,7 @@ export default function LoginPage() {
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition"
                         >
-                          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                       </div>
                     </div>
@@ -412,58 +436,65 @@ export default function LoginPage() {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 focus:ring-4 focus:ring-blue-500/20 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2.5 sm:py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 focus:ring-4 focus:ring-blue-500/20 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base"
                     >
                       {isLoading ? (
                         <span className="flex items-center justify-center">
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <svg className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
-                          Authenticating...
+                          <span className="text-xs sm:text-sm">Authenticating...</span>
                         </span>
                       ) : (
-                        <span className="flex items-center justify-center">
-                          <TrendingUp className="mr-2" size={20} />
-                          Launch Dashboard
+                        <span className="flex items-center justify-center cursor-pointer">
+                          <TrendingUp className="mr-1.5 sm:mr-2" size={16} />
+                          <span className="text-xs sm:text-sm">Launch Dashboard</span>
                         </span>
                       )}
                     </button>
                   </form>
 
                   {/* Demo Account Info */}
-                  <div className="mt-8 p-4 bg-gray-800/50 rounded-xl border border-gray-700 backdrop-blur">
-                    <p className="text-sm font-medium text-gray-300 mb-3 flex items-center">
-                      <span className="text-lg mr-2">🚀</span>
-                      Demo Accounts
-                    </p>
-                    <div className="space-y-2 text-xs">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                        <span className="text-blue-400">Super Admin:</span>
-                        <span className="font-mono text-gray-400">admin@tsicertification.co.id</span>
+                  <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-gray-800/50 rounded-xl border border-gray-700 backdrop-blur">
+                    <details className="group">
+                      <summary className="flex items-center justify-between cursor-pointer list-none">
+                        <p className="text-xs sm:text-sm font-medium text-gray-300 flex items-center">
+                          <span className="text-base sm:text-lg mr-2">🚀</span>
+                          Demo Accounts
+                        </p>
+                        <svg className="w-4 h-4 text-gray-400 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </summary>
+                      <div className="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
+                          <span className="text-blue-400">Super Admin:</span>
+                          <span className="font-mono text-gray-400 text-[10px] sm:text-xs break-all">admin@tsicertification.co.id</span>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
+                          <span className="text-purple-400">Manager (Diara):</span>
+                          <span className="font-mono text-gray-400 text-[10px] sm:text-xs break-all">diara@tsicertification.co.id</span>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
+                          <span className="text-green-400">Staff (Mercy):</span>
+                          <span className="font-mono text-gray-400 text-[10px] sm:text-xs break-all">mercy@tsicertification.co.id</span>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
+                          <span className="text-teal-400">Staff (Dhea):</span>
+                          <span className="font-mono text-gray-400 text-[10px] sm:text-xs break-all">dhea@tsicertification.co.id</span>
+                        </div>
                       </div>
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                        <span className="text-purple-400">Manager (Diara):</span>
-                        <span className="font-mono text-gray-400">diara@tsicertification.co.id</span>
+                      <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-gray-700">
+                        <p className="text-[10px] sm:text-xs text-gray-500">
+                          🔐 Default password: <span className="text-gray-300 font-mono">password</span>
+                        </p>
                       </div>
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                        <span className="text-green-400">Staff (Mercy):</span>
-                        <span className="font-mono text-gray-400">mercy@tsicertification.co.id</span>
-                      </div>
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                        <span className="text-teal-400">Staff (Dhea):</span>
-                        <span className="font-mono text-gray-400">dhea@tsicertification.co.id</span>
-                      </div>
-                    </div>
-                    <div className="mt-3 pt-3 border-t border-gray-700">
-                      <p className="text-xs text-gray-500">
-                        🔐 Default password: <span className="text-gray-300 font-mono">password</span>
-                      </p>
-                    </div>
+                    </details>
                   </div>
 
-                  <div className="mt-4 text-center">
-                    <p className="text-xs text-gray-500">
+                  <div className="mt-3 sm:mt-4 text-center">
+                    <p className="text-[10px] sm:text-xs text-gray-500">
                       System auto-detects your role level upon login
                     </p>
                   </div>
