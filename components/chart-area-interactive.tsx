@@ -94,7 +94,7 @@ function ChartCard({ title, data, statusColor, chartType }: {
       <CardContent className="px-2 pt-4 sm:px-4 sm:pt-6 relative z-10">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[320px] sm:h-[280px] w-full"
+          className="aspect-auto h-[280px] sm:h-[320px] w-full"
         >
           {(() => {
             switch (chartType) {
@@ -567,13 +567,13 @@ export function ChartAreaInteractive({ selectedStaff, selectedYear, selectedStat
   // Determine grid layout based on selected status
   const getGridLayoutClass = () => {
     if (selectedStatus === 'lanjut') {
-      return 'grid gap-3 sm:gap-4 md:grid-cols-1 lg:grid-cols-1 h-[400px] sm:h-[445px]';
+      return 'grid gap-3 sm:gap-4 md:grid-cols-1 lg:grid-cols-1';
     } else if (selectedStatus === 'loss') {
-      return 'grid gap-3 sm:gap-4 md:grid-cols-1 lg:grid-cols-1 h-[400px] sm:h-[445px]';
+      return 'grid gap-3 sm:gap-4 md:grid-cols-1 lg:grid-cols-1';
     } else if (selectedStatus === 'suspend') {
-      return 'grid gap-3 sm:gap-4 md:grid-cols-1 lg:grid-cols-1 h-[400px] sm:h-[445px]';
+      return 'grid gap-3 sm:gap-4 md:grid-cols-1 lg:grid-cols-1';
     } else {
-      return 'grid gap-3 sm:gap-4 md:grid-cols-1 lg:grid-cols-3 h-[400px] sm:h-[445px]';
+      return 'grid gap-3 sm:gap-4 md:grid-cols-1 lg:grid-cols-3';
     }
   };
 

@@ -1295,7 +1295,7 @@ export default function ManagerDashboard() {
                 </div>
               )}
               {/* Chart */}
-              <div className={`${selectedStaff !== "all" && staffData.find(staff => staff._id === selectedStaff) ? "lg:col-span-10" : "lg:col-span-12"} h-full ${animationsReady ? 'animate-on-mount slide-in-right delay-300' : ''}`}>
+              <div className={`${selectedStaff !== "all" && staffData.find(staff => staff._id === selectedStaff) ? "lg:col-span-10" : "lg:col-span-12"} min-h-[300px] sm:min-h-[350px] lg:min-h-[400px] ${animationsReady ? 'animate-on-mount slide-in-right delay-300' : ''}`}>
                 <ChartAreaInteractive
                   selectedStaff={selectedStaff}
                   selectedYear={selectedYear}
@@ -2326,65 +2326,64 @@ export default function ManagerDashboard() {
       {/* Money Breakdown Modal */}
       <Dialog open={showMoneyBreakdownModal} onOpenChange={setShowMoneyBreakdownModal}>
         <DialogContent
-          className="max-h-[90vh] overflow-y-auto"
+          className="max-h-[90vh] overflow-y-auto p-4 sm:p-6"
           style={{
             width: '95vw',
-            maxWidth: '1600px',
-            minWidth: '1000px'
+            maxWidth: '1600px'
           }}
         >
-          <DialogHeader>
-            <div className="flex items-center gap-3">
-              <TrendingUp className="h-6 w-6" />
-              <div>
-                <DialogTitle>Total Money Breakdown</DialogTitle>
-                <DialogDescription>
+          <DialogHeader className="px-0 sm:px-0 pb-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <DialogTitle className="text-lg sm:text-xl">Total Money Breakdown</DialogTitle>
+                <DialogDescription className="text-xs sm:text-sm">
                   Detailed breakdown of sales amounts by staff member
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
 
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {moneyBreakdownData.map((staffData, staffIndex) => (
               <Card key={staffIndex}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 justify-between">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-5 w-5" />
-                      {staffData.staffName}
+                <CardHeader className="pb-3 sm:pb-4">
+                  <CardTitle className="flex items-center gap-2 justify-between text-sm sm:text-base">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Users className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                      <span className="truncate">{staffData.staffName}</span>
                     </div>
-                    <div className="text-lg font-bold text-green-600">
+                    <div className="text-sm sm:text-lg font-bold text-green-600">
                       Rp {staffData.visits.reduce((sum, visit) => sum + (visit.salesAmount || 0), 0).toLocaleString('id-ID')}
                     </div>
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     {staffData.visits.length} visit{staffData.visits.length > 1 ? 's' : ''} with sales amounts
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                   <div className="overflow-x-auto">
-                    <Table className="min-w-[700px]">
+                    <Table className="w-full">
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="text-xs font-medium w-12 text-center">No</TableHead>
-                          <TableHead className="text-xs font-medium min-w-[150px]">Client</TableHead>
-                          <TableHead className="text-xs font-medium min-w-[120px]">Date</TableHead>
-                          <TableHead className="text-xs font-medium min-w-[100px]">Status</TableHead>
-                          <TableHead className="text-xs font-medium text-right min-w-[150px]">Sales Amount</TableHead>
-                          <TableHead className="text-xs font-medium min-w-[200px]">Location</TableHead>
+                          <TableHead className="text-[10px] sm:text-xs font-medium w-8 sm:w-12 text-center px-1 sm:px-2">No</TableHead>
+                          <TableHead className="text-[10px] sm:text-xs font-medium min-w-[80px] sm:min-w-[120px] px-1 sm:px-2">Client</TableHead>
+                          <TableHead className="text-[10px] sm:text-xs font-medium min-w-[80px] sm:min-w-[100px] px-1 sm:px-2">Date</TableHead>
+                          <TableHead className="text-[10px] sm:text-xs font-medium min-w-[70px] sm:min-w-[90px] px-1 sm:px-2">Status</TableHead>
+                          <TableHead className="text-[10px] sm:text-xs font-medium text-right min-w-[90px] sm:min-w-[120px] px-1 sm:px-2">Sales</TableHead>
+                          <TableHead className="text-[10px] sm:text-xs font-medium min-w-[80px] sm:min-w-[150px] hidden sm:table-cell px-1 sm:px-2">Location</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {staffData.visits.map((visit, visitIndex) => (
                           <TableRow key={visit._id} className="hover:bg-muted/50">
-                            <TableCell className="text-xs font-medium text-center w-12 py-3">
+                            <TableCell className="text-[10px] sm:text-xs font-medium text-center w-8 sm:w-12 py-1.5 sm:py-2 px-1 sm:px-2">
                               {visitIndex + 1}
                             </TableCell>
-                            <TableCell className="text-xs py-3 truncate max-w-[150px]" title={visit.client}>
+                            <TableCell className="text-[10px] sm:text-xs py-1.5 sm:py-2 px-1 sm:px-2 truncate max-w-[80px] sm:max-w-[120px]" title={visit.client}>
                               {visit.client}
                             </TableCell>
-                            <TableCell className="text-xs py-3">
+                            <TableCell className="text-[10px] sm:text-xs py-1.5 sm:py-2 px-1 sm:px-2">
                               {(() => {
                                 const dateStr = visit.scheduleVisit;
                                 if (!dateStr) return 'Invalid Date';
@@ -2394,10 +2393,10 @@ export default function ManagerDashboard() {
                                   date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
                               })()}
                             </TableCell>
-                            <TableCell className="text-xs py-3">
+                            <TableCell className="text-[10px] sm:text-xs py-1.5 sm:py-2 px-1 sm:px-2">
                               <Badge
                                 variant="outline"
-                                className={`text-xs px-2 py-1 whitespace-nowrap ${
+                                className={`text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.5 whitespace-nowrap ${
                                   visit.statusClient === 'LANJUT' ? 'border-green-500 text-green-700 bg-green-50' :
                                   visit.statusClient === 'LOSS' ? 'border-red-500 text-red-700 bg-red-50' :
                                   visit.statusClient === 'SUSPEND' ? 'border-yellow-500 text-yellow-700 bg-yellow-50' :
@@ -2408,10 +2407,10 @@ export default function ManagerDashboard() {
                                 {visit.statusClient === 'TO_DO' ? 'TO DO' : visit.statusClient}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-xs text-right font-medium py-3 text-green-600">
+                            <TableCell className="text-[10px] sm:text-xs text-right font-medium py-1.5 sm:py-2 px-1 sm:px-2 text-green-600">
                               Rp {visit.salesAmount?.toLocaleString('id-ID') || 0}
                             </TableCell>
-                            <TableCell className="text-xs py-3 truncate max-w-[200px]" title={visit.location}>
+                            <TableCell className="text-[10px] sm:text-xs py-1.5 sm:py-2 px-1 sm:px-2 truncate max-w-[80px] sm:max-w-[150px] hidden sm:table-cell" title={visit.location}>
                               {visit.location || '-'}
                             </TableCell>
                           </TableRow>
@@ -2419,13 +2418,13 @@ export default function ManagerDashboard() {
                       </TableBody>
                       <TableFooter>
                         <TableRow className="bg-muted/50 font-semibold">
-                          <TableCell colSpan={4} className="text-xs text-right py-3">
-                            Total for {staffData.staffName}:
+                          <TableCell colSpan={4} className="text-[10px] sm:text-xs text-right py-1.5 sm:py-2 px-1 sm:px-2">
+                            Total:
                           </TableCell>
-                          <TableCell className="text-xs text-right font-bold text-green-600 py-3">
+                          <TableCell className="text-[10px] sm:text-xs text-right font-bold text-green-600 py-1.5 sm:py-2 px-1 sm:px-2">
                             Rp {staffData.visits.reduce((sum, visit) => sum + (visit.salesAmount || 0), 0).toLocaleString('id-ID')}
                           </TableCell>
-                          <TableCell></TableCell>
+                          <TableCell className="hidden sm:table-cell"></TableCell>
                         </TableRow>
                       </TableFooter>
                     </Table>
@@ -2436,18 +2435,18 @@ export default function ManagerDashboard() {
 
             {/* Grand Total */}
             <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <TrendingUp className="h-8 w-8 text-green-600" />
+              <CardContent className="pt-4 sm:pt-6 pb-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
                     <div>
-                      <h3 className="text-lg font-semibold text-green-600">Grand Total All Staff</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {moneyBreakdownData.reduce((sum, staff) => sum + staff.visits.length, 0)} total visits with sales amounts
+                      <h3 className="text-base sm:text-lg font-semibold text-green-600">Grand Total</h3>
+                      <p className="text-[10px] sm:text-sm text-muted-foreground">
+                        {moneyBreakdownData.reduce((sum, staff) => sum + staff.visits.length, 0)} total visits
                       </p>
                     </div>
                   </div>
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-xl sm:text-2xl font-bold text-green-600 text-left sm:text-right">
                     Rp {moneyBreakdownData.reduce((sum, staff) =>
                       sum + staff.visits.reduce((visitSum, visit) => visitSum + (visit.salesAmount || 0), 0), 0
                     ).toLocaleString('id-ID')}
