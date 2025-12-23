@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
+import { handleLogout } from "@/lib/auth"
 
 export interface CRMUser {
   id: string;
@@ -48,11 +49,6 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
       case 'staff': return 'Team Member'
       default: return role
     }
-  }
-
-  const handleLogout = () => {
-    localStorage.removeItem('crm_user');
-    window.location.href = '/login';
   }
 
   return (
@@ -200,15 +196,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
                 <IconActivity className="mr-2 h-4 w-4" />
                 Dashboard
               </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <IconCalendar className="mr-2 h-4 w-4" />
-                My Targets
-              </Button>
-              {(user.role === 'super_admin' || user.role === 'manager') && (
+              {(user.role === 'super_admin') && (
                 <>
                   <Button
                     variant="ghost"

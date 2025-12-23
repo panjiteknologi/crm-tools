@@ -88,13 +88,13 @@ function ChartCard({ title, data, statusColor, chartType }: {
       {/* Futuristic background overlay */}
       <div className={`absolute inset-0 ${getBackgroundGradient()} opacity-80`}></div>
       <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 via-transparent to-purple-500/10 animate-pulse"></div>
-      <CardHeader className="relative z-10 pb-2">
-        <CardTitle className="text-sm sm:text-base">{title}</CardTitle>
+      <CardHeader className="relative z-10 pb-1 px-2">
+        <CardTitle className="text-s" style={{ textAlign:'center' }}>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-4 sm:pt-6 relative z-10">
+      <CardContent className="px-1 pt-2 relative z-10">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[280px] sm:h-[320px] w-full"
+          className="aspect-auto h-[180px] sm:h-[200px] md:h-[250px] lg:h-[280px] w-full"
         >
           {(() => {
             switch (chartType) {
@@ -422,12 +422,12 @@ function ChartCard({ title, data, statusColor, chartType }: {
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 sm:w-3 sm:h-3" style={{ backgroundColor: 'hsl(270, 60%, 50%)' }}></div>
             <span className="text-xs sm:text-xs font-medium hidden sm:inline">Mercy</span>
-            <span className="text-xs sm:text-xs font-medium sm:hidden">M</span>
+            <span className="text-xs sm:text-xs font-medium sm:hidden">Mercy</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 sm:w-3 sm:h-3" style={{ backgroundColor: 'hsl(210, 80%, 50%)' }}></div>
             <span className="text-xs sm:text-xs font-medium hidden sm:inline">Dhea</span>
-            <span className="text-xs sm:text-xs font-medium sm:hidden">D</span>
+            <span className="text-xs sm:text-xs font-medium sm:hidden">Dhea</span>
           </div>
         </div>
       </CardContent>

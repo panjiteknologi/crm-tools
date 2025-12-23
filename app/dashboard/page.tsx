@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from '@/components/ui/badge';
 import { ChartAreaInteractive } from '@/components/chart-area-interactive';
 import { api } from '@/convex/_generated/api';
+import { handleLogout } from '@/lib/auth';
 
 interface Staff {
   _id: string;
@@ -340,11 +341,6 @@ export default function Dashboard() {
       link.click();
       document.body.removeChild(link);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('crm_user');
-    window.location.href = '/login';
   };
 
   // Get staff ID from current user state

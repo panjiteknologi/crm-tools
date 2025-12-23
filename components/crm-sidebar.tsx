@@ -72,25 +72,10 @@ const getNavigationItems = (role: string) => {
       icon: IconActivity,
     },
     {
-      title: "Team Management",
-      url: "/dashboard/team",
-      icon: IconUsers,
-    },
-    {
       title: "My Visits",
       url: "/dashboard/my-visits",
       icon: IconCalendar,
     },
-    {
-      title: "Analytics",
-      url: "/dashboard/analytics",
-      icon: IconTrendingUp,
-    },
-    {
-      title: "Targets",
-      url: "/dashboard/targets",
-      icon: IconTarget,
-    }
   ];
 };
 

@@ -371,18 +371,18 @@ export default function ManagerDashboard() {
   };
 
   const getMonths = () => [
-    { value: 0, label: 'Januari' },
-    { value: 1, label: 'Februari' },
-    { value: 2, label: 'Maret' },
-    { value: 3, label: 'April' },
+    { value: 0, label: 'Jan' },
+    { value: 1, label: 'Feb' },
+    { value: 2, label: 'Mar' },
+    { value: 3, label: 'Apr' },
     { value: 4, label: 'Mei' },
     { value: 5, label: 'Jun' },
-    { value: 6, label: 'Juli' },
-    { value: 7, label: 'Agustus' },
-    { value: 8, label: 'September' },
-    { value: 9, label: 'Oktober' },
-    { value: 10, label: 'November' },
-    { value: 11, label: 'Desember' }
+    { value: 6, label: 'Jul' },
+    { value: 7, label: 'Agu' },
+    { value: 8, label: 'Sep' },
+    { value: 9, label: 'Okt' },
+    { value: 10, label: 'Nov' },
+    { value: 11, label: 'Des' }
   ];
 
   // Update date range when From month changes
@@ -974,7 +974,7 @@ export default function ManagerDashboard() {
         </div>
       </div>
 
-      <div className="lg:flex lg:flex-row gap-6 py-4 lg:py-8 px-4 lg:px-6">
+      <div className="flex flex-col lg:flex-row gap-6 py-8 px-4 lg:px-6">
         {/* LEFT SIDEBAR - FILTERS (Desktop Only) */}
         <div className="hidden lg:block lg:w-80 flex-shrink-0">
           <div className="sticky top-6 space-y-6">
@@ -1114,304 +1114,123 @@ export default function ManagerDashboard() {
             </div>
         </div>
 
-        {/* MOBILE FILTERS - Instagram/Twitter Style */}
+        {/* MOBILE FILTERS */}
         <div className="lg:hidden">
-          {/* Bottom Tab Bar */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border lg:hidden safe-area-bottom">
-            <div className="flex items-center justify-around px-2 py-1">
-              {/* Team */}
-              <button
-                onClick={() => setActiveFilterSheet(activeFilterSheet === 'team' ? null : 'team')}
-                className={`flex flex-col items-center justify-center py-1 px-2 min-w-0 flex-1 ${
-                  activeFilterSheet === 'team' ? 'text-primary' : 'text-muted-foreground'
-                }`}
-              >
-                <Users className="h-5 w-5 mb-0.5" />
-                <span className="text-[10px] font-medium leading-none">Team</span>
-              </button>
+          {/* Bottom Filter Navigation Bar - Responsive with Labels */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg lg:hidden safe-area-bottom">
+            <div className="flex px-safe py-2">
+              {/* Staff Select */}
+              <div className="flex-1 flex flex-col ">
+                <span className="text-[9px] text-muted-foreground font-medium pl-2">Team</span>
+                <Select value={selectedStaff} onValueChange={(v) => setSelectedStaff(v)}>
+                  <SelectTrigger className="h-auto min-h-[32px] pl-2 pr-1 flex-1 text-[10px] sm:text-xs border-r-0 rounded-r-none">
+                    <SelectValue placeholder="Team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    {staffData.map((staff) => (
+                      <SelectItem key={staff._id} value={staff._id} className="text-xs">
+                        {staff.name.split(' ')[0]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              {/* Status */}
-              <button
-                onClick={() => setActiveFilterSheet(activeFilterSheet === 'status' ? null : 'status')}
-                className={`flex flex-col items-center justify-center py-1 px-2 min-w-0 flex-1 ${
-                  activeFilterSheet === 'status' ? 'text-primary' : 'text-muted-foreground'
-                }`}
-              >
-                <FilterIcon className="h-5 w-5 mb-0.5" />
-                <span className="text-[10px] font-medium leading-none">Status</span>
-              </button>      
+              {/* Status Select */}
+              <div className="flex-1 flex flex-col ">
+                <span className="text-[9px] text-muted-foreground font-medium pl-2">Status</span>
+                <Select value={selectedStatus} onValueChange={(v) => setSelectedStatus(v)}>
+                  <SelectTrigger className="h-auto min-h-[32px] pl-2 pr-1 flex-1 text-[10px] sm:text-xs border-r-0 rounded-r-none rounded-l-none">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="visited">Visited</SelectItem>
+                    <SelectItem value="task">To Do</SelectItem>
+                    <SelectItem value="lanjut">Lanjut</SelectItem>
+                    <SelectItem value="loss">Loss</SelectItem>
+                    <SelectItem value="suspend">Suspend</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              {/* Chart */}
-              <button
-                onClick={() => setActiveFilterSheet(activeFilterSheet === 'chart' ? null : 'chart')}
-                className={`flex flex-col items-center justify-center py-1 px-2 min-w-0 flex-1 ${
-                  activeFilterSheet === 'chart' ? 'text-primary' : 'text-muted-foreground'
-                }`}
-              >
-                <BarChart3 className="h-5 w-5 mb-0.5" />
-                <span className="text-[10px] font-medium leading-none">Chart</span>
-              </button>
+              {/* Year Select */}
+              <div className="flex-1 flex flex-col ">
+                <span className="text-[9px] text-muted-foreground font-medium pl-2">Year</span>
+                <Select value={selectedYear.toString()} onValueChange={(v) => handleYearChange(Number(v))}>
+                  <SelectTrigger className="h-auto min-h-[32px] pl-2 pr-1 flex-1 text-[10px] sm:text-xs border-r-0 rounded-l-none rounded-r-none">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getYears().map((y) => (
+                      <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              {/* Date */}
-              <button
-                onClick={() => setActiveFilterSheet(activeFilterSheet === 'date' ? null : 'date')}
-                className={`flex flex-col items-center justify-center py-1 px-2 min-w-0 flex-1 ${
-                  activeFilterSheet === 'date' ? 'text-primary' : 'text-muted-foreground'
-                }`}
-              >
-                <Calendar className="h-5 w-5 mb-0.5" />
-                <span className="text-[10px] font-medium leading-none">Month</span>
-              </button>
+              {/* Chart Type Select */}
+              <div className="flex-1 flex flex-col ">
+                <span className="text-[9px] text-muted-foreground font-medium pl-2">Chart</span>
+                <Select value={selectedChartType} onValueChange={(v) => setSelectedChartType(v)}>
+                  <SelectTrigger className="h-auto min-h-[32px] pl-2 pr-1 flex-1 text-[10px] sm:text-xs border-r-0 rounded-l-none rounded-r-none">
+                    <SelectValue placeholder="Chart" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="area">Area</SelectItem>
+                    <SelectItem value="bar">Bar</SelectItem>
+                    <SelectItem value="line">Line</SelectItem>
+                    <SelectItem value="pie">Pie</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              {/* Year */}
-              <button
-                onClick={() => setActiveFilterSheet(activeFilterSheet === 'year' ? null : 'year')}
-                className={`flex flex-col items-center justify-center py-1 px-2 min-w-0 flex-1 ${
-                  activeFilterSheet === 'year' ? 'text-primary' : 'text-muted-foreground'
-                }`}
-              >
-                <CalendarIcon className="h-5 w-5 mb-0.5" />
-                <span className="text-[10px] font-medium leading-none">Year</span>
-              </button>
+              {/* From Month Select */}
+              <div className="flex-1 flex flex-col ">
+                <span className="text-[9px] text-muted-foreground font-medium pl-2">From</span>
+                <Select
+                  value={dateRange.startMonth.toString()}
+                  onValueChange={(v) => handleFromMonthChange(Number(v))}
+                >
+                  <SelectTrigger className="h-auto min-h-[32px] pl-2 pr-1 flex-1 text-[10px] sm:text-xs border-r-0 rounded-l-none rounded-r-none">
+                    <SelectValue placeholder="From" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getMonths().map((m) => (
+                      <SelectItem key={m.value} value={m.value.toString()}>
+                        {m.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* To Month Select */}
+              <div className="flex-1 flex flex-col ">
+                <span className="text-[9px] text-muted-foreground font-medium pl-2">To</span>
+                <Select
+                  value={dateRange.endMonth.toString()}
+                  onValueChange={(v) => handleToMonthChange(Number(v))}
+                >
+                  <SelectTrigger className="h-auto min-h-[32px] pl-2 pr-1 flex-1 text-[10px] sm:text-xs rounded-l-none">
+                    <SelectValue placeholder="To" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getMonths().map((m) => (
+                      <SelectItem key={m.value} value={m.value.toString()}>
+                        {m.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
-          {/* Action Sheet Overlay */}
-          {activeFilterSheet && (
-            <div
-              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-              onClick={() => setActiveFilterSheet(null)}
-            >
-              <div
-                className="absolute bottom-[53px] left-0 right-0 bg-background border-t border-border rounded-t-2xl shadow-2xl max-h-[60vh] overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Handle Bar */}
-                <div className="flex justify-center py-2 border-b border-border/50">
-                  <div className="w-10 h-1 bg-muted-foreground/30 rounded-full"></div>
-                </div>
-
-                {/* Team Sheet */}
-                {activeFilterSheet === 'team' && (
-                  <div className="p-4 space-y-2">
-                    <h3 className="text-sm font-semibold mb-3">Filter by Team Member</h3>
-                    <button
-                      onClick={() => { setSelectedStaff('all'); setActiveFilterSheet(null); }}
-                      className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                        selectedStaff === 'all'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      All Team
-                    </button>
-                    {staffData.map((staff) => (
-                      <button
-                        key={staff._id}
-                        onClick={() => { setSelectedStaff(staff._id); setActiveFilterSheet(null); }}
-                        className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm flex items-center gap-2 ${
-                          selectedStaff === staff._id
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted hover:bg-muted/80'
-                        }`}
-                      >
-                        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                        {staff.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Status Sheet */}
-                {activeFilterSheet === 'status' && (
-                  <div className="p-4 space-y-2">
-                    <h3 className="text-sm font-semibold mb-3">Filter by Status</h3>
-                    <button
-                      onClick={() => { setSelectedStatus('all'); setActiveFilterSheet(null); }}
-                      className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                        selectedStatus === 'all'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      All Status
-                    </button>
-                    <button
-                      onClick={() => { setSelectedStatus('visited'); setActiveFilterSheet(null); }}
-                      className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                        selectedStatus === 'visited'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      Visited
-                    </button>
-                    <button
-                      onClick={() => { setSelectedStatus('task'); setActiveFilterSheet(null); }}
-                      className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                        selectedStatus === 'task'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      To Do
-                    </button>
-                    <button
-                      onClick={() => { setSelectedStatus('lanjut'); setActiveFilterSheet(null); }}
-                      className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                        selectedStatus === 'lanjut'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      Lanjut
-                    </button>
-                    <button
-                      onClick={() => { setSelectedStatus('loss'); setActiveFilterSheet(null); }}
-                      className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                        selectedStatus === 'loss'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      Loss
-                    </button>
-                    <button
-                      onClick={() => { setSelectedStatus('suspend'); setActiveFilterSheet(null); }}
-                      className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                        selectedStatus === 'suspend'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      Suspend
-                    </button>
-                  </div>
-                )}
-
-                {/* Year Sheet */}
-                {activeFilterSheet === 'year' && (
-                  <div className="p-4 space-y-2">
-                    <h3 className="text-sm font-semibold mb-3">Select Year</h3>
-                    {getYears().map((y) => (
-                      <button
-                        key={y}
-                        onClick={() => { handleYearChange(y); setActiveFilterSheet(null); }}
-                        className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                          selectedYear === y
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted hover:bg-muted/80'
-                        }`}
-                      >
-                        {y}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Chart Sheet */}
-                {activeFilterSheet === 'chart' && (
-                  <div className="p-4 space-y-2">
-                    <h3 className="text-sm font-semibold mb-3">Chart Type</h3>
-                    <button
-                      onClick={() => { setSelectedChartType('area'); setActiveFilterSheet(null); }}
-                      className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                        selectedChartType === 'area'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      Area
-                    </button>
-                    <button
-                      onClick={() => { setSelectedChartType('bar'); setActiveFilterSheet(null); }}
-                      className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                        selectedChartType === 'bar'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      Bar
-                    </button>
-                    <button
-                      onClick={() => { setSelectedChartType('line'); setActiveFilterSheet(null); }}
-                      className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                        selectedChartType === 'line'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      Line
-                    </button>
-                    <button
-                      onClick={() => { setSelectedChartType('pie'); setActiveFilterSheet(null); }}
-                      className={`w-full text-left py-3 px-4 rounded-lg font-medium text-sm ${
-                        selectedChartType === 'pie'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      Pie
-                    </button>
-                  </div>
-                )}
-
-                {/* Date Sheet */}
-                {activeFilterSheet === 'date' && (
-                  <div className="p-4 space-y-3">
-                    <h3 className="text-sm font-semibold mb-3">Date Range</h3>
-                    <div className="w-full">
-                      <label className="text-xs text-muted-foreground mb-1 block">From Month</label>
-                      <Select
-                        value={dateRange.startMonth.toString()}
-                        onValueChange={(v) => handleFromMonthChange(Number(v))}
-                      >
-                        <SelectTrigger className="h-10 text-sm w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getMonths().map((m) => (
-                            <SelectItem key={m.value} value={m.value.toString()}>
-                              {m.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="w-full">
-                      <label className="text-xs text-muted-foreground mb-1 block">To Month</label>
-                      <Select
-                        value={dateRange.endMonth.toString()}
-                        onValueChange={(v) => handleToMonthChange(Number(v))}
-                      >
-                        <SelectTrigger className="h-10 text-sm w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getMonths().map((m) => (
-                            <SelectItem key={m.value} value={m.value.toString()}>
-                              {m.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <button
-                      onClick={() => setActiveFilterSheet(null)}
-                      className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-medium text-sm mt-2"
-                    >
-                      Done
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Bottom padding */}
-          {/* <div className="h-14 lg:hidden"></div> */}
+          {/* Add padding to bottom of page to account for fixed bottom nav */}
+          <div className="h-20 lg:hidden"></div>
         </div>
-
 
         {/* MAIN CONTENT */}
         <div className="flex-1 min-w-0 space-y-6">
@@ -2172,7 +1991,7 @@ export default function ManagerDashboard() {
 
         {/* Interactive Chart Component */}
          {/* Recent Visits Table */}
-         <div className={`transition-all duration-300 ease-in-out ${animationsReady ? 'animate-on-mount slide-in-bottom delay-600' : ''}`} key={`table-${selectedStaff}-${selectedStatus}-${selectedYear}`} style={{ marginBottom: "8ex" }}>
+         <div className={`transition-all duration-300 ease-in-out ${animationsReady ? 'animate-on-mount slide-in-bottom delay-600' : ''}`} key={`table-${selectedStaff}-${selectedStatus}-${selectedYear}`}>
           <div className="">
             <Card>
               <CardHeader className="pb-3 sm:pb-4">
