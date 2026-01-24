@@ -11,6 +11,8 @@ import {
   IconSearch,
   IconActivity,
   IconLogout,
+  IconDatabase,
+  IconChartBar,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -57,19 +59,24 @@ const getNavigationItems = (role: string) => {
   if (role === 'manager') {
     return [
       {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: IconActivity,
+        title: "Dashboard Manager",
+        url: "/dashboard-manager",
+        icon: IconChartBar,
       }
     ];
   }
 
-  // Super admin sees all items
+  // Super admin sees all items - Dashboard Manager is the main dashboard
   return [
     {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: IconActivity,
+      title: "Dashboard Manager",
+      url: "/dashboard-manager",
+      icon: IconChartBar,
+    },
+    {
+      title: "CRM Data",
+      url: "/dashboard-manager/crm-data",
+      icon: IconDatabase,
     },
     {
       title: "My Visits",
@@ -147,7 +154,7 @@ export function CRMSidebar({ user, ...props }: CRMSidebarProps) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="/dashboard" className="flex items-center gap-3">
+              <a href={user.role === 'staff' ? '/dashboard' : '/dashboard-manager'} className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <IconActivity className="h-4 w-4" />
                 </div>

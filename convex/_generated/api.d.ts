@@ -9,6 +9,8 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as crmTargets from "../crmTargets.js";
+import type * as importCrmTargets from "../importCrmTargets.js";
 import type * as initData from "../initData.js";
 import type * as migrate from "../migrate.js";
 import type * as notifications from "../notifications.js";
@@ -27,6 +29,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  crmTargets: typeof crmTargets;
+  importCrmTargets: typeof importCrmTargets;
   initData: typeof initData;
   migrate: typeof migrate;
   notifications: typeof notifications;

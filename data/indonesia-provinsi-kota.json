@@ -1,0 +1,674 @@
+{
+  "Aceh": {
+    "kabupaten_kota": [
+      "Aceh Barat",
+      "Aceh Barat Daya",
+      "Aceh Besar",
+      "Aceh Jaya",
+      "Aceh Selatan",
+      "Aceh Singkil",
+      "Aceh Tamiang",
+      "Aceh Tengah",
+      "Aceh Tenggara",
+      "Aceh Timur",
+      "Aceh Utara",
+      "Bener Meriah",
+      "Bireuen",
+      "Gayo Lues",
+      "Nagan Raya",
+      "Pidie",
+      "Pidie Jaya",
+      "Simeulue",
+      "Subulussalam",
+      "Banda Aceh",
+      "Langsa",
+      "Lhokseumawe",
+      "Sabang"
+    ]
+  },
+  "Sumatera Utara": {
+    "kabupaten_kota": [
+      "Asahan",
+      "Batubara",
+      "Dairi",
+      "Deli Serdang",
+      "Humbang Hasundutan",
+      "Karo",
+      "Labuhanbatu",
+      "Langkat",
+      "Mandailing Natal",
+      "Nias",
+      "Nias Barat",
+      "Nias Selatan",
+      "Nias Utara",
+      "Padang Lawas",
+      "Pakpak Bharat",
+      "Samosir",
+      "Serdang Bedagai",
+      "Simalungun",
+      "Tapanuli Selatan",
+      "Tapanuli Tengah",
+      "Tapanuli Utara",
+      "Binjai",
+      "Gunungsitoli",
+      "Medan",
+      "Padangsidimpuan",
+      "Pematangsiantar",
+      "Sibolga",
+      "Tanjungbalai",
+      "Tebing Tinggi"
+    ]
+  },
+  "Sumatera Barat": {
+    "kabupaten_kota": [
+      "Agam",
+      "Dharmasraya",
+      "Kepulauan Mentawai",
+      "Lima Puluh Kota",
+      "Padang Pariaman",
+      "Pasaman",
+      "Pasaman Barat",
+      "Pesisir Selatan",
+      "Sijunjung",
+      "Solok",
+      "Solok Selatan",
+      "Tanah Datar",
+      "Bukittinggi",
+      "Padang",
+      "Padangpanjang",
+      "Pariaman",
+      "Payakumbuh",
+      "Sawahlunto",
+      "Solok"
+    ]
+  },
+  "Riau": {
+    "kabupaten_kota": [
+      "Bengkalis",
+      "Indragiri Hulu",
+      "Indragiri Hilir",
+      "Kampar",
+      "Kepulauan Meranti",
+      "Kuantan Singingi",
+      "Pelalawan",
+      "Rokan Hilir",
+      "Rokan Hulu",
+      "Siak",
+      "Dumai",
+      "Pekanbaru"
+    ]
+  },
+  "Kepulauan Riau": {
+    "kabupaten_kota": [
+      "Bintan",
+      "Karimun",
+      "Kepulauan Anambas",
+      "Lingga",
+      "Natuna",
+      "Batam"
+    ]
+  },
+  "Sumatera Selatan": {
+    "kabupaten_kota": [
+      "Banyuasin",
+      "Empat Lawang",
+      "Lahat",
+      "Muara Enim",
+      "Musi Banyuasin",
+      "Musi Rawas",
+      "Ogan Ilir",
+      "Ogan Komering Ilir",
+      "Ogan Komering Ulu",
+      "Ogan Komering Ulu Selatan",
+      "Penukal Abab Lematang Ilir",
+      "Lubuklinggau",
+      "Pagar Alam",
+      "Palembang",
+      "Prabumulih"
+    ]
+  },
+  "Jambi": {
+    "kabupaten_kota": [
+      "Batanghari",
+      "Bungo",
+      "Kerinci",
+      "Merangin",
+      "Muaro Jambi",
+      "Sarolangun",
+      "Tanjung Jabung Barat",
+      "Tanjung Jabung Timur",
+      "Tebo",
+      "Jambi",
+      "Sungaipenuh"
+    ]
+  },
+  "Bengkulu": {
+    "kabupaten_kota": [
+      "Bengkulu Selatan",
+      "Bengkulu Tengah",
+      "Bengkulu Utara",
+      "Kaur",
+      "Kepahiang",
+      "Lebong",
+      "Mukomuko",
+      "Rejang Lebong",
+      "Seluma",
+      "Bengkulu"
+    ]
+  },
+  "Lampung": {
+    "kabupaten_kota": [
+      "Lampung Barat",
+      "Lampung Selatan",
+      "Lampung Tengah",
+      "Lampung Timur",
+      "Lampung Utara",
+      "Mesuji",
+      "Pesawaran",
+      "Pesisir Barat",
+      "Pringsewu",
+      "Tanggamus",
+      "Tulang Bawang",
+      "Way Kanan",
+      "Bandar Lampung",
+      "Metro"
+    ]
+  },
+  "Bangka Belitung": {
+    "kabupaten_kota": [
+      "Bangka",
+      "Bangka Barat",
+      "Bangka Selatan",
+      "Bangka Tengah",
+      "Belitung",
+      "Belitung Timur",
+      "Pangkalpinang"
+    ]
+  },
+  "Kepulauan Bangka Belitung": {
+    "kabupaten_kota": [
+      "Bangka",
+      "Bangka Barat",
+      "Bangka Selatan",
+      "Bangka Tengah",
+      "Belitung",
+      "Belitung Timur",
+      "Pangkalpinang"
+    ]
+  },
+  "Banten": {
+    "kabupaten_kota": [
+      "Tangerang",
+      "Serang",
+      "Lebak",
+      "Pandeglang",
+      "Tangerang",
+      "Tangerang Selatan",
+      "Serang",
+      "Cilegon"
+    ]
+  },
+  "DKI Jakarta": {
+    "kabupaten_kota": [
+      "Jakarta Barat",
+      "Jakarta Pusat",
+      "Jakarta Selatan",
+      "Jakarta Timur",
+      "Jakarta Utara",
+      "Administrasi Kepulauan Seribu"
+    ]
+  },
+  "Jawa Barat": {
+    "kabupaten_kota": [
+      "Bandung",
+      "Bandung Barat",
+      "Bekasi",
+      "Bogor",
+      "Ciamis",
+      "Cianjur",
+      "Cirebon",
+      "Garut",
+      "Indramayu",
+      "Karawang",
+      "Kuningan",
+      "Majalengka",
+      "Pangandaran",
+      "Purwakarta",
+      "Subang",
+      "Sukabumi",
+      "Sumedang",
+      "Tasikmalaya",
+      "Bandung",
+      "Banjar",
+      "Bekasi",
+      "Bogor",
+      "Cimahi",
+      "Cirebon",
+      "Depok",
+      "Sukabumi",
+      "Tasikmalaya"
+    ]
+  },
+  "Jawa Tengah": {
+    "kabupaten_kota": [
+      "Banjarnegara",
+      "Banyumas",
+      "Batang",
+      "Blora",
+      "Boyolali",
+      "Brebes",
+      "Cilacap",
+      "Demak",
+      "Grobogan",
+      "Jepara",
+      "Karanganyar",
+      "Kebumen",
+      "Kendal",
+      "Klaten",
+      "Kudus",
+      "Magelang",
+      "Pati",
+      "Pekalongan",
+      "Pemalang",
+      "Purbalingga",
+      "Purworejo",
+      "Rembang",
+      "Semarang",
+      "Sragen",
+      "Sukoharjo",
+      "Tegal",
+      "Temanggung",
+      "Wonogiri",
+      "Wonosobo",
+      "Magelang",
+      "Pekalongan",
+      "Salatiga",
+      "Semarang",
+      "Surakarta",
+      "Tegal"
+    ]
+  },
+  "DI Yogyakarta": {
+    "kabupaten_kota": [
+      "Bantul",
+      "Gunung Kidul",
+      "Kulon Progo",
+      "Sleman",
+      "Yogyakarta"
+    ]
+  },
+  "Jawa Timur": {
+    "kabupaten_kota": [
+      "Bangkalan",
+      "Banyuwangi",
+      "Blitar",
+      "Bojonegoro",
+      "Bondowoso",
+      "Gresik",
+      "Jember",
+      "Jombang",
+      "Kediri",
+      "Lamongan",
+      "Lumajang",
+      "Madiun",
+      "Magetan",
+      "Malang",
+      "Mojokerto",
+      "Nganjuk",
+      "Ngawi",
+      "Pacitan",
+      "Pamekasan",
+      "Pasuruan",
+      "Ponorogo",
+      "Probolinggo",
+      "Sampang",
+      "Sidoarjo",
+      "Situbondo",
+      "Sumenep",
+      "Trenggalek",
+      "Tuban",
+      "Tulungagung",
+      "Batu",
+      "Blitar",
+      "Kediri",
+      "Madiun",
+      "Malang",
+      "Mojokerto",
+      "Pasuruan",
+      "Probolinggo",
+      "Surabaya"
+    ]
+  },
+  "Kalimantan Barat": {
+    "kabupaten_kota": [
+      "Bengkayang",
+      "Kapuas Hulu",
+      "Kayong Utara",
+      "Ketapang",
+      "Kubu Raya",
+      "Landak",
+      "Melawi",
+      "Mempawah",
+      "Pontianak",
+      "Sambas",
+      "Sanggau",
+      "Sekadau",
+      "Sintang",
+      "Pontianak",
+      "Singkawang"
+    ]
+  },
+  "Kalimantan Tengah": {
+    "kabupaten_kota": [
+      "Barito Selatan",
+      "Barito Timur",
+      "Barito Utara",
+      "Gunung Mas",
+      "Kapuas",
+      "Katingan",
+      "Kotawaringin Barat",
+      "Kotawaringin Timur",
+      "Lamandau",
+      "Murung Raya",
+      "Pulang Pisau",
+      "Seruyan",
+      "Sukamara",
+      "Palangka Raya"
+    ]
+  },
+  "Kalimantan Selatan": {
+    "kabupaten_kota": [
+      "Balangan",
+      "Banjar",
+      "Barito Kuala",
+      "Hulu Sungai Selatan",
+      "Hulu Sungai Tengah",
+      "Hulu Sungai Utara",
+      "Kotabaru",
+      "Tabalong",
+      "Tanah Bumbu",
+      "Tanah Laut",
+      "Tapin",
+      "Banjarbaru",
+      "Banjarbaru"
+    ]
+  },
+  "Kalimantan Timur": {
+    "kabupaten_kota": [
+      "Berau",
+      "Kutai Barat",
+      "Kutai Kartanegara",
+      "Kutai Timur",
+      "Mahakam Ulu",
+      "Paser",
+      "Penajam Paser Utara",
+      "Balikpapan",
+      "Bontang",
+      "Samarinda"
+    ]
+  },
+  "Kalimantan Utara": {
+    "kabupaten_kota": [
+      "Bulungan",
+      "Malinau",
+      "Nunukan",
+      "Tana Tidung",
+      "Tarakan"
+    ]
+  },
+  "Sulawesi Utara": {
+    "kabupaten_kota": [
+      "Bolaang Mongondow",
+      "Bolaang Mongondow Selatan",
+      "Bolaang Mongondow Timur",
+      "Bolaang Mongondow Utara",
+      "Kepulauan Sangihe",
+      "Kepulauan Talaud",
+      "Minahasa",
+      "Minahasa Selatan",
+      "Minahasa Tenggara",
+      "Minahasa Utara",
+      "Bitung",
+      "Kotamobagu",
+      "Manado",
+      "Tomohon"
+    ]
+  },
+  "Sulawesi Tengah": {
+    "kabupaten_kota": [
+      "Banggai",
+      "Banggai Kepulauan",
+      "Buol",
+      "Donggala",
+      "Morowali",
+      "Parigi Moutong",
+      "Poso",
+      "Sigi",
+      "Tojo Una-Una",
+      "Toli-Toli",
+      "Palu"
+    ]
+  },
+  "Sulawesi Selatan": {
+    "kabupaten_kota": [
+      "Bantaeng",
+      "Barru",
+      "Bone",
+      "Bulukumba",
+      "Enrekang",
+      "Gowa",
+      "Jeneponto",
+      "Kepulauan Selayar",
+      "Luwu",
+      "Luwu Timur",
+      "Luwu Utara",
+      "Maros",
+      "Pangkajene dan Kepulauan",
+      "Pinrang",
+      "Sidenreng Rappang",
+      "Sinjai",
+      "Soppeng",
+      "Takalar",
+      "Tana Toraja",
+      "Toraja Utara",
+      "Wajo",
+      "Makassar",
+      "Palopo",
+      "Parepare"
+    ]
+  },
+  "Sulawesi Tenggara": {
+    "kabupaten_kota": [
+      "Bombana",
+      "Buton",
+      "Buton Selatan",
+      "Buton Utara",
+      "Kolaka",
+      "Kolaka Timur",
+      "Kolaka Utara",
+      "Konawe",
+      "Konawe Kepulauan",
+      "Konawe Selatan",
+      "Konawe Utara",
+      "Muna",
+      "Muna Barat",
+      "Wakatobi",
+      "Bau-Bau",
+      "Kendari"
+    ]
+  },
+  "Gorontalo": {
+    "kabupaten_kota": [
+      "Boalemo",
+      "Bone Bolango",
+      "Gorontalo",
+      "Gorontalo Utara",
+      "Pohuwato",
+      "Gorontalo"
+    ]
+  },
+  "Sulawesi Barat": {
+    "kabupaten_kota": [
+      "Majene",
+      "Mamasa",
+      "Mamuju",
+      "Mamuju Tengah",
+      "Mamuju Utara",
+      "Polewali Mandar",
+      "Mamuju"
+    ]
+  },
+  "Maluku": {
+    "kabupaten_kota": [
+      "Buru Selatan",
+      "Kepulauan Aru",
+      "Kepulauan Buru",
+      "Kepulauan Seram Bagian Barat",
+      "Kepulauan Seram Bagian Timur",
+      "Maluku Barat Daya",
+      "Maluku Tengah",
+      "Maluku Tenggara",
+      "Seram Bagian Barat",
+      "Seram Bagian Timur",
+      "Tual",
+      "Ambon",
+      "Tual"
+    ]
+  },
+  "Maluku Utara": {
+    "kabupaten_kota": [
+      "Halmahera Barat",
+      "Halmahera Barat Daya",
+      "Halmahera Tengah",
+      "Halmahera Timur",
+      "Halmahera Selatan",
+      "Halmahera Utara",
+      "Kepulauan Sula",
+      "Kepulauan Taliabu",
+      "Pulau Morotai",
+      "Pulau Ternate",
+      "Pulau Tidore",
+      "Ternate",
+      "Tidore Kepulauan"
+    ]
+  },
+  "Papua": {
+    "kabupaten_kota": [
+      "Asmat",
+      "Biak Numfor",
+      "Boven Digoel",
+      "Deiyai",
+      "Dogiyai",
+      "Intan Jaya",
+      "Jayapura",
+      "Jayawijaya",
+      "Keerom",
+      "Kepulauan Yapen",
+      "Lanny Jaya",
+      "Mamberamo Raya",
+      "Mamberamo Tengah",
+      "Mappi",
+      "Merauke",
+      "Mimika",
+      "Nabire",
+      "Nduga",
+      "Paniai",
+      "Pegunungan Arfak",
+      "Puncak",
+      "Sarmi",
+      "Supiori",
+      "Tolikara",
+      "Waropen",
+      "Yahukimo",
+      "Yalimo",
+      "Jayapura"
+    ]
+  },
+  "Papua Barat": {
+    "kabupaten_kota": [
+      "Fakfak",
+      "Kaimana",
+      "Manokwari",
+      "Maybrat",
+      "Raja Ampat",
+      "Sorong",
+      "Sorong Selatan",
+      "Tambrauw",
+      "Teluk Bintuni",
+      "Teluk Wondama",
+      "Sorong"
+    ]
+  },
+  "Papua Pegunungan": {
+    "kabupaten_kota": [
+      "Deiyai",
+      "Dogiyai",
+      "Intan Jaya",
+      "Jayawijaya",
+      "Lanny Jaya",
+      "Mamberamo Raya",
+      "Mamberamo Tengah",
+      "Mimika",
+      "Nabire",
+      "Nduga",
+      "Paniai",
+      "Pegunungan Arfak",
+      "Puncak",
+      "Tolikara",
+      "Yahukimo",
+      "Yalimo"
+    ]
+  },
+  "Bali": {
+    "kabupaten_kota": [
+      "Badung",
+      "Bangli",
+      "Buleleng",
+      "Gianyar",
+      "Jembrana",
+      "Karangasem",
+      "Klungkung",
+      "Tabanan",
+      "Denpasar"
+    ]
+  },
+  "Nusa Tenggara Barat": {
+    "kabupaten_kota": [
+      "Bima",
+      "Dompu",
+      "Lombok Barat",
+      "Lombok Tengah",
+      "Lombok Timur",
+      "Sumbawa",
+      "Sumbawa Barat",
+      "Bima",
+      "Mataram"
+    ]
+  },
+  "Nusa Tenggara Timur": {
+    "kabupaten_kota": [
+      "Alor",
+      "Belu",
+      "Ende",
+      "Flores Timur",
+      "Flores Timur",
+      "Kupang",
+      "Lembata",
+      "Malaka",
+      "Manggarai",
+      "Manggarai Barat",
+      "Manggarai Timur",
+      "Nagekeo",
+      "Ngada",
+      "Sabu Raijua",
+      "Sikka",
+      "Sumba Barat",
+      "Sumba Barat Daya",
+      "Sumba Tengah",
+      "Sumba Timur",
+      "Timor Tengah Selatan",
+      "Timor Tengah Utara",
+      "Kupang"
+    ]
+  }
+}

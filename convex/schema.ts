@@ -123,4 +123,52 @@ export default defineSchema({
     .index("by_action", ["action"])
     .index("by_entity", ["entity"])
     .index("by_createdAt", ["createdAt"]),
+
+  // Table CRM Targets (diimport dari CSV)
+  crmTargets: defineTable({
+    // Data dari CSV (sesuai field yang diminta)
+    tahun: v.string(), // TAHUN
+    bulanExpDate: v.string(), // BULAN EXP DATE
+    produk: v.string(), // PRODUK (ISO, ISPO, dll)
+    picCrm: v.string(), // PIC CRM (DHA, MRC)
+    sales: v.string(), // SALES (NAC, ARH, BSC, dll)
+    namaAssociate: v.string(), // NAMA ASSOSIATE
+    namaPerusahaan: v.string(), // NAMA PERUSAHAAN
+    status: v.string(), // STATUS (WAITING, PROSES, SUSPEND, LOSS, DONE)
+    alasan: v.optional(v.string()), // ALASAN
+    category: v.optional(v.string()), // CATEGORY (GOLD, SILVER, BRONZE)
+    provinsi: v.string(), // PROVINSI
+    kota: v.string(), // KOTA
+    alamat: v.string(), // ALAMAT lengkap
+    akreditasi: v.optional(v.string()), // AKREDITASI (KAN, NON AKRE)
+    eaCode: v.optional(v.string()), // EA CODE
+    std: v.optional(v.string()), // STD (SMK3, HACCP, dll)
+    iaDate: v.optional(v.string()), // IA DATE
+    expDate: v.optional(v.string()), // EXP DATE
+    tahapAudit: v.optional(v.string()), // TAHAP AUDIT
+    hargaKontrak: v.optional(v.number()), // HARGA KONTRAK
+    bulanTtdNotif: v.optional(v.string()), // BULAN TTD NOTIF (Format: YYYY-MM-DD)
+    hargaTerupdate: v.optional(v.number()), // HARGA TERUPDATE
+    trimmingValue: v.optional(v.number()), // TRIMMING VALUE
+    lossValue: v.optional(v.number()), // LOSS VALUE
+    cashback: v.optional(v.number()), // CASHBACK
+    terminPembayaran: v.optional(v.string()), // TERMIN PEMBAYARAN
+    statusSertifikat: v.optional(v.string()), // STATUS SERTIFIKAT
+    tanggalKunjungan: v.optional(v.string()), // TANGGAL KUNJUNGAN
+    statusKunjungan: v.optional(v.string()), // STATUS KUNJUNGAN (VISITED, NOT YET)
+    // Audit fields (sesuai request)
+    created_by: v.optional(v.id("users")), // CREATED BY - User yang membuat data
+    createdAt: v.number(), // CREATED AT - Timestamp pembuatan
+    updated_by: v.optional(v.id("users")), // UPDATED BY - User yang terakhir update
+    updatedAt: v.number(), // UPDATED AT - Timestamp update terakhir
+  })
+    .index("by_picCrm", ["picCrm"])
+    .index("by_sales", ["sales"])
+    .index("by_status", ["status"])
+    .index("by_category", ["category"])
+    .index("by_provinsi", ["provinsi"])
+    .index("by_kota", ["kota"])
+    .index("by_tanggalKunjungan", ["tanggalKunjungan"])
+    .index("by_created_by", ["created_by"])
+    .index("by_createdAt", ["createdAt"]),
 });

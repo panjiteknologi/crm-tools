@@ -2,6 +2,7 @@ import "./globals.css";
 import { ConvexProvider } from "convex/react";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { ThemeProvider } from "next-themes";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,
@@ -19,6 +20,7 @@ export default function RootLayout({
         >
           <ConvexClientProvider>{children}</ConvexClientProvider>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

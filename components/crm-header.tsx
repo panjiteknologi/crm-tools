@@ -52,10 +52,10 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-sidebar-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-sidebar-border/40 bg-white dark:bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-          <SidebarTrigger className="-ml-1 lg:hidden" />
+          <SidebarTrigger className="-ml-1 bg-white hover:bg-gray-100" />
 
           <div className="flex items-center gap-3 ml-2 lg:ml-0">
             <div className="hidden sm:block">
@@ -74,7 +74,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
                 placeholder="Search clients, visits..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-white border-gray-200"
               />
             </div>
           </div>
@@ -84,7 +84,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden"
+              className="md:hidden bg-white hover:bg-gray-100"
               onClick={() => {/* Handle mobile search */}}
             >
               <Search className="h-4 w-4" />
@@ -95,7 +95,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
               variant="ghost"
               size="sm"
               onClick={onThemeToggle}
-              className="h-9 w-9 p-0"
+              className="h-9 w-9 p-0 bg-white hover:bg-gray-100"
             >
               {isDarkMode ? (
                 <Sun className="h-4 w-4" />
@@ -108,7 +108,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="relative h-9 w-9 p-0"
+              className="relative h-9 w-9 p-0 bg-white hover:bg-gray-100"
             >
               <Bell className="h-4 w-4" />
               <Badge className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive" />
@@ -119,7 +119,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-9 w-9 rounded-full overflow-hidden"
+                  className="relative h-9 w-9 rounded-full overflow-hidden bg-white hover:bg-gray-100"
                 >
                   <div className="h-full w-full rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
                     {user.name.charAt(0).toUpperCase()}
@@ -158,7 +158,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="lg:hidden h-9 w-9 p-0"
+              className="lg:hidden h-9 w-9 p-0 bg-white hover:bg-gray-100"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? (
@@ -173,7 +173,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
 
       {/* Mobile Menu - Full screen overlay */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-16 z-50 bg-background border-b border-sidebar-border/40">
+        <div className="lg:hidden fixed inset-x-0 top-16 z-50 bg-white dark:bg-background border-b border-sidebar-border/40">
           <div className="px-4 py-4 space-y-4">
             {/* Mobile Search */}
             <div className="relative">
@@ -188,33 +188,45 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
 
             {/* Mobile Navigation */}
             <nav className="space-y-2">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <IconActivity className="mr-2 h-4 w-4" />
-                Dashboard
-              </Button>
-              {(user.role === 'super_admin') && (
+              {(user.role === 'super_admin' || user.role === 'manager') ? (
                 <>
                   <Button
                     variant="ghost"
                     className="w-full justify-start"
                     onClick={() => setIsMobileMenuOpen(false)}
+                    asChild
                   >
-                    <IconUsers className="mr-2 h-4 w-4" />
-                    Team Management
+                    <a href="/dashboard-manager">
+                      <IconTrendingUp className="mr-2 h-4 w-4" />
+                      Dashboard Manager
+                    </a>
                   </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <IconTrendingUp className="mr-2 h-4 w-4" />
-                    Analytics
-                  </Button>
+                  {user.role === 'super_admin' && (
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      asChild
+                    >
+                      <a href="/dashboard-manager/crm-data">
+                        <IconUsers className="mr-2 h-4 w-4" />
+                        CRM Data
+                      </a>
+                    </Button>
+                  )}
                 </>
+              ) : (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  asChild
+                >
+                  <a href="/dashboard">
+                    <IconActivity className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </a>
+                </Button>
               )}
             </nav>
           </div>

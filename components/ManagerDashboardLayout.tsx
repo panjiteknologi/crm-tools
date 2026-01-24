@@ -83,7 +83,7 @@ export default function ManagerDashboardLayout({ children }: ManagerDashboardLay
   }
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen overflow-hidden bg-background">
         <CRMSidebar user={user} />
         <div className="flex flex-1 flex-col overflow-hidden">
