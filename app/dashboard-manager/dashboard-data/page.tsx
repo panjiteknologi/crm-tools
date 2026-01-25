@@ -1931,7 +1931,14 @@ export default function CrmDataManagementPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">CRM Dashboard Data</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">
+              CRM Dashboard Data
+              {filterTahun !== 'all' && (
+                <span className="ml-3 text-lg sm:text-2xl font-semibold text-primary">
+                  {filterTahun}
+                </span>
+              )}
+            </h1>
             <p className="text-muted-foreground mt-1">
               {filteredTargets.length} records found
             </p>
@@ -2213,6 +2220,239 @@ export default function CrmDataManagementPage() {
             </div>
           </div>
         </div>
+
+        {/* Total Target Card - Combined MRC & DHA */}
+        <Card>
+          <CardContent className="p-6">
+            {(() => {
+              // Calculate TOTAL from ALL data (without filters) - this stays constant
+              const allData = (crmTargets || []);
+
+              const totalAllContracts = allData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+
+              // Calculate FILTERED data - this changes based on filters
+              const filteredData = (filteredTargets || []);
+
+              const totalFilteredContracts = filteredData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+              const lanjutContracts = filteredData
+                .filter(t => t.status === 'LANJUT' || t.status === 'DONE')
+                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+              const lossContracts = filteredData
+                .filter(t => t.status === 'LOSS')
+                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+              const suspendContracts = filteredData
+                .filter(t => t.status === 'SUSPEND')
+                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+              const prosesContracts = filteredData
+                .filter(t => t.status === 'PROSES')
+                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+              const waitingContracts = filteredData
+                .filter(t => t.status === 'WAITING')
+                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+
+              // Calculate percentage based on filtered data
+              const achievementPercentage = totalFilteredContracts > 0
+                ? Math.round((lanjutContracts / totalFilteredContracts) * 100)
+                : 0;
+
+              // Determine which progress bar to show based on status filter
+              const getProgressConfig = () => {
+                // Percentage is ALWAYS calculated from total ALL contracts (not filtered)
+                if (filterStatus === 'LANJUT' || filterStatus === 'all') {
+                  return {
+                    label: 'Pencapaian Kontrak Lanjut',
+                    value: lanjutContracts,
+                    color: 'green',
+                    percentage: totalAllContracts > 0 ? Math.round((lanjutContracts / totalAllContracts) * 100) : 0
+                  };
+                } else if (filterStatus === 'LOSS') {
+                  return {
+                    label: 'Pencapaian Kontrak Loss',
+                    value: lossContracts,
+                    color: 'red',
+                    percentage: totalAllContracts > 0 ? Math.round((lossContracts / totalAllContracts) * 100) : 0
+                  };
+                } else if (filterStatus === 'SUSPEND') {
+                  return {
+                    label: 'Pencapaian Kontrak Suspend',
+                    value: suspendContracts,
+                    color: 'orange',
+                    percentage: totalAllContracts > 0 ? Math.round((suspendContracts / totalAllContracts) * 100) : 0
+                  };
+                } else if (filterStatus === 'PROSES') {
+                  return {
+                    label: 'Pencapaian Kontrak Proses',
+                    value: prosesContracts,
+                    color: 'blue',
+                    percentage: totalAllContracts > 0 ? Math.round((prosesContracts / totalAllContracts) * 100) : 0
+                  };
+                } else if (filterStatus === 'WAITING') {
+                  return {
+                    label: 'Pencapaian Kontrak Waiting',
+                    value: waitingContracts,
+                    color: 'gray',
+                    percentage: totalAllContracts > 0 ? Math.round((waitingContracts / totalAllContracts) * 100) : 0
+                  };
+                } else {
+                  // Default: show LANJUT
+                  return {
+                    label: 'Pencapaian Kontrak Lanjut',
+                    value: lanjutContracts,
+                    color: 'green',
+                    percentage: totalAllContracts > 0 ? Math.round((lanjutContracts / totalAllContracts) * 100) : 0
+                  };
+                }
+              };
+
+              const progressConfig = getProgressConfig();
+
+              const colorClasses = {
+                green: {
+                  bg: 'bg-gradient-to-r from-green-500 to-green-600',
+                  text: 'text-green-600'
+                },
+                red: {
+                  bg: 'bg-gradient-to-r from-red-500 to-red-600',
+                  text: 'text-red-600'
+                },
+                orange: {
+                  bg: 'bg-gradient-to-r from-orange-500 to-orange-600',
+                  text: 'text-orange-600'
+                },
+                blue: {
+                  bg: 'bg-gradient-to-r from-blue-500 to-blue-600',
+                  text: 'text-blue-600'
+                },
+                gray: {
+                  bg: 'bg-gradient-to-r from-gray-500 to-gray-600',
+                  text: 'text-gray-600'
+                }
+              };
+
+              return (
+                <div className="space-y-4">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
+                        <BarChart3 className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold">Total Target ( Contract Base )</h3>
+                        <p className="text-sm text-muted-foreground">Combined MRC & DHA (All Data)</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-primary">Rp {totalAllContracts.toLocaleString('id-ID')}</p>
+                      <p className="text-xs text-muted-foreground">{allData.length} kontrak total</p>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar - Dynamic based on status filter */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{progressConfig.label}</span>
+                      <span className={`text-sm font-bold ${colorClasses[progressConfig.color].text}`}>
+                        {progressConfig.percentage}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                      <div
+                        className={`${colorClasses[progressConfig.color].bg} h-4 rounded-full transition-all duration-700 ease-out flex items-center justify-end pr-2`}
+                        style={{ width: `${Math.min(progressConfig.percentage, 100)}%` }}
+                      >
+                        {progressConfig.percentage > 10 && (
+                          <span className="text-[10px] font-bold text-white">{progressConfig.percentage}%</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>
+                        Rp {progressConfig.value.toLocaleString('id-ID')} dari Rp {totalAllContracts.toLocaleString('id-ID')} (Total Semua Kontrak)
+                        {filterStatus !== 'all' && filterStatus !== 'LANJUT' && (
+                          <span className="ml-2">• Filter: {filterStatus}</span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Detailed Breakdown */}
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t">
+                    {/* LANJUT */}
+                    <div className="flex flex-col items-center p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">✓</span>
+                        </div>
+                        <span className="text-lg font-bold text-green-700">Rp {Math.round(lanjutContracts).toLocaleString('id-ID')}</span>
+                      </div>
+                      <span className="text-xs text-green-600 font-medium">LANJUT/DONE</span>
+                      <span className="text-[10px] text-green-600">
+                        {filteredData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').length} kontrak
+                      </span>
+                    </div>
+
+                    {/* PROSES */}
+                    <div className="flex flex-col items-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">⏳</span>
+                        </div>
+                        <span className="text-lg font-bold text-blue-700">Rp {Math.round(prosesContracts).toLocaleString('id-ID')}</span>
+                      </div>
+                      <span className="text-xs text-blue-600 font-medium">PROSES</span>
+                      <span className="text-[10px] text-blue-600">
+                        {filteredData.filter(t => t.status === 'PROSES').length} kontrak
+                      </span>
+                    </div>
+
+                    {/* SUSPEND */}
+                    <div className="flex flex-col items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">⏸</span>
+                        </div>
+                        <span className="text-lg font-bold text-orange-700">Rp {Math.round(suspendContracts).toLocaleString('id-ID')}</span>
+                      </div>
+                      <span className="text-xs text-orange-600 font-medium">SUSPEND</span>
+                      <span className="text-[10px] text-orange-600">
+                        {filteredData.filter(t => t.status === 'SUSPEND').length} kontrak
+                      </span>
+                    </div>
+
+                    {/* LOSS */}
+                    <div className="flex flex-col items-center p-3 bg-red-50 rounded-lg border border-red-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">✗</span>
+                        </div>
+                        <span className="text-lg font-bold text-red-700">Rp {Math.round(lossContracts).toLocaleString('id-ID')}</span>
+                      </div>
+                      <span className="text-xs text-red-600 font-medium">LOSS</span>
+                      <span className="text-[10px] text-red-600">
+                        {filteredData.filter(t => t.status === 'LOSS').length} kontrak
+                      </span>
+                    </div>
+
+                    {/* WAITING */}
+                    <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">⏰</span>
+                        </div>
+                        <span className="text-lg font-bold text-gray-700">Rp {Math.round(waitingContracts).toLocaleString('id-ID')}</span>
+                      </div>
+                      <span className="text-xs text-gray-600 font-medium">WAITING</span>
+                      <span className="text-[10px] text-gray-600">
+                        {filteredData.filter(t => t.status === 'WAITING').length} kontrak
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
 
         {/* Staff Performance Cards - MRC & DHA */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
