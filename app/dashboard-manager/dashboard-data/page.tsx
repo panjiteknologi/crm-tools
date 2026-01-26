@@ -2326,7 +2326,7 @@ export default function CrmDataManagementPage() {
 
               const progressConfig = getProgressConfig();
 
-              const colorClasses = {
+              const colorClasses: { [key: string]: { bg: string; text: string } } = {
                 green: {
                   bg: 'bg-gradient-to-r from-green-500 to-green-600',
                   text: 'text-green-600'
@@ -2612,7 +2612,7 @@ export default function CrmDataManagementPage() {
               }));
 
               // Color classes - MATCHES Total Target progress bar colors
-              const colorClasses = {
+              const colorClasses: { [key: string]: { bg: string; border: string; text: string; textLight: string; bgBadge: string; textBadge: string; bgFooter: string; borderFooter: string; textFooter: string } } = {
                 green: {
                   bg: 'from-green-50 to-green-100',
                   border: 'border-green-200',
