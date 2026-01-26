@@ -15,6 +15,7 @@ import { Search, Filter, BarChart3, ChevronDown, ChevronRight, Users, X } from '
 import indonesiaData from '@/data/indonesia-provinsi-kota.json';
 import masterSalesData from '@/data/master-sales.json';
 import { ChartCardCrmData } from '@/components/chart-card-crm-data';
+import { ChartCardPencapaianMonthly } from '@/components/chart-card-pencapaian-monthly';
 
 interface CrmTarget {
   _id: Id<"crmTargets">;
@@ -82,7 +83,7 @@ export default function CrmDataManagementPage() {
   const [activeFilterSheet, setActiveFilterSheet] = useState<string | null>(null);
 
   // Comprehensive Filters
-  const [expandedFilterSections, setExpandedFilterSections] = useState<string[]>(['date', 'details', 'picSales', 'lokasi', 'sertifikat', 'pembayaran', 'jadwal']);
+  const [expandedFilterSections, setExpandedFilterSections] = useState<string[]>(['date', 'details', 'picSales', 'sertifikat', 'pembayaran', 'jadwal']);
   const currentYear = new Date().getFullYear().toString();
   const [filterTahun, setFilterTahun] = useState<string>(currentYear);
   const [filterFromBulanExp, setFilterFromBulanExp] = useState<string>('all');
@@ -557,7 +558,26 @@ export default function CrmDataManagementPage() {
                       </div>
                     </div>
 
-                    {/* Status - Button Filter with Colors */}
+                  </div>
+                )}
+              </div>
+
+              {/* Section Lokasi */}
+              <div className="border rounded-lg overflow-hidden">
+                <button
+                  onClick={() => toggleFilterSection('lokasi')}
+                  className="w-full flex items-center justify-between p-3 bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                >
+                  <span className="font-medium text-sm">Filter Company</span>
+                  {expandedFilterSections.includes('lokasi') ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </button>
+                {expandedFilterSections.includes('lokasi') && (
+                  <div className="p-3 space-y-3 border-t">
+                                        {/* Status - Button Filter with Colors */}
                     <div>
                       <Label className="mb-1.5 block text-xs">Status</Label>
                       <div className="flex flex-wrap gap-2">
@@ -618,24 +638,6 @@ export default function CrmDataManagementPage() {
                       </div>
                     </div>
 
-                    {/* Alasan */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Alasan</Label>
-                      <Select value={filterAlasan} onValueChange={setFilterAlasan}>
-                        <SelectTrigger className="w-full h-8 text-xs">
-                          <SelectValue placeholder="All Alasan" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Alasan</SelectItem>
-                          {alasanOptions.map((alasan) => (
-                            <SelectItem key={alasan} value={alasan}>
-                              {alasan}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
                     {/* Category - Button Filter with Gradient Colors */}
                     <div>
                       <Label className="mb-1.5 block text-xs">Category</Label>
@@ -684,7 +686,6 @@ export default function CrmDataManagementPage() {
                         })}
                       </div>
                     </div>
-
                     {/* Provinsi */}
                     <div>
                       <Label className="mb-1.5 block text-xs">Provinsi</Label>
@@ -725,6 +726,25 @@ export default function CrmDataManagementPage() {
                           {kotaOptions.map((kota) => (
                             <SelectItem key={kota} value={kota}>
                               {kota}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    
+                    {/* Alasan */}
+                    <div>
+                      <Label className="mb-1.5 block text-xs">Alasan</Label>
+                      <Select value={filterAlasan} onValueChange={setFilterAlasan}>
+                        <SelectTrigger className="w-full h-8 text-xs">
+                          <SelectValue placeholder="All Alasan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Alasan</SelectItem>
+                          {alasanOptions.map((alasan) => (
+                            <SelectItem key={alasan} value={alasan}>
+                              {alasan}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1932,7 +1952,7 @@ export default function CrmDataManagementPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">
-              CRM Dashboard Data
+              CRM Dashboard Pencapaian
               {filterTahun !== 'all' && (
                 <span className="ml-3 text-lg sm:text-2xl font-semibold text-primary">
                   {filterTahun}
@@ -2377,75 +2397,87 @@ export default function CrmDataManagementPage() {
                   </div>
 
                   {/* Detailed Breakdown */}
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 pt-4 border-t">
                     {/* LANJUT */}
-                    <div className="flex flex-col items-center p-3 bg-green-50 rounded-lg border border-green-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">✓</span>
+                    <div className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-green-50 rounded-lg border border-green-200">
+                      {/* Left - Percentage Circle */}
+                      <div className="flex-shrink-0">
+                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-green-500 flex items-center justify-center">
+                          <span className="text-white text-xs sm:text-sm font-bold">{totalAllContracts > 0 ? Math.round((lanjutContracts / totalAllContracts) * 100) : 0}%</span>
                         </div>
-                        <span className="text-lg font-bold text-green-700">Rp {Math.round(lanjutContracts).toLocaleString('id-ID')}</span>
                       </div>
-                      <span className="text-xs text-green-600 font-medium">LANJUT/DONE</span>
-                      <span className="text-[10px] text-green-600">
-                        {filteredData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').length} kontrak
-                      </span>
+                      {/* Right - Info */}
+                      <div className="flex-1 min-w-0 text-left">
+                        <span className="text-[10px] sm:text-xs text-green-600 font-medium">LANJUT/DONE</span>
+                        <div className="text-xs sm:text-sm font-bold text-green-700 truncate">Rp {Math.round(lanjutContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] sm:text-[10px] text-green-600">
+                          {filteredData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').length} kontrak
+                        </span>
+                      </div>
                     </div>
 
                     {/* PROSES */}
-                    <div className="flex flex-col items-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">⏳</span>
+                    <div className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex-shrink-0">
+                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-blue-500 flex items-center justify-center">
+                          <span className="text-white text-xs sm:text-sm font-bold">{totalAllContracts > 0 ? Math.round((prosesContracts / totalAllContracts) * 100) : 0}%</span>
                         </div>
-                        <span className="text-lg font-bold text-blue-700">Rp {Math.round(prosesContracts).toLocaleString('id-ID')}</span>
                       </div>
-                      <span className="text-xs text-blue-600 font-medium">PROSES</span>
-                      <span className="text-[10px] text-blue-600">
-                        {filteredData.filter(t => t.status === 'PROSES').length} kontrak
-                      </span>
+                      <div className="flex-1 min-w-0 text-left">
+                        <span className="text-[10px] sm:text-xs text-blue-600 font-medium">PROSES</span>
+                        <div className="text-xs sm:text-sm font-bold text-blue-700 truncate">Rp {Math.round(prosesContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] sm:text-[10px] text-blue-600">
+                          {filteredData.filter(t => t.status === 'PROSES').length} kontrak
+                        </span>
+                      </div>
                     </div>
 
                     {/* SUSPEND */}
-                    <div className="flex flex-col items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">⏸</span>
+                    <div className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="flex-shrink-0">
+                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-orange-500 flex items-center justify-center">
+                          <span className="text-white text-xs sm:text-sm font-bold">{totalAllContracts > 0 ? Math.round((suspendContracts / totalAllContracts) * 100) : 0}%</span>
                         </div>
-                        <span className="text-lg font-bold text-orange-700">Rp {Math.round(suspendContracts).toLocaleString('id-ID')}</span>
                       </div>
-                      <span className="text-xs text-orange-600 font-medium">SUSPEND</span>
-                      <span className="text-[10px] text-orange-600">
-                        {filteredData.filter(t => t.status === 'SUSPEND').length} kontrak
-                      </span>
+                      <div className="flex-1 min-w-0 text-left">
+                        <span className="text-[10px] sm:text-xs text-orange-600 font-medium">SUSPEND</span>
+                        <div className="text-xs sm:text-sm font-bold text-orange-700 truncate">Rp {Math.round(suspendContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] sm:text-[10px] text-orange-600">
+                          {filteredData.filter(t => t.status === 'SUSPEND').length} kontrak
+                        </span>
+                      </div>
                     </div>
 
                     {/* LOSS */}
-                    <div className="flex flex-col items-center p-3 bg-red-50 rounded-lg border border-red-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">✗</span>
+                    <div className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-red-50 rounded-lg border border-red-200">
+                      <div className="flex-shrink-0">
+                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-red-500 flex items-center justify-center">
+                          <span className="text-white text-xs sm:text-sm font-bold">{totalAllContracts > 0 ? Math.round((lossContracts / totalAllContracts) * 100) : 0}%</span>
                         </div>
-                        <span className="text-lg font-bold text-red-700">Rp {Math.round(lossContracts).toLocaleString('id-ID')}</span>
                       </div>
-                      <span className="text-xs text-red-600 font-medium">LOSS</span>
-                      <span className="text-[10px] text-red-600">
-                        {filteredData.filter(t => t.status === 'LOSS').length} kontrak
-                      </span>
+                      <div className="flex-1 min-w-0 text-left">
+                        <span className="text-[10px] sm:text-xs text-red-600 font-medium">LOSS</span>
+                        <div className="text-xs sm:text-sm font-bold text-red-700 truncate">Rp {Math.round(lossContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] sm:text-[10px] text-red-600">
+                          {filteredData.filter(t => t.status === 'LOSS').length} kontrak
+                        </span>
+                      </div>
                     </div>
 
                     {/* WAITING */}
-                    <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">⏰</span>
+                    <div className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex-shrink-0">
+                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gray-500 flex items-center justify-center">
+                          <span className="text-white text-xs sm:text-sm font-bold">{totalAllContracts > 0 ? Math.round((waitingContracts / totalAllContracts) * 100) : 0}%</span>
                         </div>
-                        <span className="text-lg font-bold text-gray-700">Rp {Math.round(waitingContracts).toLocaleString('id-ID')}</span>
                       </div>
-                      <span className="text-xs text-gray-600 font-medium">WAITING</span>
-                      <span className="text-[10px] text-gray-600">
-                        {filteredData.filter(t => t.status === 'WAITING').length} kontrak
-                      </span>
+                      <div className="flex-1 min-w-0 text-left">
+                        <span className="text-[10px] sm:text-xs text-gray-600 font-medium">WAITING</span>
+                        <div className="text-xs sm:text-sm font-bold text-gray-700 truncate">Rp {Math.round(waitingContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] sm:text-[10px] text-gray-600">
+                          {filteredData.filter(t => t.status === 'WAITING').length} kontrak
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2453,6 +2485,237 @@ export default function CrmDataManagementPage() {
             })()}
           </CardContent>
         </Card>
+
+        {/* Pencapaian Chart - Monthly Breakdown */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Pencapaian Analytics (Per Bulan)
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  Visualisasi data berdasarkan total harga kontrak per bulan {filterStatus !== 'all' && `- Status: ${filterStatus.toUpperCase()}`}
+                </CardDescription>
+              </div>
+              <Select value={selectedChartType} onValueChange={setSelectedChartType}>
+                <SelectTrigger className="w-32 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="area">Area</SelectItem>
+                  <SelectItem value="bar">Bar</SelectItem>
+                  <SelectItem value="line">Line</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              // Filter data based on status filter
+              let filteredByStatus = (filteredTargets || []);
+
+              // When filterStatus is 'all', only show LANJUT/DONE contracts
+              // Otherwise, filter by the selected status
+              if (filterStatus === 'all') {
+                filteredByStatus = filteredByStatus.filter(t => t.status === 'LANJUT' || t.status === 'DONE');
+              } else {
+                const statusUpper = filterStatus?.toUpperCase() || '';
+                filteredByStatus = filteredByStatus.filter(t => {
+                  if (statusUpper === 'LANJUT') {
+                    return t.status === 'LANJUT' || t.status === 'DONE';
+                  }
+                  return t.status === statusUpper;
+                });
+              }
+
+              // Group by bulanExpDate and calculate totals
+              const monthlyData: { [key: string]: { total: number; count: number } } = {};
+
+              filteredByStatus.forEach(target => {
+                const bulan = target.bulanExpDate || 'Unknown';
+                const amount = target.hargaKontrak || 0;
+
+                if (!monthlyData[bulan]) {
+                  monthlyData[bulan] = {
+                    total: 0,
+                    count: 0
+                  };
+                }
+
+                monthlyData[bulan].total += amount;
+                monthlyData[bulan].count += 1;
+              });
+
+              // Convert to array and sort by month
+              const bulanOrder: { [key: string]: number } = {
+                'januari': 1, 'februari': 2, 'maret': 3, 'april': 4, 'mei': 5, 'juni': 6,
+                'juli': 7, 'agustus': 8, 'september': 9, 'oktober': 10, 'november': 11, 'desember': 12,
+                '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
+                '7': 7, '8': 8, '9': 9, '10': 10, '11': 11, '12': 12
+              };
+
+              const sortedMonthlyData = Object.entries(monthlyData)
+                .filter(([bulan]) => bulan.toLowerCase() !== 'unknown')
+                .sort(([a], [b]) => {
+                  const orderA = bulanOrder[a.toLowerCase()] || 999;
+                  const orderB = bulanOrder[b.toLowerCase()] || 999;
+                  return orderA - orderB;
+                });
+
+              // Calculate grand total
+              const grandTotal = filteredByStatus.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+
+              // Determine status color - SAME LOGIC as Total Target progress bar
+              const getStatusColor = () => {
+                if (filterStatus === 'LANJUT' || filterStatus === 'all') {
+                  return 'green';
+                } else if (filterStatus === 'LOSS') {
+                  return 'red';
+                } else if (filterStatus === 'SUSPEND') {
+                  return 'orange';
+                } else if (filterStatus === 'PROSES') {
+                  return 'blue';
+                } else if (filterStatus === 'WAITING') {
+                  return 'gray';
+                } else {
+                  return 'green'; // Default
+                }
+              };
+
+              const statusColor = getStatusColor();
+
+              // Create aggregated data array for chart (one data point per month with total value)
+              const chartData = sortedMonthlyData.map(([bulan, data]) => ({
+                bulanExpDate: bulan,
+                hargaKontrak: data.total,
+                namaPerusahaan: `Total ${bulan}`,
+                picCrm: 'All',
+                sales: 'All',
+                status: filterStatus !== 'all' ? filterStatus.toUpperCase() : 'ALL',
+                bulanTtdNotif: undefined,
+                category: undefined,
+                provinsi: undefined,
+                kota: undefined,
+                alamat: undefined,
+                akreditasi: undefined,
+                eaCode: undefined,
+                std: undefined,
+                iaDate: undefined,
+                expDate: undefined,
+                tahapAudit: undefined,
+                _id: '' as any,
+                tahun: filterTahun !== 'all' ? filterTahun : undefined,
+                createdAt: 0,
+                updatedAt: 0
+              }));
+
+              // Color classes - MATCHES Total Target progress bar colors
+              const colorClasses = {
+                green: {
+                  bg: 'from-green-50 to-green-100',
+                  border: 'border-green-200',
+                  text: 'text-green-700',
+                  textLight: 'text-green-600',
+                  bgBadge: 'bg-green-100',
+                  textBadge: 'text-green-800',
+                  bgFooter: 'from-green-50 to-green-100',
+                  borderFooter: 'border-green-200',
+                  textFooter: 'text-green-900'
+                },
+                red: {
+                  bg: 'from-red-50 to-red-100',
+                  border: 'border-red-200',
+                  text: 'text-red-700',
+                  textLight: 'text-red-600',
+                  bgBadge: 'bg-red-100',
+                  textBadge: 'text-red-800',
+                  bgFooter: 'from-red-50 to-red-100',
+                  borderFooter: 'border-red-200',
+                  textFooter: 'text-red-900'
+                },
+                orange: {
+                  bg: 'from-orange-50 to-orange-100',
+                  border: 'border-orange-200',
+                  text: 'text-orange-700',
+                  textLight: 'text-orange-600',
+                  bgBadge: 'bg-orange-100',
+                  textBadge: 'text-orange-800',
+                  bgFooter: 'from-orange-50 to-orange-100',
+                  borderFooter: 'border-orange-200',
+                  textFooter: 'text-orange-900'
+                },
+                blue: {
+                  bg: 'from-blue-50 to-blue-100',
+                  border: 'border-blue-200',
+                  text: 'text-blue-700',
+                  textLight: 'text-blue-600',
+                  bgBadge: 'bg-blue-100',
+                  textBadge: 'text-blue-800',
+                  bgFooter: 'from-blue-50 to-blue-100',
+                  borderFooter: 'border-blue-200',
+                  textFooter: 'text-blue-900'
+                },
+                gray: {
+                  bg: 'from-gray-50 to-gray-100',
+                  border: 'border-gray-200',
+                  text: 'text-gray-700',
+                  textLight: 'text-gray-600',
+                  bgBadge: 'bg-gray-100',
+                  textBadge: 'text-gray-800',
+                  bgFooter: 'from-gray-50 to-gray-100',
+                  borderFooter: 'border-gray-200',
+                  textFooter: 'text-gray-900'
+                }
+              };
+
+              const colors = colorClasses[statusColor as keyof typeof colorClasses] || colorClasses.green;
+
+              return (
+                <div className="space-y-6">
+                  {/* Summary Card */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div className="p-4 bg-white rounded-lg border border-gray-200">
+                      <p className="text-sm text-gray-600 font-medium">Rata-rata per Bulan</p>
+                      <p className="text-2xl font-bold text-gray-700 mt-1">
+                        Rp {sortedMonthlyData.length > 0 ? Math.round(grandTotal / sortedMonthlyData.length).toLocaleString('id-ID') : '0'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">{sortedMonthlyData.length} bulan aktif</p>
+                    </div>
+                    <div className="p-4 bg-white rounded-lg border border-gray-200">
+                      <p className="text-sm text-gray-600 font-medium">Tertinggi</p>
+                      <p className="text-2xl font-bold text-green-600 mt-1">
+                        Rp {sortedMonthlyData.length > 0 ? Math.max(...sortedMonthlyData.map(([, data]) => data.total)).toLocaleString('id-ID') : '0'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {sortedMonthlyData.length > 0 ? sortedMonthlyData.reduce((a, b) => a[1].total > b[1].total ? a : b)[0] : '-'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Chart - Dynamic color based on status - MATCHES Total Target progress bar */}
+                  <ChartCardPencapaianMonthly
+                    title={`Pencapaian Per Bulan${filterStatus !== 'all' ? ` - ${filterStatus.toUpperCase()}` : ''}`}
+                    data={chartData}
+                    statusColor={statusColor}
+                    chartType={selectedChartType}
+                    isFullWidth={true}
+                  />
+
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
+
+        {/* Disclaimer - Pencapaian PIC CRM Contract Base */}
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800 font-medium text-center">
+            ⚠️ <strong>Disclaimer:</strong> Dibawah ini adalah pencapaian berdasarkan PIC CRM ( Contract Base )
+          </p>
+        </div>
 
         {/* Staff Performance Cards - MRC & DHA */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

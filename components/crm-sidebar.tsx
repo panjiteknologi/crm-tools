@@ -64,12 +64,12 @@ const getNavigationItems = (role: string) => {
         icon: IconChartBar,
       },
       {
-        title: "Dashboard Data",
+        title: "Dashboard Pencapaian",
         url: "/dashboard-manager/dashboard-data",
         icon: IconDatabase,
       },
       {
-        title: "CRM Data",
+        title: "CRM Data Management",
         url: "/dashboard-manager/crm-data",
         icon: IconTarget,
       }
@@ -78,18 +78,18 @@ const getNavigationItems = (role: string) => {
 
   // Super admin sees all items - Dashboard Manager is the main dashboard
   return [
+    // {
+    //   title: "Dashboard Manager",
+    //   url: "/dashboard-manager",
+    //   icon: IconChartBar,
+    // },
     {
-      title: "Dashboard Manager",
-      url: "/dashboard-manager",
-      icon: IconChartBar,
-    },
-    {
-      title: "Dashboard Data",
+      title: "Dashboard Pencapaian",
       url: "/dashboard-manager/dashboard-data",
       icon: IconDatabase,
     },
     {
-      title: "CRM Data",
+      title: "CRM Data Management",
       url: "/dashboard-manager/crm-data",
       icon: IconTarget,
     },

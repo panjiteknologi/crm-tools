@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Area, AreaChart, Bar, BarChart, Line, LineChart, Pie, PieChart, Cell, CartesianGrid, XAxis, YAxis, ResponsiveContainer, LabelList, Rectangle, Tooltip } from "recharts"
+import { Area, AreaChart, Bar, BarChart, Line, LineChart, CartesianGrid, XAxis, YAxis, LabelList, Tooltip } from "recharts"
 
 import {
   Card,
@@ -17,14 +17,11 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 
-export const description = "CRM Data Analytics Chart"
+export const description = "Pencapaian Analytics Monthly Chart"
 
 const chartConfig = {
-  MRC: {
-    label: "MRC",
-  },
-  DHA: {
-    label: "DHA",
+  Pencapaian: {
+    label: "Pencapaian",
   },
 } satisfies ChartConfig
 
@@ -50,49 +47,51 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-interface ChartCardCrmDataProps {
+interface ChartCardPencapaianMonthlyProps {
   title: string
   data: any[]
   statusColor: string
   chartType?: string
-  filterTahun?: string
-  filterPicCrm?: string
-  filterProvinsi?: string
-  filterKota?: string
   isFullWidth?: boolean
 }
 
-function ChartCardCrmData({
+function ChartCardPencapaianMonthly({
   title,
   data,
   statusColor,
   chartType = 'area',
-  filterTahun,
-  filterPicCrm,
-  filterProvinsi,
-  filterKota,
   isFullWidth = false
-}: ChartCardCrmDataProps) {
+}: ChartCardPencapaianMonthlyProps) {
   // Month names for chart
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  // Get colors for MRC and DHA
-  const mrcColor = 'hsl(280, 70%, 50%)'; // Purple
-  const dhaColor = 'hsl(210, 80%, 50%)'; // Blue
+  // Get color based on statusColor prop
+  const getStatusColorValue = () => {
+    switch (statusColor) {
+      case 'green': return 'hsl(142, 76%, 36%)';  // Green
+      case 'red': return 'hsl(0, 84%, 60%)';      // Red
+      case 'orange': return 'hsl(25, 95%, 53%)';   // Orange
+      case 'blue': return 'hsl(210, 80%, 50%)';    // Blue
+      case 'gray': return 'hsl(220, 10%, 40%)';    // Gray
+      default: return 'hsl(142, 76%, 36%)';        // Default Green
+    }
+  };
 
-  // Process data for chart - group by month and separate by PIC
+  const chartColor = getStatusColorValue();
+
+  // Process data for chart - group by month and COMBINE MRC + DHA
   const getChartData = () => {
     if (!data || data.length === 0) {
-      return monthNames.map(month => ({ month, MRC: 0, DHA: 0 }));
+      return monthNames.map(month => ({ month, value: 0 }));
     }
 
     // Initialize data for all months
-    const monthlyData: { [key: string]: { MRC: number; DHA: number } } = {};
+    const monthlyData: { [key: string]: number } = {};
     monthNames.forEach(month => {
-      monthlyData[month] = { MRC: 0, DHA: 0 };
+      monthlyData[month] = 0;
     });
 
-    // Group by month and picCrm
+    // Group by month and COMBINE all MRC and DHA values
     data.forEach(item => {
       // Extract month from bulanExpDate
       let monthIndex = 0;
@@ -114,24 +113,18 @@ function ChartCardCrmData({
       }
 
       const monthName = monthNames[monthIndex];
-      const picCrm = (item.picCrm || '').toUpperCase();
 
-      // Add hargaKontrak to the corresponding month and PIC
+      // Add hargaKontrak to the corresponding month (COMBINED MRC + DHA)
       if (!monthlyData[monthName]) {
-        monthlyData[monthName] = { MRC: 0, DHA: 0 };
+        monthlyData[monthName] = 0;
       }
-
-      if (picCrm === 'MRC') {
-        monthlyData[monthName].MRC += item.hargaKontrak || 0;
-      } else if (picCrm === 'DHA') {
-        monthlyData[monthName].DHA += item.hargaKontrak || 0;
-      }
+      monthlyData[monthName] += item.hargaKontrak || 0;
     });
 
     // Convert to array
     const chartData = monthNames.map(month => ({
       month,
-      ...monthlyData[month]
+      value: monthlyData[month]
     }));
 
     return chartData;
@@ -139,12 +132,23 @@ function ChartCardCrmData({
 
   const chartData = getChartData();
 
-  // Determine background gradient
+  // Determine background gradient based on status color
   const getBackgroundGradient = () => {
-    return 'bg-gradient-to-br from-purple-500/20 via-blue-400/10 to-transparent';
+    if (statusColor === 'green') {
+      return 'bg-gradient-to-br from-green-500/20 via-green-400/10 to-transparent';
+    } else if (statusColor === 'red') {
+      return 'bg-gradient-to-br from-red-500/20 via-red-400/10 to-transparent';
+    } else if (statusColor === 'orange') {
+      return 'bg-gradient-to-br from-orange-500/20 via-orange-400/10 to-transparent';
+    } else if (statusColor === 'blue') {
+      return 'bg-gradient-to-br from-blue-500/20 via-blue-400/10 to-transparent';
+    } else if (statusColor === 'gray') {
+      return 'bg-gradient-to-br from-gray-500/20 via-gray-400/10 to-transparent';
+    }
+    return 'bg-gradient-to-br from-green-500/20 via-green-400/10 to-transparent';
   };
 
-  const hasData = chartData.length > 0 && (chartData.some(item => item.MRC > 0) || chartData.some(item => item.DHA > 0));
+  const hasData = chartData.length > 0 && chartData.some(item => item.value > 0);
 
   return (
     <Card className="@container/card relative overflow-hidden">
@@ -155,7 +159,7 @@ function ChartCardCrmData({
       <CardHeader className="relative z-10 pb-2">
         <CardTitle className="text-sm font-semibold text-center">{title}</CardTitle>
         <CardDescription className="text-sm text-center font-semibold text-black/70">
-          Total: {data.length} data | MRC: Rp {chartData.reduce((sum, item) => sum + (item.MRC || 0), 0).toLocaleString('id-ID')} | DHA: Rp {chartData.reduce((sum, item) => sum + (item.DHA || 0), 0).toLocaleString('id-ID')}
+          Total: {data.length} data | Rp {chartData.reduce((sum, item) => sum + item.value, 0).toLocaleString('id-ID')}
         </CardDescription>
       </CardHeader>
 
@@ -202,28 +206,14 @@ function ChartCardCrmData({
                       cursor={true}
                       content={<CustomTooltip />}
                     />
-                    <Bar dataKey="MRC" fill={mrcColor} radius={[4, 4, 0, 0]}>
+                    <Bar dataKey="value" fill={chartColor} radius={[4, 4, 0, 0]}>
                       <LabelList
-                        dataKey="MRC"
+                        dataKey="value"
                         position="top"
                         fontSize={isFullWidth ? 12 : 9}
                         fontWeight="bold"
                         className="hidden sm:inline"
-                        fill={mrcColor}
-                        formatter={(value: number) => {
-                          if (value === 0) return '';
-                          return value.toLocaleString('id-ID');
-                        }}
-                      />
-                    </Bar>
-                    <Bar dataKey="DHA" fill={dhaColor} radius={[4, 4, 0, 0]}>
-                      <LabelList
-                        dataKey="DHA"
-                        position="top"
-                        fontSize={isFullWidth ? 12 : 9}
-                        fontWeight="bold"
-                        className="hidden sm:inline"
-                        fill={dhaColor}
+                        fill={chartColor}
                         formatter={(value: number) => {
                           if (value === 0) return '';
                           return value.toLocaleString('id-ID');
@@ -261,40 +251,19 @@ function ChartCardCrmData({
                     />
                     <Line
                       type="monotone"
-                      dataKey="MRC"
-                      stroke={mrcColor}
+                      dataKey="value"
+                      stroke={chartColor}
                       strokeWidth={2}
-                      dot={{ fill: mrcColor, strokeWidth: 1.5, r: 4 }}
+                      dot={{ fill: chartColor, strokeWidth: 1.5, r: 4 }}
                       activeDot={{ r: 6 }}
                     >
                       <LabelList
-                        dataKey="MRC"
+                        dataKey="value"
                         position="top"
                         fontSize={isFullWidth ? 12 : 9}
                         fontWeight="bold"
                         className="hidden sm:inline"
-                        fill={mrcColor}
-                        formatter={(value: number) => {
-                          if (value === 0) return '';
-                          return value.toLocaleString('id-ID');
-                        }}
-                      />
-                    </Line>
-                    <Line
-                      type="monotone"
-                      dataKey="DHA"
-                      stroke={dhaColor}
-                      strokeWidth={2}
-                      dot={{ fill: dhaColor, strokeWidth: 1.5, r: 4 }}
-                      activeDot={{ r: 6 }}
-                    >
-                      <LabelList
-                        dataKey="DHA"
-                        position="top"
-                        fontSize={isFullWidth ? 12 : 9}
-                        fontWeight="bold"
-                        className="hidden sm:inline"
-                        fill={dhaColor}
+                        fill={chartColor}
                         formatter={(value: number) => {
                           if (value === 0) return '';
                           return value.toLocaleString('id-ID');
@@ -304,64 +273,13 @@ function ChartCardCrmData({
                   </LineChart>
                 );
 
-              case 'pie':
-                // Prepare pie data - total value per month
-                const pieData = chartData
-                  .filter(item => item.value > 0)
-                  .map(item => ({
-                    name: item.month,
-                    value: item.value,
-                    color: chartColor
-                  }));
-
-                if (pieData.length === 0) {
-                  return (
-                    <div className="h-full w-full flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-muted-foreground text-sm">No data available</div>
-                      </div>
-                    </div>
-                  );
-                }
-
-                return (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={70}
-                        innerRadius={0}
-                        fill="#8884d8"
-                        dataKey="value"
-                        animationBegin={0}
-                        animationDuration={800}
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={chartColor} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        content={<CustomTooltip />}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                );
-
               default: // area chart
                 return (
                   <AreaChart data={chartData} margin={{ top: 20, right: 20, left: 10, bottom: 40 }}>
                     <defs>
-                      <linearGradient id="colorMRC" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={mrcColor} stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor={mrcColor} stopOpacity={0.2}/>
-                      </linearGradient>
-                      <linearGradient id="colorDHA" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={dhaColor} stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor={dhaColor} stopOpacity={0.2}/>
+                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={chartColor} stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor={chartColor} stopOpacity={0.2}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -389,38 +307,18 @@ function ChartCardCrmData({
                     />
                     <Area
                       type="monotone"
-                      dataKey="MRC"
-                      stroke={mrcColor}
+                      dataKey="value"
+                      stroke={chartColor}
                       strokeWidth={2}
-                      fill="url(#colorMRC)"
+                      fill="url(#colorValue)"
                     >
                       <LabelList
-                        dataKey="MRC"
+                        dataKey="value"
                         position="top"
                         fontSize={isFullWidth ? 12 : 9}
                         fontWeight="bold"
                         className="hidden sm:inline"
-                        fill={mrcColor}
-                        formatter={(value: number) => {
-                          if (value === 0) return '';
-                          return value.toLocaleString('id-ID');
-                        }}
-                      />
-                    </Area>
-                    <Area
-                      type="monotone"
-                      dataKey="DHA"
-                      stroke={dhaColor}
-                      strokeWidth={2}
-                      fill="url(#colorDHA)"
-                    >
-                      <LabelList
-                        dataKey="DHA"
-                        position="top"
-                        fontSize={isFullWidth ? 12 : 9}
-                        fontWeight="bold"
-                        className="hidden sm:inline"
-                        fill={dhaColor}
+                        fill={chartColor}
                         formatter={(value: number) => {
                           if (value === 0) return '';
                           return value.toLocaleString('id-ID');
@@ -436,12 +334,8 @@ function ChartCardCrmData({
         {/* Chart Legend */}
         <div className="flex items-center justify-center space-x-4 mt-3 p-2 bg-muted/20 rounded-lg">
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3" style={{ backgroundColor: mrcColor }}></div>
-            <span className="text-xs font-medium">MRC</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3" style={{ backgroundColor: dhaColor }}></div>
-            <span className="text-xs font-medium">DHA</span>
+            <div className="w-3 h-3" style={{ backgroundColor: chartColor }}></div>
+            <span className="text-xs font-medium">Pencapaian</span>
           </div>
         </div>
       </CardContent>
@@ -449,4 +343,4 @@ function ChartCardCrmData({
   );
 }
 
-export { ChartCardCrmData };
+export { ChartCardPencapaianMonthly };
