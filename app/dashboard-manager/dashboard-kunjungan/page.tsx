@@ -47,7 +47,7 @@ import { FilterCompanySection } from "@/components/filters/FilterCompanySection"
 import { FilterPicCrmSection } from "@/components/filters/FilterPicCrmSection"
 import { FilterKunjunganSection } from "@/components/filters/FilterKunjunganSection"
 
-import { IconCalendar, IconMapPin, IconPhone, IconBuilding, IconSearch, IconFilter, IconCheck, IconX, IconClock, IconCalendarTime, IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
+import { IconCalendar, IconMapPin, IconPhone, IconBuilding, IconSearch, IconFilter, IconCheck, IconX, IconClock, IconCalendarTime, IconChevronLeft, IconChevronRight, IconLoader } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 
 interface CrmTarget {
@@ -98,6 +98,9 @@ export default function DashboardKunjunganPage() {
   const crmTargets = useQuery(api.crmTargets.list) || []
   const [currentPage, setCurrentPage] = React.useState(1)
   const itemsPerPage = 10
+
+  // Loading state
+  const isLoading = crmTargets.length === 0;
 
   // Filter states
   const [filterPic, setFilterPic] = React.useState<string>("all")
@@ -192,10 +195,7 @@ export default function DashboardKunjunganPage() {
 
   // Filter data
   const filteredData = React.useMemo(() => {
-    console.log('🔍 Filter Month:', filterMonth)
-    console.log('📊 Total CRM Targets:', crmTargets.length)
-    console.log('✅ VISITED Count:', crmTargets.filter(t => t.statusKunjungan === 'VISITED').length)
-
+    
     return crmTargets.filter(target => {
       // Filter by PIC CRM
       if (filterPic !== "all" && target.picCrm !== filterPic) return false
@@ -366,13 +366,13 @@ export default function DashboardKunjunganPage() {
     : filteredData
 
   // Debug: log data
-  React.useEffect(() => {
-    console.log('📊 CRM Targets:', crmTargets.length)
-    console.log('🔍 Filtered Data:', filteredData.length)
-    console.log('📅 Display Tasks:', displayTasks.length)
-    console.log('🗓️ Selected Date:', selectedDate)
-    console.log('📆 Filter Month:', filterMonth)
-  }, [crmTargets, filteredData, displayTasks, selectedDate, filterMonth])
+  // React.useEffect(() => {
+  //   console.log('📊 CRM Targets:', crmTargets.length)
+  //   console.log('🔍 Filtered Data:', filteredData.length)
+  //   console.log('📅 Display Tasks:', displayTasks.length)
+  //   console.log('🗓️ Selected Date:', selectedDate)
+  //   console.log('📆 Filter Month:', filterMonth)
+  // }, [crmTargets, filteredData, displayTasks, selectedDate, filterMonth])
 
   // Reset page when filters change
   React.useEffect(() => {
@@ -699,6 +699,28 @@ export default function DashboardKunjunganPage() {
 
   return (
     <div className="lg:flex lg:flex-row gap-6 py-4 lg:py-8 px-4 lg:px-6 pb-20 lg:pb-8">
+      {/* Loading Overlay - Initial Data Load */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="text-center">
+            <IconLoader className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-lg font-semibold">Memuat data...</p>
+            <p className="text-sm text-muted-foreground mt-2">Mohon tunggu sebentar</p>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Overlay - Mass Update */}
+      {isMassUploading && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="text-center bg-background p-8 rounded-lg shadow-lg border">
+            <IconLoader className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
+            <p className="text-lg font-semibold">Menyimpan Data...</p>
+            <p className="text-sm text-muted-foreground mt-2">Mohon tunggu, sedang mengupdate semua standar</p>
+          </div>
+        </div>
+      )}
+
       {/* LEFT SIDEBAR - FILTERS */}
       <div className="hidden lg:block lg:w-80 flex-shrink-0">
         <div className="sticky top-6 space-y-4">
