@@ -155,33 +155,40 @@ export function CRMSidebar({ user, ...props }: CRMSidebarProps) {
   return (
     <Sidebar
       {...props}
-      collapsible="offcanvas"
+      collapsible="icon"
       variant="sidebar"
+      className="relative overflow-hidden"
     >
-      <SidebarHeader className="border-b border-sidebar-border">
+      {/* Gradient overlay for futuristic effect */}
+      <div className="absolute inset-0 bg-gradient-to-b from-purple-700/10 via-blue-600/10 to-purple-900/5 pointer-events-none" />
+
+      <SidebarHeader className="relative border-b border-sidebar-border/50 bg-gradient-to-r from-purple-600/10 via-blue-600/10 to-purple-600/10 backdrop-blur-sm">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              size="lg"
             >
-              <a href={user.role === 'staff' ? '/dashboard' : '/dashboard-manager'} className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <IconActivity className="h-4 w-4" />
+              <a href={user.role === 'staff' ? '/dashboard' : '/dashboard-manager/dashboard-data'} className="flex items-center gap-3 group">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow duration-300 flex-shrink-0">
+                  <IconActivity className="h-5 w-5" />
                 </div>
-                <span className="text-base font-semibold">CRM Tools</span>
+                <div className="flex flex-col">
+                  <span className="text-base font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">CRM Tools</span>
+                  <span className="text-xs text-muted-foreground">Management System</span>
+                </div>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent className="gap-4 py-4">
+      <SidebarContent className="relative gap-4 py-6">
         <NavMain items={navItems} />
         <NavSecondary items={secondaryItems} className="mt-auto" />
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter className="relative border-t border-sidebar-border/50 bg-background/50 backdrop-blur-sm">
         <NavUser
           user={{
             name: user.name,

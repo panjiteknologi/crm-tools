@@ -16,6 +16,7 @@ import indonesiaData from '@/data/indonesia-provinsi-kota.json';
 import masterSalesData from '@/data/master-sales.json';
 import { ChartCardCrmData } from '@/components/chart-card-crm-data';
 import { ChartCardPencapaianMonthly } from '@/components/chart-card-pencapaian-monthly';
+import { InfinityLoader } from '@/components/ui/infinity-loader';
 import {
   FilterSection,
   FilterDateSection,
@@ -96,8 +97,8 @@ export default function CrmDataManagementPage() {
   const [expandedFilterSections, setExpandedFilterSections] = useState<string[]>(['date', 'details', 'picSales', 'sertifikat', 'pembayaran', 'jadwal']);
   const currentYear = new Date().getFullYear().toString();
   const [filterTahun, setFilterTahun] = useState<string>(currentYear);
-  const [filterFromBulanExp, setFilterFromBulanExp] = useState<string>('all');
-  const [filterToBulanExp, setFilterToBulanExp] = useState<string>('all');
+  const [filterFromBulanExp, setFilterFromBulanExp] = useState<string>('1');
+  const [filterToBulanExp, setFilterToBulanExp] = useState<string>('12');
   const [filterAlasan, setFilterAlasan] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterProvinsi, setFilterProvinsi] = useState<string>('all');
@@ -177,8 +178,8 @@ export default function CrmDataManagementPage() {
   // Reset all filters
   const resetAllFilters = () => {
     setFilterTahun(currentYear);
-    setFilterFromBulanExp('all');
-    setFilterToBulanExp('all');
+    setFilterFromBulanExp('1');
+    setFilterToBulanExp('12');
     setFilterPicCrm('all');
     setFilterStatus('all');
     setFilterAlasan('all');
@@ -430,8 +431,11 @@ export default function CrmDataManagementPage() {
 
   if (crmTargets === undefined) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex flex-col items-center justify-center h-64">
+        <InfinityLoader size="md" />
+        <p className="mt-4 text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Loading CRM Data...
+        </p>
       </div>
     );
   }
@@ -1664,7 +1668,7 @@ export default function CrmDataManagementPage() {
                   variant="outline"
                   size="sm"
                   onClick={resetAllFilters}
-                  className="h-7 text-xs"
+                  className="h-7 text-xs cursor-pointer bg-destructive text-destructive-foreground text-white hover:text-red-500"
                 >
                   Reset All
                 </Button>

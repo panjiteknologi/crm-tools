@@ -155,6 +155,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { ChartAreaInteractive } from '@/components/chart-area-interactive';
+import { InfinityLoader } from '@/components/ui/infinity-loader';
 import { api } from '@/convex/_generated/api';
 import { handleLogout } from '@/lib/auth';
 
@@ -563,8 +564,11 @@ export default function ManagerDashboard() {
 
   if (!user || !targets || !allUsers) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex flex-col items-center justify-center h-64">
+        <InfinityLoader size="md" />
+        <p className="mt-4 text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Loading Dashboard...
+        </p>
       </div>
     );
   }

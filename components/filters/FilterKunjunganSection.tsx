@@ -1,18 +1,65 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface FilterKunjunganSectionProps {
+  filterFromKunjungan: string;
+  setFilterFromKunjungan: (value: string) => void;
+  filterToKunjungan: string;
+  setFilterToKunjungan: (value: string) => void;
   filterStatusKunjungan: string;
   setFilterStatusKunjungan: (value: string) => void;
+  bulanOptions: Array<{ value: string; label: string }>;
 }
 
 export function FilterKunjunganSection({
+  filterFromKunjungan,
+  setFilterFromKunjungan,
+  filterToKunjungan,
+  setFilterToKunjungan,
   filterStatusKunjungan,
   setFilterStatusKunjungan,
+  bulanOptions,
 }: FilterKunjunganSectionProps) {
   return (
     <>
+      {/* From/To Kunjungan */}
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label className="mb-1.5 block text-xs">From</Label>
+          <Select value={filterFromKunjungan} onValueChange={setFilterFromKunjungan}>
+            <SelectTrigger className="w-full h-8">
+              <SelectValue placeholder="From" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              {bulanOptions.map((bulan) => (
+                <SelectItem key={bulan.value} value={bulan.value}>
+                  {bulan.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="mb-1.5 block text-xs">To</Label>
+          <Select value={filterToKunjungan} onValueChange={setFilterToKunjungan}>
+            <SelectTrigger className="w-full h-8">
+              <SelectValue placeholder="To" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              {bulanOptions.map((bulan) => (
+                <SelectItem key={bulan.value} value={bulan.value}>
+                  {bulan.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       {/* Status Kunjungan */}
       <div>
         <Label className="mb-1.5 block text-xs">Status Kunjungan</Label>

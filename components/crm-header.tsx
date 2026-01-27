@@ -52,39 +52,26 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-sidebar-border/40 bg-white dark:bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className={`sticky top-0 z-50 w-full rounded-xl border border-border shadow-md ${isDarkMode ? 'bg-background' : 'bg-white'}`}>
       <div className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-          <SidebarTrigger className="-ml-1 bg-white hover:bg-gray-100" />
+          <SidebarTrigger className="-ml-1 hover:bg-gray-100 cursor-pointer" />
 
           <div className="flex items-center gap-3 ml-2 lg:ml-0">
             <div className="hidden sm:block">
-              <h1 className="text-lg font-semibold tracking-tight">Dashboard</h1>
-              <p className="text-sm text-muted-foreground">Business Intelligence Platform</p>
+              <h1 className="text-lg font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">Dashboard</h1>
+              <p className="text-sm text-muted-foreground/90 font-medium">Business Intelligence Platform</p>
             </div>
           </div>
 
           <Separator orientation="vertical" className="h-6 hidden sm:block" />
-
-          {/* Search Bar - Hidden on mobile */}
-          <div className="hidden md:flex flex-1 max-w-sm lg:max-w-md">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search clients, visits..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white border-gray-200"
-              />
-            </div>
-          </div>
 
           <div className="ml-auto flex items-center gap-2">
             {/* Mobile Search Toggle */}
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden bg-white hover:bg-gray-100"
+              className="md:hidden hover:bg-gray-100"
               onClick={() => {/* Handle mobile search */}}
             >
               <Search className="h-4 w-4" />
@@ -95,7 +82,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
               variant="ghost"
               size="sm"
               onClick={onThemeToggle}
-              className="h-9 w-9 p-0 bg-white hover:bg-gray-100"
+              className="h-9 w-9 p-0 cursor-pointer hover:bg-gray-100"
             >
               {isDarkMode ? (
                 <Sun className="h-4 w-4" />
@@ -108,7 +95,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="relative h-9 w-9 p-0 bg-white hover:bg-gray-100"
+              className="relative h-9 w-9 p-0 cursor-pointer hover:bg-gray-100"
             >
               <Bell className="h-4 w-4" />
               <Badge className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive" />
@@ -119,7 +106,7 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-9 w-9 rounded-full overflow-hidden bg-white hover:bg-gray-100"
+                  className="relative h-9 w-9 rounded-full overflow-hidden cursor-pointer hover:bg-gray-100"
                 >
                   <div className="h-full w-full rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
                     {user.name.charAt(0).toUpperCase()}

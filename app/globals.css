@@ -123,3 +123,100 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom Scrollbar - Purple Theme */
+@layer utilities {
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(168 85 247) rgb(243 232 255);
+  }
+
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    @apply bg-purple-100/50 dark:bg-purple-950/30;
+    border-radius: 10px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply bg-gradient-to-b from-purple-500 to-purple-600;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    @apply bg-gradient-to-b from-purple-600 to-purple-700;
+  }
+
+  /* Dark mode scrollbar */
+  .dark *::-webkit-scrollbar-track {
+    @apply bg-purple-950/30;
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    @apply bg-gradient-to-b from-purple-600 to-purple-700;
+  }
+
+  .dark *::-webkit-scrollbar-thumb:hover {
+    @apply bg-gradient-to-b from-purple-500 to-purple-600;
+  }
+
+  /* Infinity Loader Animations */
+  @keyframes infinityDraw {
+    0% {
+      stroke-dashoffset: 200;
+    }
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes infinityDot {
+    0%, 100% {
+      left: 0%;
+      opacity: 0;
+      transform: translateY(-50%) scale(0.5);
+    }
+    10% {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+    25% {
+      left: 25%;
+      transform: translateY(-50%) scale(1);
+    }
+    50% {
+      left: 50%;
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+    75% {
+      left: 75%;
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+    90% {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+    95% {
+      left: 100%;
+      opacity: 0;
+      transform: translateY(-50%) scale(0.5);
+    }
+  }
+
+  .animate-infinity-draw {
+    animation: infinityDraw 3s ease-in-out infinite;
+  }
+
+  .animate-infinity-dot {
+    animation: infinityDot 2s ease-in-out infinite;
+  }
+}

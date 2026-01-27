@@ -172,9 +172,25 @@ export default function DashboardKunjunganPage() {
   }, [crmTargets])
 
   const alasanOptions = React.useMemo(() => {
-    const alasan = new Set(crmTargets.map(t => t.alasan).filter(Boolean))
+    const alasan = new Set(crmTargets.map(t => t.alasan).filter((a): a is string => Boolean(a)))
     return Array.from(alasan).sort()
   }, [crmTargets])
+
+  // Bulan options for filters
+  const bulanOptions = [
+    { value: '1', label: 'Januari' },
+    { value: '2', label: 'Februari' },
+    { value: '3', label: 'Maret' },
+    { value: '4', label: 'April' },
+    { value: '5', label: 'Mei' },
+    { value: '6', label: 'Juni' },
+    { value: '7', label: 'Juli' },
+    { value: '8', label: 'Agustus' },
+    { value: '9', label: 'September' },
+    { value: '10', label: 'Oktober' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'Desember' },
+  ]
 
   // Filter data
   const filteredData = React.useMemo(() => {
@@ -861,8 +877,13 @@ export default function DashboardKunjunganPage() {
                 {expandedFilterSections.includes('jadwal') && (
                   <div className="p-3 space-y-3 border-t">
                     <FilterKunjunganSection
+                      filterFromKunjungan="all"
+                      setFilterFromKunjungan={() => {}}
+                      filterToKunjungan="all"
+                      setFilterToKunjungan={() => {}}
                       filterStatusKunjungan={filterStatusKunjungan}
                       setFilterStatusKunjungan={setFilterStatusKunjungan}
+                      bulanOptions={bulanOptions}
                     />
                   </div>
                 )}
@@ -2061,8 +2082,13 @@ export default function DashboardKunjunganPage() {
                   </Button>
                 </div>
                 <FilterKunjunganSection
+                  filterFromKunjungan="all"
+                  setFilterFromKunjungan={() => {}}
+                  filterToKunjungan="all"
+                  setFilterToKunjungan={() => {}}
                   filterStatusKunjungan={filterStatusKunjungan}
                   setFilterStatusKunjungan={setFilterStatusKunjungan}
+                  bulanOptions={bulanOptions}
                 />
               </div>
             )}

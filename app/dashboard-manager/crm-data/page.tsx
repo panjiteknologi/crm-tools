@@ -19,6 +19,14 @@ import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import { getCurrentUser } from '@/lib/auth';
 import indonesiaData from '@/data/indonesia-provinsi-kota.json';
+import { InfinityLoader } from '@/components/ui/infinity-loader';
+import { FilterSection } from '@/components/filters/FilterSection';
+import { FilterDateSection } from '@/components/filters/FilterDateSection';
+import { FilterPicCrmSection } from '@/components/filters/FilterPicCrmSection';
+import { FilterCompanySection } from '@/components/filters/FilterCompanySection';
+import { FilterPicSalesSection } from '@/components/filters/FilterPicSalesSection';
+import { FilterSertifikatSection } from '@/components/filters/FilterSertifikatSection';
+import { FilterKunjunganSection } from '@/components/filters/FilterKunjunganSection';
 
 interface CrmTarget {
   _id: Id<"crmTargets">;
@@ -356,8 +364,8 @@ export default function CrmDataManagementPage() {
   const [expandedFilterSections, setExpandedFilterSections] = useState<string[]>(['date', 'details']);
   const currentYear = new Date().getFullYear().toString();
   const [filterTahun, setFilterTahun] = useState<string>(currentYear);
-  const [filterFromBulanExp, setFilterFromBulanExp] = useState<string>('all');
-  const [filterToBulanExp, setFilterToBulanExp] = useState<string>('all');
+  const [filterFromBulanExp, setFilterFromBulanExp] = useState<string>('1');
+  const [filterToBulanExp, setFilterToBulanExp] = useState<string>('12');
   const [filterAlasan, setFilterAlasan] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterProvinsi, setFilterProvinsi] = useState<string>('all');
@@ -373,6 +381,8 @@ export default function CrmDataManagementPage() {
   const [filterFromKunjungan, setFilterFromKunjungan] = useState<string>('all');
   const [filterToKunjungan, setFilterToKunjungan] = useState<string>('all');
   const [filterStatusKunjungan, setFilterStatusKunjungan] = useState<string>('all');
+  const [filterPicSales, setFilterPicSales] = useState<string>('all');
+  const [filterTipeProduk, setFilterTipeProduk] = useState<string>('all');
 
   // Fetch CRM targets
   const crmTargets = useQuery(api.crmTargets.getCrmTargets);
@@ -384,7 +394,7 @@ export default function CrmDataManagementPage() {
   const deleteAllTargets = useMutation(api.crmTargets.deleteAllCrmTargets);
 
   // Filter options - Dynamic from crmTargets data
-  const tahunOptions = [...new Set(crmTargets?.map(t => t.tahun).filter(Boolean) || [])].sort();
+  const tahunOptions = Array.from({ length: 11 }, (_, i) => (2024 + i).toString());
   const bulanOptions = [
     { value: '1', label: 'Januari' },
     { value: '2', label: 'Februari' },
@@ -421,6 +431,9 @@ export default function CrmDataManagementPage() {
   const tahapanAuditFromData = [...new Set(crmTargets?.map(t => t.tahapAudit).filter(Boolean) || [])];
   const tahapanAuditOptions = [...new Set([...defaultTahapanAudit, ...tahapanAuditFromData])].sort() as string[];
 
+  // Sales options
+  const salesOptions = [...new Set(crmTargets?.map(t => t.sales).filter(Boolean) || [])].sort() as string[];
+
   // Toggle filter section
   const toggleFilterSection = (section: string) => {
     setExpandedFilterSections(prev =>
@@ -433,8 +446,8 @@ export default function CrmDataManagementPage() {
   // Reset all filters
   const resetAllFilters = () => {
     setFilterTahun(currentYear);
-    setFilterFromBulanExp('all');
-    setFilterToBulanExp('all');
+    setFilterFromBulanExp('1');
+    setFilterToBulanExp('12');
     setFilterPicCrm('all');
     setFilterStatus('all');
     setFilterAlasan('all');
@@ -452,6 +465,8 @@ export default function CrmDataManagementPage() {
     setFilterFromKunjungan('all');
     setFilterToKunjungan('all');
     setFilterStatusKunjungan('all');
+    setFilterPicSales('all');
+    setFilterTipeProduk('all');
     setSearchTerm('');
   };
 
@@ -566,6 +581,7 @@ export default function CrmDataManagementPage() {
 
     // Details section filters
     const matchesPicCrm = filterPicCrm === 'all' || target.picCrm === filterPicCrm;
+    const matchesPicSales = filterPicSales === 'all' || target.sales === filterPicSales;
     const matchesStatus = filterStatus === 'all' || target.status === filterStatus;
     const matchesAlasan = filterAlasan === 'all' || target.alasan === filterAlasan;
     const matchesCategory = filterCategory === 'all' || target.category === filterCategory;
@@ -579,6 +595,7 @@ export default function CrmDataManagementPage() {
       (target.kota && normalizeKota(target.kota) === normalizeKota(filterKota));
 
     // Sertifikat section filters
+    const matchesTipeProduk = filterTipeProduk === 'all' || target.produk === filterTipeProduk;
     const matchesStandar = filterStandar === 'all' || target.std === filterStandar;
     const matchesAkreditasi = filterAkreditasi === 'all' || target.akreditasi === filterAkreditasi;
     const matchesEaCode = filterEaCode === '' || (target.eaCode || '').toLowerCase().includes(filterEaCode.toLowerCase());
@@ -615,8 +632,8 @@ export default function CrmDataManagementPage() {
     const matchesStatusKunjungan = filterStatusKunjungan === 'all' || target.statusKunjungan === filterStatusKunjungan;
 
     return matchesSearch && matchesTahun && matchesBulanExp && matchesPicCrm &&
-           matchesStatus && matchesAlasan && matchesCategory && matchesProvinsi &&
-           matchesKota && matchesStandar && matchesAkreditasi && matchesEaCode &&
+           matchesPicSales && matchesStatus && matchesAlasan && matchesCategory && matchesProvinsi &&
+           matchesKota && matchesTipeProduk && matchesStandar && matchesAkreditasi && matchesEaCode &&
            matchesTahapAudit && matchesBulanTTD && matchesStatusSertifikat &&
            matchesTermin && matchesKunjungan && matchesStatusKunjungan;
   }) || [];
@@ -1624,8 +1641,11 @@ export default function CrmDataManagementPage() {
 
   if (crmTargets === undefined) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex flex-col items-center justify-center h-64">
+        <InfinityLoader size="md" />
+        <p className="mt-4 text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Loading CRM Management...
+        </p>
       </div>
     );
   }
@@ -1669,580 +1689,118 @@ export default function CrmDataManagementPage() {
               </div>
 
               {/* Section Date */}
-              <div className="border rounded-lg overflow-hidden">
-                <button
-                  onClick={() => toggleFilterSection('date')}
-                  className="w-full flex items-center justify-between p-3 bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                >
-                  <span className="font-medium text-sm">📅 Filter Date</span>
-                  {expandedFilterSections.includes('date') ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                </button>
-                {expandedFilterSections.includes('date') && (
-                  <div className="p-3 space-y-3 border-t">
-                    {/* Tahun */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Tahun</Label>
-                      <Select value={filterTahun} onValueChange={setFilterTahun}>
-                        <SelectTrigger className="w-full h-8">
-                          <SelectValue placeholder="All Tahun" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Tahun</SelectItem>
-                          {tahunOptions.map(tahun => (
-                            <SelectItem key={tahun} value={tahun}>{tahun}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+              <FilterSection
+                title="Filter Date"
+                isExpanded={expandedFilterSections.includes('date')}
+                onToggle={() => toggleFilterSection('date')}
+              >
+                <FilterDateSection
+                  filterTahun={filterTahun}
+                  setFilterTahun={setFilterTahun}
+                  filterFromBulanExp={filterFromBulanExp}
+                  setFilterFromBulanExp={setFilterFromBulanExp}
+                  filterToBulanExp={filterToBulanExp}
+                  setFilterToBulanExp={setFilterToBulanExp}
+                  tahunOptions={tahunOptions}
+                  bulanOptions={bulanOptions}
+                />
+              </FilterSection>
 
-                    {/* From/To Bulan Exp */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="mb-1.5 block text-xs">From Bulan Exp</Label>
-                        <Select value={filterFromBulanExp} onValueChange={setFilterFromBulanExp}>
-                          <SelectTrigger className="w-full h-8">
-                            <SelectValue placeholder="From" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All</SelectItem>
-                            {bulanOptions.map(bulan => (
-                              <SelectItem key={bulan.value} value={bulan.value}>{bulan.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="mb-1.5 block text-xs">To Bulan Exp</Label>
-                        <Select value={filterToBulanExp} onValueChange={setFilterToBulanExp}>
-                          <SelectTrigger className="w-full h-8">
-                            <SelectValue placeholder="To" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All</SelectItem>
-                            {bulanOptions.map(bulan => (
-                              <SelectItem key={bulan.value} value={bulan.value}>{bulan.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* Section Details - PIC CRM */}
+              <FilterSection
+                title="Filter PIC CRM"
+                isExpanded={expandedFilterSections.includes('details')}
+                onToggle={() => toggleFilterSection('details')}
+              >
+                <FilterPicCrmSection
+                  filterPicCrm={filterPicCrm}
+                  setFilterPicCrm={setFilterPicCrm}
+                  picCrmOptions={uniquePicCrms}
+                />
+              </FilterSection>
 
-              {/* Section Details */}
-              <div className="border rounded-lg overflow-hidden">
-                <button
-                  onClick={() => toggleFilterSection('details')}
-                  className="w-full flex items-center justify-between p-3 bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                >
-                  <span className="font-medium text-sm">📋 Filter PIC CRM</span>
-                  {expandedFilterSections.includes('details') ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                </button>
-                {expandedFilterSections.includes('details') && (
-                  <div className="p-3 space-y-3 border-t">
-                    {/* PIC CRM - Button Filter */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">PIC CRM</Label>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant={filterPicCrm === "all" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setFilterPicCrm("all")}
-                          className="flex items-center gap-1 text-xs h-8 px-2 cursor-pointer"
-                        >
-                          All PIC
-                        </Button>
-                        {uniquePicCrms.map((pic) => (
-                          <Button
-                            key={pic}
-                            variant={filterPicCrm === pic ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setFilterPicCrm(pic)}
-                            className="flex items-center gap-1 text-xs h-8 px-2 cursor-pointer"
-                          >
-                            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex-shrink-0"></div>
-                            {pic}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
+              {/* Section Company - Status, Category, Provinsi, Kota, Alasan */}
+              <FilterSection
+                title="Filter Company"
+                isExpanded={expandedFilterSections.includes('lokasi')}
+                onToggle={() => toggleFilterSection('lokasi')}
+              >
+                <FilterCompanySection
+                  filterStatus={filterStatus}
+                  setFilterStatus={setFilterStatus}
+                  filterCategory={filterCategory}
+                  setFilterCategory={setFilterCategory}
+                  filterProvinsi={filterProvinsi}
+                  setFilterProvinsi={setFilterProvinsi}
+                  filterKota={filterKota}
+                  setFilterKota={setFilterKota}
+                  filterAlasan={filterAlasan}
+                  setFilterAlasan={setFilterAlasan}
+                  statusOptions={uniqueStatuses}
+                  provinsiOptions={provinsiOptions}
+                  kotaOptions={kotaOptions}
+                  alasanOptions={alasanOptions}
+                />
+              </FilterSection>
 
-                    {/* Status - Button Filter with Colors */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Status</Label>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant={filterStatus === "all" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setFilterStatus("all")}
-                          className={`flex items-center gap-1 text-xs h-8 px-2 cursor-pointer ${
-                            filterStatus === "all"
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : ""
-                          }`}
-                        >
-                          All Status
-                        </Button>
-                        {uniqueStatuses.map((status) => {
-                          const statusUpper = status?.toUpperCase() || '';
-                          let statusColor = '';
-
-                          switch (statusUpper) {
-                            case 'PROSES':
-                              statusColor = 'bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-300';
-                              break;
-                            case 'LANJUT':
-                              statusColor = 'bg-green-100 hover:bg-green-200 text-green-700 border-green-300';
-                              break;
-                            case 'LOSS':
-                              statusColor = 'bg-red-100 hover:bg-red-200 text-red-700 border-red-300';
-                              break;
-                            case 'SUSPEND':
-                              statusColor = 'bg-orange-100 hover:bg-orange-200 text-orange-700 border-orange-300';
-                              break;
-                            case 'WAITING':
-                              statusColor = 'bg-gray-200 hover:bg-gray-300 text-gray-700 border-gray-300';
-                              break;
-                            case 'DONE':
-                              statusColor = 'bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-300';
-                              break;
-                            default:
-                              statusColor = 'bg-gray-200 hover:bg-gray-300 text-gray-700 border-gray-300';
-                          }
-
-                          return (
-                            <Button
-                              key={status}
-                              size="sm"
-                              onClick={() => setFilterStatus(status)}
-                              className={`flex items-center gap-1 text-xs h-8 px-2 border cursor-pointer ${
-                                filterStatus === status
-                                  ? 'bg-black hover:bg-gray-800 text-white border-black'
-                                  : statusColor
-                              }`}
-                            >
-                              {status}
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Alasan */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Alasan</Label>
-                      <Select value={filterAlasan} onValueChange={setFilterAlasan}>
-                        <SelectTrigger className="w-full h-8 text-xs">
-                          <SelectValue placeholder="All Alasan" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Alasan</SelectItem>
-                          {alasanOptions.map((alasan) => (
-                            <SelectItem key={alasan} value={alasan}>
-                              {alasan}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Category - Button Filter with Gradient Colors */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Category</Label>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant={filterCategory === "all" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setFilterCategory("all")}
-                          className={`flex items-center gap-1 text-xs h-8 px-2 cursor-pointer ${
-                            filterCategory === "all"
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : ""
-                          }`}
-                        >
-                          All Category
-                        </Button>
-                        {['GOLD', 'SILVER', 'BRONZE'].map((category) => {
-                          let categoryColor = '';
-
-                          switch (category) {
-                            case 'GOLD':
-                              categoryColor = 'bg-gradient-to-r from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 text-yellow-800 border-yellow-300 font-medium shadow-sm';
-                              break;
-                            case 'SILVER':
-                              categoryColor = 'bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-800 border-gray-300 font-medium shadow-sm';
-                              break;
-                            case 'BRONZE':
-                              categoryColor = 'bg-gradient-to-r from-orange-100 to-orange-200 hover:from-orange-200 hover:to-orange-300 text-orange-800 border-orange-300 font-medium shadow-sm';
-                              break;
-                          }
-
-                          return (
-                            <Button
-                              key={category}
-                              size="sm"
-                              onClick={() => setFilterCategory(category)}
-                              className={`flex items-center gap-1 text-xs h-8 px-2 border cursor-pointer ${
-                                filterCategory === category
-                                  ? 'bg-black hover:bg-gray-800 text-white border-black font-semibold'
-                                  : categoryColor
-                              }`}
-                            >
-                              {category}
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Provinsi */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Provinsi</Label>
-                      <Select
-                        value={filterProvinsi}
-                        onValueChange={(val) => {
-                          setFilterProvinsi(val);
-                          setFilterKota('all');
-                        }}
-                      >
-                        <SelectTrigger className="w-full h-8 text-xs">
-                          <SelectValue placeholder="All Provinsi" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Provinsi</SelectItem>
-                          {provinsiOptions.map((provinsi) => (
-                            <SelectItem key={provinsi} value={provinsi}>
-                              {provinsi}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Kota */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Kota</Label>
-                      <Select
-                        value={filterKota}
-                        onValueChange={setFilterKota}
-                        disabled={filterProvinsi === 'all'}
-                      >
-                        <SelectTrigger className="w-full h-8 text-xs">
-                          <SelectValue placeholder={filterProvinsi === 'all' ? 'Select Provinsi first' : 'All Kota'} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Kota</SelectItem>
-                          {kotaOptions.map((kota) => (
-                            <SelectItem key={kota} value={kota}>
-                              {kota}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* Section PIC Sales */}
+              <FilterSection
+                title="Filter PIC Sales"
+                isExpanded={expandedFilterSections.includes('picSales')}
+                onToggle={() => toggleFilterSection('picSales')}
+              >
+                <FilterPicSalesSection
+                  filterPicSales={filterPicSales}
+                  setFilterPicSales={setFilterPicSales}
+                  salesOptions={salesOptions}
+                />
+              </FilterSection>
 
               {/* Section Sertifikat */}
-              <div className="border rounded-lg overflow-hidden">
-                <button
-                  onClick={() => toggleFilterSection('sertifikat')}
-                  className="w-full flex items-center justify-between p-3 bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                >
-                  <span className="font-medium text-sm">📜 Filter Sertifikat</span>
-                  {expandedFilterSections.includes('sertifikat') ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                </button>
-                {expandedFilterSections.includes('sertifikat') && (
-                  <div className="p-3 space-y-3 border-t">
-                    {/* Standar */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Standar</Label>
-                      <Select value={filterStandar} onValueChange={setFilterStandar}>
-                        <SelectTrigger className="w-full h-8 text-xs">
-                          <SelectValue placeholder="All Standar" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Standar</SelectItem>
-                          {standarOptions.map((standar) => (
-                            <SelectItem key={standar} value={standar}>
-                              {standar}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Akreditasi */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Akreditasi</Label>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant={filterAkreditasi === "all" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setFilterAkreditasi("all")}
-                          className={`flex items-center gap-1 text-xs h-8 px-2 cursor-pointer ${
-                            filterAkreditasi === "all"
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : ""
-                          }`}
-                        >
-                          All
-                        </Button>
-                        {['KAN', 'NON AKRE'].map((akreditasi) => (
-                          <Button
-                            key={akreditasi}
-                            size="sm"
-                            onClick={() => setFilterAkreditasi(akreditasi)}
-                            className={`flex items-center gap-1 text-xs h-8 px-2 border cursor-pointer ${
-                              filterAkreditasi === akreditasi
-                                ? 'bg-black hover:bg-gray-800 text-white border-black'
-                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300'
-                            }`}
-                          >
-                            {akreditasi}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* EA CODE */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">EA CODE</Label>
-                      <Input
-                        placeholder="Search EA Code..."
-                        value={filterEaCode}
-                        onChange={(e) => setFilterEaCode(e.target.value)}
-                        className="h-8"
-                      />
-                    </div>
-
-                    {/* Tahapan Audit */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Tahapan Audit</Label>
-                      <Select value={filterTahapAudit} onValueChange={setFilterTahapAudit}>
-                        <SelectTrigger className="w-full h-8 text-xs">
-                          <SelectValue placeholder="All Tahapan" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Tahapan</SelectItem>
-                          {tahapanAuditOptions.map((tahap) => (
-                            <SelectItem key={tahap} value={tahap}>
-                              {tahap}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* From/To Bulan TTD */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="mb-1.5 block text-xs">From Bulan TTD</Label>
-                        <Select value={filterFromBulanTTD} onValueChange={setFilterFromBulanTTD}>
-                          <SelectTrigger className="w-full h-8">
-                            <SelectValue placeholder="From" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All</SelectItem>
-                            {bulanOptions.map(bulan => (
-                              <SelectItem key={bulan.value} value={bulan.value}>{bulan.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="mb-1.5 block text-xs">To Bulan TTD</Label>
-                        <Select value={filterToBulanTTD} onValueChange={setFilterToBulanTTD}>
-                          <SelectTrigger className="w-full h-8">
-                            <SelectValue placeholder="To" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All</SelectItem>
-                            {bulanOptions.map(bulan => (
-                              <SelectItem key={bulan.value} value={bulan.value}>{bulan.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {/* Status Sertifikat */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Status Sertifikat</Label>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant={filterStatusSertifikat === "all" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setFilterStatusSertifikat("all")}
-                          className={`flex items-center gap-1 text-xs h-8 px-2 cursor-pointer ${
-                            filterStatusSertifikat === "all"
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : ""
-                          }`}
-                        >
-                          All
-                        </Button>
-                        {['Terbit', 'Belum Terbit'].map((status) => (
-                          <Button
-                            key={status}
-                            size="sm"
-                            onClick={() => setFilterStatusSertifikat(status)}
-                            className={`flex items-center gap-1 text-xs h-8 px-2 border cursor-pointer ${
-                              filterStatusSertifikat === status
-                                ? 'bg-black hover:bg-gray-800 text-white border-black'
-                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300'
-                            }`}
-                          >
-                            {status}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Termin */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Termin</Label>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant={filterTermin === "all" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setFilterTermin("all")}
-                          className={`flex items-center gap-1 text-xs h-8 px-2 cursor-pointer ${
-                            filterTermin === "all"
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : ""
-                          }`}
-                        >
-                          All
-                        </Button>
-                        {['DP', 'Lunas Diawal', 'Lunas Diakhir'].map((termin) => (
-                          <Button
-                            key={termin}
-                            size="sm"
-                            onClick={() => setFilterTermin(termin)}
-                            className={`flex items-center gap-1 text-xs h-8 px-2 border cursor-pointer ${
-                              filterTermin === termin
-                                ? 'bg-black hover:bg-gray-800 text-white border-black'
-                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300'
-                            }`}
-                          >
-                            {termin}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <FilterSection
+                title="Filter Sertifikat"
+                isExpanded={expandedFilterSections.includes('sertifikat')}
+                onToggle={() => toggleFilterSection('sertifikat')}
+              >
+                <FilterSertifikatSection
+                  filterTipeProduk={filterTipeProduk}
+                  setFilterTipeProduk={setFilterTipeProduk}
+                  filterStandar={filterStandar}
+                  setFilterStandar={setFilterStandar}
+                  filterAkreditasi={filterAkreditasi}
+                  setFilterAkreditasi={setFilterAkreditasi}
+                  filterEaCode={filterEaCode}
+                  setFilterEaCode={setFilterEaCode}
+                  filterTahapAudit={filterTahapAudit}
+                  setFilterTahapAudit={setFilterTahapAudit}
+                  filterFromBulanTTD={filterFromBulanTTD}
+                  setFilterFromBulanTTD={setFilterFromBulanTTD}
+                  filterToBulanTTD={filterToBulanTTD}
+                  setFilterToBulanTTD={setFilterToBulanTTD}
+                  filterStatusSertifikat={filterStatusSertifikat}
+                  setFilterStatusSertifikat={setFilterStatusSertifikat}
+                  standarOptions={standarOptions}
+                  tahapanAuditOptions={tahapanAuditOptions}
+                  bulanOptions={bulanOptions}
+                />
+              </FilterSection>
 
               {/* Section Jadwal Kunjungan */}
-              <div className="border rounded-lg overflow-hidden">
-                <button
-                  onClick={() => toggleFilterSection('jadwal')}
-                  className="w-full flex items-center justify-between p-3 bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                >
-                  <span className="font-medium text-sm">📅 Filter Jadwal Kunjungan</span>
-                  {expandedFilterSections.includes('jadwal') ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                </button>
-                {expandedFilterSections.includes('jadwal') && (
-                  <div className="p-3 space-y-3 border-t">
-                    {/* From/To Kunjungan */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="mb-1.5 block text-xs">From</Label>
-                        <Select value={filterFromKunjungan} onValueChange={setFilterFromKunjungan}>
-                          <SelectTrigger className="w-full h-8">
-                            <SelectValue placeholder="From" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All</SelectItem>
-                            {bulanOptions.map(bulan => (
-                              <SelectItem key={bulan.value} value={bulan.value}>{bulan.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="mb-1.5 block text-xs">To</Label>
-                        <Select value={filterToKunjungan} onValueChange={setFilterToKunjungan}>
-                          <SelectTrigger className="w-full h-8">
-                            <SelectValue placeholder="To" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All</SelectItem>
-                            {bulanOptions.map(bulan => (
-                              <SelectItem key={bulan.value} value={bulan.value}>{bulan.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {/* Status Kunjungan */}
-                    <div>
-                      <Label className="mb-1.5 block text-xs">Status Kunjungan</Label>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant={filterStatusKunjungan === "all" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setFilterStatusKunjungan("all")}
-                          className={`flex items-center gap-1 text-xs h-8 px-2 cursor-pointer ${
-                            filterStatusKunjungan === "all"
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : ""
-                          }`}
-                        >
-                          All
-                        </Button>
-                        {['VISITED', 'NOT YET'].map((status) => {
-                          let statusColor = '';
-                          switch (status) {
-                            case 'VISITED':
-                              statusColor = 'bg-green-100 hover:bg-green-200 text-green-700 border-green-300';
-                              break;
-                            case 'NOT YET':
-                              statusColor = 'bg-gray-200 hover:bg-gray-300 text-gray-700 border-gray-300';
-                              break;
-                          }
-
-                          return (
-                            <Button
-                              key={status}
-                              size="sm"
-                              onClick={() => setFilterStatusKunjungan(status)}
-                              className={`flex items-center gap-1 text-xs h-8 px-2 border cursor-pointer ${
-                                filterStatusKunjungan === status
-                                  ? 'bg-black hover:bg-gray-800 text-white border-black'
-                                  : statusColor
-                              }`}
-                            >
-                              {status}
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <FilterSection
+                title="Filter Jadwal Kunjungan"
+                isExpanded={expandedFilterSections.includes('jadwal')}
+                onToggle={() => toggleFilterSection('jadwal')}
+              >
+                <FilterKunjunganSection
+                  filterFromKunjungan={filterFromKunjungan}
+                  setFilterFromKunjungan={setFilterFromKunjungan}
+                  filterToKunjungan={filterToKunjungan}
+                  setFilterToKunjungan={setFilterToKunjungan}
+                  filterStatusKunjungan={filterStatusKunjungan}
+                  setFilterStatusKunjungan={setFilterStatusKunjungan}
+                  bulanOptions={bulanOptions}
+                />
+              </FilterSection>
             </CardContent>
           </Card>
         </div>

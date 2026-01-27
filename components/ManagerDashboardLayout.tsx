@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes';
 import { CRMSidebar } from './crm-sidebar';
 import { CRMHeader } from './crm-header';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { InfinityLoader } from '@/components/ui/infinity-loader';
 
 interface User {
   id: string;
@@ -69,11 +70,11 @@ export default function ManagerDashboardLayout({ children }: ManagerDashboardLay
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+        <InfinityLoader size="lg" />
+        <p className="mt-6 text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Loading Dashboard...
+        </p>
       </div>
     );
   }
@@ -84,19 +85,19 @@ export default function ManagerDashboardLayout({ children }: ManagerDashboardLay
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className={`flex h-screen w-full overflow-hidden ${isDarkMode ? 'bg-gradient-to-br from-purple-950/50 via-background to-blue-950/50' : 'bg-gradient-to-br from-purple-100/80 via-blue-50/60 to-purple-400/80'}`}>
         <CRMSidebar user={user} />
         <div className="flex flex-1 flex-col overflow-hidden">
-          <CRMHeader
-            user={user}
-            onThemeToggle={handleThemeToggle}
-            isDarkMode={isDarkMode}
-          />
-          <main className="flex-1 overflow-hidden">
-            <div className="flex h-full flex-col">
-              <div className="flex-1 overflow-auto">
-                {children}
-              </div>
+          <div className="px-4 lg:px-6 pt-4 flex-shrink-0">
+            <CRMHeader
+              user={user}
+              onThemeToggle={handleThemeToggle}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+          <main className="flex-1 overflow-hidden px-4 lg:px-0 pb-4">
+            <div className="h-full overflow-auto">
+              {children}
             </div>
           </main>
         </div>
