@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import {
   IconUsers,
   IconCalendar,
@@ -169,7 +170,7 @@ export function CRMSidebar({ user, ...props }: CRMSidebarProps) {
               asChild
               size="lg"
             >
-              <a href={user.role === 'staff' ? '/dashboard' : '/dashboard-manager/dashboard-data'} className="flex items-center gap-3 group">
+              <Link href={user.role === 'staff' ? '/dashboard' : '/dashboard-manager/dashboard-data'} className="flex items-center gap-3 group">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow duration-300 flex-shrink-0">
                   <IconActivity className="h-5 w-5" />
                 </div>
@@ -177,7 +178,7 @@ export function CRMSidebar({ user, ...props }: CRMSidebarProps) {
                   <span className="text-base font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">CRM Tools</span>
                   <span className="text-xs text-muted-foreground">Management System</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

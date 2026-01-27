@@ -47,8 +47,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { FilterCompanySection } from "@/components/filters/FilterCompanySection"
 import { FilterPicCrmSection } from "@/components/filters/FilterPicCrmSection"
 import { FilterKunjunganSection } from "@/components/filters/FilterKunjunganSection"
+import { InfinityLoader } from "@/components/ui/infinity-loader"
 
-import { IconCalendar, IconMapPin, IconPhone, IconBuilding, IconSearch, IconFilter, IconCheck, IconX, IconClock, IconCalendarTime, IconChevronLeft, IconChevronRight, IconLoader } from "@tabler/icons-react"
+import { IconCalendar, IconMapPin, IconPhone, IconBuilding, IconSearch, IconFilter, IconCheck, IconX, IconClock, IconCalendarTime, IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 
 interface CrmTarget {
@@ -731,8 +732,8 @@ export default function DashboardKunjunganPage() {
       {isLoading && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="text-center">
-            <IconLoader className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-lg font-semibold">Memuat data...</p>
+            <InfinityLoader size="xl" />
+            <p className="mt-6 text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Memuat data...</p>
             <p className="text-sm text-muted-foreground mt-2">Mohon tunggu sebentar</p>
           </div>
         </div>
@@ -742,8 +743,8 @@ export default function DashboardKunjunganPage() {
       {isMassUploading && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="text-center bg-background p-8 rounded-lg shadow-lg border">
-            <IconLoader className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
-            <p className="text-lg font-semibold">Menyimpan Data...</p>
+            <InfinityLoader size="xl" />
+            <p className="mt-6 text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Menyimpan Data...</p>
             <p className="text-sm text-muted-foreground mt-2">Mohon tunggu, sedang mengupdate semua standar</p>
           </div>
         </div>

@@ -167,56 +167,42 @@
     @apply bg-gradient-to-b from-purple-500 to-purple-600;
   }
 
-  /* Infinity Loader Animations */
-  @keyframes infinityDraw {
+  /* Pulse Ring Loader Animations */
+  @keyframes pulseRing {
     0% {
-      stroke-dashoffset: 200;
+      transform: scale(0.8);
+      opacity: 1;
     }
     100% {
-      stroke-dashoffset: 0;
+      transform: scale(1.3);
+      opacity: 0;
     }
   }
 
-  @keyframes infinityDot {
+  @keyframes pulseDot {
     0%, 100% {
-      left: 0%;
-      opacity: 0;
-      transform: translateY(-50%) scale(0.5);
-    }
-    10% {
+      transform: scale(1);
       opacity: 1;
-      transform: translateY(-50%) scale(1);
-    }
-    25% {
-      left: 25%;
-      transform: translateY(-50%) scale(1);
     }
     50% {
-      left: 50%;
-      opacity: 1;
-      transform: translateY(-50%) scale(1);
-    }
-    75% {
-      left: 75%;
-      opacity: 1;
-      transform: translateY(-50%) scale(1);
-    }
-    90% {
-      opacity: 1;
-      transform: translateY(-50%) scale(1);
-    }
-    95% {
-      left: 100%;
-      opacity: 0;
-      transform: translateY(-50%) scale(0.5);
+      transform: scale(1.2);
+      opacity: 0.8;
     }
   }
 
-  .animate-infinity-draw {
-    animation: infinityDraw 3s ease-in-out infinite;
+  .animate-pulse-ring {
+    animation: pulseRing 2s ease-out infinite;
   }
 
-  .animate-infinity-dot {
-    animation: infinityDot 2s ease-in-out infinite;
+  .animate-pulse-dot {
+    animation: pulseDot 1.5s ease-in-out infinite;
+  }
+
+  .animation-delay-150 {
+    animation-delay: 0.15s;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 0.3s;
   }
 }

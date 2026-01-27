@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { type Icon } from "@tabler/icons-react"
+import Link from "next/link"
 
 import {
   SidebarGroup,
@@ -51,10 +52,10 @@ export function NavMain({
                     transition-all duration-200
                   ` : ""}
                 >
-                  <a href={item.url} className="relative z-10">
+                  <Link href={item.url} className="relative z-10">
                     {item.icon && <item.icon className={active ? "text-white" : ""} />}
                     <span>{item.title}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )
