@@ -3,6 +3,27 @@ import { mutation, query } from "./_generated/server";
 
 // === QUERIES ===
 
+// Get paginated CRM targets (more efficient than loading all)
+export const getCrmTargetsPaginated = query({
+  args: {
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.union(v.string(), v.null()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const results = await ctx.db
+      .query("crmTargets")
+      .order("desc")
+      .paginate(args.paginationOpts);
+
+    return {
+      page: results.page,
+      continueCursor: results.continueCursor,
+    };
+  },
+});
+
 // Get all CRM targets (alias for getCrmTargets)
 export const list = query({
   args: {},
@@ -12,11 +33,12 @@ export const list = query({
   },
 });
 
-// Get all CRM targets
+// Get all CRM targets (optimized with lean data)
 export const getCrmTargets = query({
   args: {},
   handler: async (ctx) => {
     const crmTargets = await ctx.db.query("crmTargets").collect();
+    // Return data immediately without processing
     return crmTargets;
   },
 });

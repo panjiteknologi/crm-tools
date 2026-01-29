@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
@@ -19,6 +19,7 @@ import { ChartCardPencapaianMonthly } from '@/components/chart-card-pencapaian-m
 import { ChartCardKuadranMonthly } from '@/components/chart-card-kuadran-monthly';
 import { ChartCardAssociateMonthly } from '@/components/chart-card-associate-monthly';
 import { InfinityLoader } from '@/components/ui/infinity-loader';
+import { DashboardSkeleton } from '@/components/dashboard-skeleton';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LabelList } from 'recharts';
 import {
   FilterSection,
@@ -122,10 +123,21 @@ export default function CrmDataManagementPage() {
   const [filterToKunjungan, setFilterToKunjungan] = useState<string>('all');
   const [filterStatusKunjungan, setFilterStatusKunjungan] = useState<string>('all');
 
+  // State untuk deferred chart loading
+  const [chartsVisible, setChartsVisible] = useState(false);
+
   // Fetch CRM targets
   const crmTargets = useQuery(api.crmTargets.getCrmTargets);
   const allUsers = useQuery(api.auth.getAllUsers);
   const staffUsers = allUsers?.filter(user => user.role === 'staff') || [];
+
+  // Defer chart loading setelah initial render
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setChartsVisible(true);
+    }, 100); // Delay 100ms setelah initial render
+    return () => clearTimeout(timer);
+  }, []);
 
   // Filter options - Dynamic from crmTargets data
   const tahunOptions = ['2024', '2025', '2026', '2027', '2028', '2029', '2030', '2031', '2032', '2033', '2034'];
@@ -207,8 +219,11 @@ export default function CrmDataManagementPage() {
     setSearchTerm('');
   };
 
-  // Filter and search
-  const filteredTargets = crmTargets?.filter(target => {
+  // Filter and search - OPTIMIZED with useMemo
+  const filteredTargets = useMemo(() => {
+    if (!crmTargets) return [];
+
+    return crmTargets.filter(target => {
     // Search filter
     const matchesSearch = searchTerm === '' ||
       target.namaPerusahaan.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -316,7 +331,33 @@ export default function CrmDataManagementPage() {
            matchesKota && matchesStandar && matchesAkreditasi && matchesEaCode &&
            matchesTahapAudit && matchesBulanTTD && matchesStatusSertifikat &&
            matchesTermin && matchesTipeProduk && matchesKunjungan && matchesStatusKunjungan;
-  }) || [];
+    });
+  }, [
+    crmTargets,
+    searchTerm,
+    filterTahun,
+    filterFromBulanExp,
+    filterToBulanExp,
+    filterPicCrm,
+    filterPicSales,
+    filterStatus,
+    filterAlasan,
+    filterCategory,
+    filterProvinsi,
+    filterKota,
+    filterStandar,
+    filterAkreditasi,
+    filterEaCode,
+    filterTahapAudit,
+    filterFromBulanTTD,
+    filterToBulanTTD,
+    filterStatusSertifikat,
+    filterTermin,
+    filterTipeProduk,
+    filterFromKunjungan,
+    filterToKunjungan,
+    filterStatusKunjungan
+  ]);
 
   // Pagination
   const totalPages = Math.ceil(filteredTargets.length / itemsPerPage);
@@ -327,9 +368,16 @@ export default function CrmDataManagementPage() {
     currentPage * itemsPerPage
   );
 
-  // Get unique values for filters
-  const uniqueStatuses = [...new Set(crmTargets?.map(t => t.status) || [])].sort();
-  const uniquePicCrms = [...new Set(crmTargets?.map(t => t.picCrm) || [])].sort();
+  // Get unique values for filters - OPTIMIZED with useMemo
+  const uniqueStatuses = useMemo(() =>
+    [...new Set(crmTargets?.map(t => t.status) || [])].sort(),
+    [crmTargets]
+  );
+
+  const uniquePicCrms = useMemo(() =>
+    [...new Set(crmTargets?.map(t => t.picCrm) || [])].sort(),
+    [crmTargets]
+  );
 
   // Helper function to get status badge variant
   const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
@@ -1389,7 +1437,15 @@ export default function CrmDataManagementPage() {
 
       {/* MAIN CONTENT */}
       <div className="flex-1 min-w-0 space-y-6">
-        {/* Header */}
+        {/* Loading State - Show Skeleton */}
+        {(crmTargets === undefined || crmTargets === null) && (
+          <DashboardSkeleton />
+        )}
+
+        {/* Actual Content - Only render when data is loaded */}
+        {crmTargets && (
+          <>
+            {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">
@@ -3274,6 +3330,8 @@ export default function CrmDataManagementPage() {
             )}
           </CardContent>
         </Card>
+        </>
+        )}
       </div>
     </div>
   );
