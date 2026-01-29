@@ -15,7 +15,8 @@ import { Search, Filter, BarChart3, ChevronDown, ChevronRight, Users, X } from '
 import indonesiaData from '@/data/indonesia-provinsi-kota.json';
 import masterSalesData from '@/data/master-sales.json';
 import { ChartCardCrmData } from '@/components/chart-card-crm-data';
-import { ChartCardPencapaianMonthly } from '@/components/chart-card-pencapaian-monthly';
+import { ChartCardPencapaianMonthly } from '@/components/chart-card-pencapaian-monthly'
+import { ChartCardKuadranMonthly } from '@/components/chart-card-kuadran-monthly';
 import { InfinityLoader } from '@/components/ui/infinity-loader';
 import {
   FilterSection,
@@ -1679,32 +1680,40 @@ export default function CrmDataManagementPage() {
 
         {/* Total Target Card - Combined MRC & DHA */}
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="px-6">
             {(() => {
               // Calculate TOTAL from ALL data (without filters) - this stays constant
               const allData = (crmTargets || []);
 
-              const totalAllContracts = allData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+              const totalAllContracts = Math.round(allData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+
+              // Calculate total unique companies
+              const allCompanies = new Set(allData.map(t => t.namaPerusahaan));
+              const totalAllCompanies = allCompanies.size;
 
               // Calculate FILTERED data - this changes based on filters
               const filteredData = (filteredTargets || []);
 
-              const totalFilteredContracts = filteredData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
-              const lanjutContracts = filteredData
+              // Calculate total unique companies from filtered data
+              const filteredCompanies = new Set(filteredData.map(t => t.namaPerusahaan));
+              const totalFilteredCompanies = filteredCompanies.size;
+
+              const totalFilteredContracts = Math.round(filteredData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+              const lanjutContracts = Math.round(filteredData
                 .filter(t => t.status === 'LANJUT' || t.status === 'DONE')
-                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
-              const lossContracts = filteredData
+                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+              const lossContracts = Math.round(filteredData
                 .filter(t => t.status === 'LOSS')
-                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
-              const suspendContracts = filteredData
+                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+              const suspendContracts = Math.round(filteredData
                 .filter(t => t.status === 'SUSPEND')
-                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
-              const prosesContracts = filteredData
+                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+              const prosesContracts = Math.round(filteredData
                 .filter(t => t.status === 'PROSES')
-                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
-              const waitingContracts = filteredData
+                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+              const waitingContracts = Math.round(filteredData
                 .filter(t => t.status === 'WAITING')
-                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
 
               // Calculate percentage based on filtered data
               const achievementPercentage = totalFilteredContracts > 0
@@ -1716,7 +1725,7 @@ export default function CrmDataManagementPage() {
                 // Percentage is ALWAYS calculated from total ALL contracts (not filtered)
                 if (filterStatus === 'LANJUT' || filterStatus === 'all') {
                   return {
-                    label: 'Pencapaian Kontrak Lanjut',
+                    label: 'Pencapaian Kontrak Lanjut / Done',
                     value: lanjutContracts,
                     color: 'green',
                     percentage: totalAllContracts > 0 ? Math.round((lanjutContracts / totalAllContracts) * 100) : 0
@@ -1788,7 +1797,7 @@ export default function CrmDataManagementPage() {
               return (
                 <div className="space-y-4">
                   {/* Header */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
                         <BarChart3 className="h-6 w-6 text-white" />
@@ -1798,9 +1807,36 @@ export default function CrmDataManagementPage() {
                         <p className="text-sm text-muted-foreground">Combined MRC & DHA (All Data)</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-primary">Rp {totalAllContracts.toLocaleString('id-ID')}</p>
-                      <p className="text-xs text-muted-foreground">{allData.length} kontrak total</p>
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+                      
+
+                      {/* Total Sertifikat Card */}
+                      <div className="flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-2 rounded-lg border border-green-200">
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-white">📜</span>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-green-600 font-bold leading-tight">Total Sertifikat</p>
+                          <p className="text-lg font-bold text-green-700 leading-tight">{allData.length}</p>
+                        </div>
+                      </div>
+
+                      {/* Total Perusahaan Card */}
+                      <div className="flex items-center gap-2 bg-gradient-to-r from-orange-50 to-amber-50 px-3 py-2 rounded-lg border border-orange-200">
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-white">🏢</span>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-orange-600 font-bold leading-tight">Total Perusahaan</p>
+                          <p className="text-lg font-bold text-orange-700 leading-tight">{totalAllCompanies}</p>
+                        </div>
+                      </div>
+
+                      {/* Total Nilai Kontrak - Tanpa Card */}
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-primary">Rp {totalAllContracts.toLocaleString('id-ID')}</p>
+                        <p className="text-sm text-muted-foreground">Total Nilai Kontrak</p>
+                      </div>
                     </div>
                   </div>
 
@@ -1828,6 +1864,7 @@ export default function CrmDataManagementPage() {
                         {filterStatus !== 'all' && filterStatus !== 'LANJUT' && (
                           <span className="ml-2">• Filter: {filterStatus}</span>
                         )}
+                        <span className="ml-2">• {totalFilteredCompanies} dari {totalAllCompanies} Perusahaan</span>
                       </span>
                     </div>
                   </div>
@@ -1847,7 +1884,7 @@ export default function CrmDataManagementPage() {
                         <span className="text-[10px] sm:text-xs text-green-600 font-medium">LANJUT/DONE</span>
                         <div className="text-xs sm:text-sm font-bold text-green-700 truncate">Rp {Math.round(lanjutContracts).toLocaleString('id-ID')}</div>
                         <span className="text-[9px] sm:text-[10px] text-green-600">
-                          {filteredData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').length} kontrak
+                          {filteredData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').length} Sertifikat
                         </span>
                       </div>
                     </div>
@@ -1863,7 +1900,7 @@ export default function CrmDataManagementPage() {
                         <span className="text-[10px] sm:text-xs text-blue-600 font-medium">PROSES</span>
                         <div className="text-xs sm:text-sm font-bold text-blue-700 truncate">Rp {Math.round(prosesContracts).toLocaleString('id-ID')}</div>
                         <span className="text-[9px] sm:text-[10px] text-blue-600">
-                          {filteredData.filter(t => t.status === 'PROSES').length} kontrak
+                          {filteredData.filter(t => t.status === 'PROSES').length} Sertifikat
                         </span>
                       </div>
                     </div>
@@ -1879,7 +1916,7 @@ export default function CrmDataManagementPage() {
                         <span className="text-[10px] sm:text-xs text-orange-600 font-medium">SUSPEND</span>
                         <div className="text-xs sm:text-sm font-bold text-orange-700 truncate">Rp {Math.round(suspendContracts).toLocaleString('id-ID')}</div>
                         <span className="text-[9px] sm:text-[10px] text-orange-600">
-                          {filteredData.filter(t => t.status === 'SUSPEND').length} kontrak
+                          {filteredData.filter(t => t.status === 'SUSPEND').length} Sertifikat
                         </span>
                       </div>
                     </div>
@@ -1895,7 +1932,7 @@ export default function CrmDataManagementPage() {
                         <span className="text-[10px] sm:text-xs text-red-600 font-medium">LOSS</span>
                         <div className="text-xs sm:text-sm font-bold text-red-700 truncate">Rp {Math.round(lossContracts).toLocaleString('id-ID')}</div>
                         <span className="text-[9px] sm:text-[10px] text-red-600">
-                          {filteredData.filter(t => t.status === 'LOSS').length} kontrak
+                          {filteredData.filter(t => t.status === 'LOSS').length} Sertifikat
                         </span>
                       </div>
                     </div>
@@ -1911,7 +1948,7 @@ export default function CrmDataManagementPage() {
                         <span className="text-[10px] sm:text-xs text-gray-600 font-medium">WAITING</span>
                         <div className="text-xs sm:text-sm font-bold text-gray-700 truncate">Rp {Math.round(waitingContracts).toLocaleString('id-ID')}</div>
                         <span className="text-[9px] sm:text-[10px] text-gray-600">
-                          {filteredData.filter(t => t.status === 'WAITING').length} kontrak
+                          {filteredData.filter(t => t.status === 'WAITING').length} Sertifikat
                         </span>
                       </div>
                     </div>
@@ -1984,6 +2021,10 @@ export default function CrmDataManagementPage() {
                 monthlyData[bulan].count += 1;
               });
 
+              // Debug: Log monthly data
+              console.log('📊 Monthly Data:', Object.keys(monthlyData));
+              console.log('📊 Monthly Details:', monthlyData);
+
               // Convert to array and sort by month
               const bulanOrder: { [key: string]: number } = {
                 'januari': 1, 'februari': 2, 'maret': 3, 'april': 4, 'mei': 5, 'juni': 6,
@@ -2001,7 +2042,11 @@ export default function CrmDataManagementPage() {
                 });
 
               // Calculate grand total
-              const grandTotal = filteredByStatus.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+              const grandTotal = Math.round(filteredByStatus.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+
+              // Calculate total unique companies from filtered by status data
+              const filteredByStatusCompanies = new Set(filteredByStatus.map(t => t.namaPerusahaan));
+              const totalFilteredCompanies = filteredByStatusCompanies.size;
 
               // Determine status color - SAME LOGIC as Total Target progress bar
               const getStatusColor = () => {
@@ -2121,13 +2166,11 @@ export default function CrmDataManagementPage() {
                       <p className="text-xs text-gray-500 mt-1">{sortedMonthlyData.length} bulan aktif</p>
                     </div>
                     <div className="p-4 bg-white rounded-lg border border-gray-200">
-                      <p className="text-sm text-gray-600 font-medium">Tertinggi</p>
-                      <p className="text-2xl font-bold text-green-600 mt-1">
-                        Rp {sortedMonthlyData.length > 0 ? Math.max(...sortedMonthlyData.map(([, data]) => data.total)).toLocaleString('id-ID') : '0'}
+                      <p className="text-sm text-gray-600 font-medium">Total Perusahaan</p>
+                      <p className="text-2xl font-bold text-primary mt-1">
+                        {totalFilteredCompanies}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {sortedMonthlyData.length > 0 ? sortedMonthlyData.reduce((a, b) => a[1].total > b[1].total ? a : b)[0] : '-'}
-                      </p>
+                      <p className="text-xs text-gray-500 mt-1">Perusahaan unique</p>
                     </div>
                   </div>
 
@@ -2140,6 +2183,203 @@ export default function CrmDataManagementPage() {
                     isFullWidth={true}
                   />
 
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
+
+        {/* Kuadran Analytics - Monthly Trend */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Kuadran Analytics - Monthly Trend
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  Distribusi kuadran per bulan (Januari - Desember)
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              // Filter data that has kuadran field
+              const dataWithKuadran = (filteredTargets || []).filter(t => t.kuadran);
+
+              // Group by Bulan and Kuadran
+              const monthlyKuadranData: { [key: string]: { [key: string]: { total: number; count: number } } } = {};
+
+              dataWithKuadran.forEach(target => {
+                const bulan = target.bulanExpDate || 'Unknown';
+                const kuadran = target.kuadran || 'Unknown';
+                const amount = target.hargaKontrak || 0;
+
+                if (!monthlyKuadranData[bulan]) {
+                  monthlyKuadranData[bulan] = {};
+                }
+                if (!monthlyKuadranData[bulan][kuadran]) {
+                  monthlyKuadranData[bulan][kuadran] = {
+                    total: 0,
+                    count: 0
+                  };
+                }
+
+                monthlyKuadranData[bulan][kuadran].total += amount;
+                monthlyKuadranData[bulan][kuadran].count += 1;
+              });
+
+              // Define month order
+              const bulanOrder: { [key: string]: number } = {
+                'januari': 1, 'februari': 2, 'maret': 3, 'april': 4, 'mei': 5, 'juni': 6,
+                'juli': 7, 'agustus': 8, 'september': 9, 'oktober': 10, 'november': 11, 'desember': 12,
+                '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
+                '7': 7, '8': 8, '9': 9, '10': 10, '11': 11, '12': 12
+              };
+
+              // Sort months
+              const sortedMonths = Object.keys(monthlyKuadranData)
+                .filter(bulan => bulan.toLowerCase() !== 'unknown')
+                .sort((a, b) => {
+                  const orderA = bulanOrder[a.toLowerCase()] || 999;
+                  const orderB = bulanOrder[b.toLowerCase()] || 999;
+                  return orderA - orderB;
+                });
+
+              // Define kuadran order and colors
+              const kuadranOrder = ['K1', 'K2', 'K3', 'K4'];
+              const kuadranColors: { [key: string]: { color: string; bg: string; border: string; gradient: string } } = {
+                'K1': {
+                  color: '#3B82F6', // Blue
+                  bg: 'bg-blue-50',
+                  border: 'border-blue-500',
+                  gradient: 'from-blue-500 to-blue-600'
+                },
+                'K2': {
+                  color: '#10B981', // Green
+                  bg: 'bg-green-50',
+                  border: 'border-green-500',
+                  gradient: 'from-green-500 to-green-600'
+                },
+                'K3': {
+                  color: '#F59E0B', // Orange
+                  bg: 'bg-orange-50',
+                  border: 'border-orange-500',
+                  gradient: 'from-orange-500 to-orange-600'
+                },
+                'K4': {
+                  color: '#8B5CF6', // Purple
+                  bg: 'bg-purple-50',
+                  border: 'border-purple-500',
+                  gradient: 'from-purple-500 to-purple-600'
+                }
+              };
+
+              return (
+                <div className="space-y-6">
+                  {/* Summary Cards per Kuadran */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {kuadranOrder.map(kuadran => {
+                      const kuadranTotal = Object.values(monthlyKuadranData).reduce((sum, month) => {
+                        return sum + (month[kuadran]?.total || 0);
+                      }, 0);
+                      const kuadranCount = Object.values(monthlyKuadranData).reduce((sum, month) => {
+                        return sum + (month[kuadran]?.count || 0);
+                      }, 0);
+
+                      // Calculate unique companies per kuadran
+                      const kuadranCompanies = new Set(
+                        dataWithKuadran
+                          .filter(t => t.kuadran === kuadran)
+                          .map(t => t.namaPerusahaan)
+                      );
+                      const kuadranCompanyCount = kuadranCompanies.size;
+
+                      const colors = kuadranColors[kuadran] || kuadranColors['K1'];
+                      const grandTotal = Object.values(monthlyKuadranData).reduce((sum, month) => {
+                        return sum + Object.values(month).reduce((s, k) => s + k.total, 0);
+                      }, 0);
+                      const percentage = grandTotal > 0 ? Math.round((kuadranTotal / grandTotal) * 100) : 0;
+
+                      return (
+                        <div key={kuadran} className={`bg-gradient-to-br ${colors.bg} rounded-lg border ${colors.border} p-4`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-xl font-bold" style={{ color: colors.color }}>{kuadran}</h4>
+                            <div className={`h-8 w-8 rounded-full bg-gradient-to-r ${colors.gradient} flex items-center justify-center`}>
+                              <span className="text-white text-xs font-bold">{percentage}%</span>
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm font-semibold" style={{ color: colors.color }}>
+                              Rp {kuadranTotal.toLocaleString('id-ID')}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {kuadranCount} Sertifikat . {kuadranCompanyCount} Perusahaan
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Chart - Monthly Trend by Kuadran */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">Trend Kuadran Per Bulan</h3>
+                      <Select value={selectedChartType} onValueChange={setSelectedChartType}>
+                        <SelectTrigger className="w-32 h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="area">Area</SelectItem>
+                          <SelectItem value="bar">Bar</SelectItem>
+                          <SelectItem value="line">Line</SelectItem>
+                          <SelectItem value="pie">Pie</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Chart Visualization */}
+                    <ChartCardKuadranMonthly
+                      title={`Distribusi Kuadran Per Bulan${filterStatus !== 'all' ? ` - ${filterStatus.toUpperCase()}` : ''}`}
+                      data={(() => {
+                        // Flatten data for chart: create one data point per month per kuadran
+                        const chartData: any[] = [];
+                        sortedMonths.forEach(bulan => {
+                          kuadranOrder.forEach(kuadran => {
+                            const data = monthlyKuadranData[bulan]?.[kuadran];
+                            if (data && data.total > 0) {
+                              chartData.push({
+                                bulanExpDate: bulan,
+                                hargaKontrak: data.total,
+                                namaPerusahaan: `${kuadran}`,
+                                picCrm: kuadran, // Used to identify kuadran in chart
+                                sales: kuadran,
+                                status: 'ALL',
+                                provinsi: undefined,
+                                kota: undefined,
+                                alamat: undefined,
+                                akreditasi: undefined,
+                                eaCode: undefined,
+                                std: undefined,
+                                iaDate: undefined,
+                                expDate: undefined,
+                                tahapAudit: undefined,
+                                _id: '' as any,
+                                tahun: filterTahun !== 'all' ? filterTahun : undefined,
+                                createdAt: 0,
+                                updatedAt: 0
+                              });
+                            }
+                          });
+                        });
+                        return chartData;
+                      })()}
+                      chartType={selectedChartType}
+                    />
+                  </div>
                 </div>
               );
             })()}
@@ -2168,8 +2408,8 @@ export default function CrmDataManagementPage() {
                 const mrcSuspend = mrcData.filter(t => t.status === 'SUSPEND').length;
                 const mrcProses = mrcData.filter(t => t.status === 'PROSES').length;
                 const mrcWaiting = mrcData.filter(t => t.status === 'WAITING').length;
-                const mrcTotalAmount = mrcData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
-                const mrcLanjutAmount = mrcData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+                const mrcTotalAmount = Math.round(mrcData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                const mrcLanjutAmount = Math.round(mrcData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
                 const targetVisits = 100; // Sesuaikan dengan target tahunan
 
                   return (
@@ -2266,8 +2506,8 @@ export default function CrmDataManagementPage() {
                 const dhaSuspend = dhaData.filter(t => t.status === 'SUSPEND').length;
                 const dhaProses = dhaData.filter(t => t.status === 'PROSES').length;
                 const dhaWaiting = dhaData.filter(t => t.status === 'WAITING').length;
-                const dhaTotalAmount = dhaData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
-                const dhaLanjutAmount = dhaData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0);
+                const dhaTotalAmount = Math.round(dhaData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                const dhaLanjutAmount = Math.round(dhaData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
                 const targetVisits = 100; // Sesuaikan dengan target tahunan
 
                   return (
