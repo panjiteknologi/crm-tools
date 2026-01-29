@@ -51,6 +51,10 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
     }
   }
 
+  // Check if user is Diara and has custom avatar
+  const isDiara = user.email === 'diara@tsicertification.co.id'
+  const userAvatar = isDiara ? '/images/diara.jpeg' : user.avatar
+
   return (
     <header className={`sticky top-0 z-50 w-full rounded-xl border border-border shadow-md ${isDarkMode ? 'bg-background' : 'bg-white'}`}>
       <div className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -106,11 +110,21 @@ export function CRMHeader({ user, onThemeToggle, isDarkMode }: CRMHeaderProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-9 w-9 rounded-full overflow-hidden cursor-pointer hover:bg-gray-100"
+                  className="relative h-9 w-9 p-0 rounded-full overflow-hidden cursor-pointer hover:bg-gray-100"
                 >
-                  <div className="h-full w-full rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
+                  {userAvatar ? (
+                    <div className="h-full w-full rounded-full overflow-hidden">
+                      <img
+                        src={userAvatar}
+                        alt={user.name}
+                        className="h-full w-full object-cover rounded-full"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-full w-full rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
