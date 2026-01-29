@@ -32,66 +32,61 @@
   {
     "id": 7,
     "kode": "007",
-    "nama": "DRF"
+    "nama": "Erick"
   },
   {
     "id": 8,
     "kode": "008",
-    "nama": "Erick"
+    "nama": "Eva"
   },
   {
     "id": 9,
     "kode": "009",
-    "nama": "Eva"
+    "nama": "Gatya"
   },
   {
     "id": 10,
     "kode": "010",
-    "nama": "Gatya"
+    "nama": "JSF"
   },
   {
     "id": 11,
     "kode": "011",
-    "nama": "JSF"
+    "nama": "Karl"
   },
   {
     "id": 12,
     "kode": "012",
-    "nama": "Karl"
+    "nama": "OFC"
   },
   {
     "id": 13,
     "kode": "013",
-    "nama": "OFC"
+    "nama": "PRM"
   },
   {
     "id": 14,
     "kode": "014",
-    "nama": "PRM"
+    "nama": "Surya"
   },
   {
     "id": 15,
     "kode": "015",
-    "nama": "Surya"
+    "nama": "Tata"
   },
   {
     "id": 16,
     "kode": "016",
-    "nama": "Tata"
+    "nama": "Tiara"
   },
   {
     "id": 17,
     "kode": "017",
-    "nama": "Tiara"
+    "nama": "Tika"
   },
   {
     "id": 18,
     "kode": "018",
-    "nama": "Tika"
-  },
-  {
-    "id": 19,
-    "kode": "019",
     "nama": "Diki"
   }
 ]

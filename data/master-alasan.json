@@ -1,6 +1,6 @@
 {
   "alasan": [
-    { "id": 1, "alasan": "Menunggu info manajemen" },
+    { "id": 1, "alasan": "Menunggu info lanjutan" },
     { "id": 2, "alasan": "Proses ttd form request" },
     { "id": 3, "alasan": "Proses ttd kontrak" },
     { "id": 4, "alasan": "Tidak ada respon" },
@@ -12,6 +12,10 @@
     { "id": 10, "alasan": "Mundur audit" },
     { "id": 11, "alasan": "Pindah LS" },
     { "id": 12, "alasan": "IA Reten" },
-    { "id": 13, "alasan": "Tidak sesuai standar" }
+    { "id": 13, "alasan": "Tidak sesuai standar" },
+    { "id": 14, "alasan": "Merger" },
+    { "id": 15, "alasan": "Tidak bisa dihubungi" },
+    { "id": 15, "alasan": "Penawaran harga" },
+    { "id": 16, "alasan": "Ditunda" }
   ]
 }

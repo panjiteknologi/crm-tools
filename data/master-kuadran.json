@@ -1,0 +1,28 @@
+{
+  "kuadran": [
+    {
+      "kode": "K1",
+      "nama": "Kuadran 1",
+      "deskripsi": "Kuadran 1",
+      "status": "Aktif"
+    },
+    {
+      "kode": "K2",
+      "nama": "Kuadran 2",
+      "deskripsi": "Kuadran 2",
+      "status": "Aktif"
+    },
+    {
+      "kode": "K3",
+      "nama": "Kuadran 3",
+      "deskripsi": "Kuadran 3",
+      "status": "Aktif"
+    },
+    {
+      "kode": "K4",
+      "nama": "Kuadran 4",
+      "deskripsi": "Kuadran 4",
+      "status": "Aktif"
+    }
+  ]
+}
