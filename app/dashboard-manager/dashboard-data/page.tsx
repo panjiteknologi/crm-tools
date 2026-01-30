@@ -386,7 +386,7 @@ export default function CrmDataManagementPage() {
     switch (statusUpper) {
       case 'PROSES':
         return 'default';
-      case 'LANJUT':
+      case 'DONE':
         return 'secondary';
       case 'LOSS':
         return 'destructive';
@@ -404,7 +404,7 @@ export default function CrmDataManagementPage() {
     switch (statusUpper) {
       case 'PROSES':
         return 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600';
-      case 'LANJUT':
+      case 'DONE':
         return 'bg-green-600 hover:bg-green-700 text-white border-green-600';
       case 'LOSS':
         return 'bg-red-600 hover:bg-red-700 text-white border-red-600';
@@ -1747,6 +1747,13 @@ export default function CrmDataManagementPage() {
 
               const totalAllContracts = Math.round(allData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
 
+              // Calculate total amount by status from hargaTerupdate (except WAITING uses hargaKontrak)
+              const totalDoneAmount = Math.round(allData.filter(t => t.status === 'DONE').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+              const totalProsesAmount = Math.round(allData.filter(t => t.status === 'PROSES').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+              const totalSuspendAmount = Math.round(allData.filter(t => t.status === 'SUSPEND').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+              const totalLossAmount = Math.round(allData.filter(t => t.status === 'LOSS').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+              const totalWaitingAmount = Math.round(allData.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+
               // Calculate total unique companies
               const allCompanies = new Set(allData.map(t => t.namaPerusahaan));
               const totalAllCompanies = allCompanies.size;
@@ -1760,35 +1767,35 @@ export default function CrmDataManagementPage() {
 
               const totalFilteredContracts = Math.round(filteredData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
               const lanjutContracts = Math.round(filteredData
-                .filter(t => t.status === 'LANJUT' || t.status === 'DONE')
-                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                .filter(t => t.status === 'DONE')
+                .reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
               const lossContracts = Math.round(filteredData
                 .filter(t => t.status === 'LOSS')
-                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                .reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
               const suspendContracts = Math.round(filteredData
                 .filter(t => t.status === 'SUSPEND')
-                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                .reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
               const prosesContracts = Math.round(filteredData
                 .filter(t => t.status === 'PROSES')
-                .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                .reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
               const waitingContracts = Math.round(filteredData
                 .filter(t => t.status === 'WAITING')
                 .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
 
-              // Calculate percentage based on filtered data
+              // Calculate percentage based on filtered data (90% of total)
               const achievementPercentage = totalFilteredContracts > 0
-                ? Math.round((lanjutContracts / totalFilteredContracts) * 100)
+                ? Math.round((lanjutContracts / (totalFilteredContracts * 0.9)) * 100)
                 : 0;
 
               // Determine which progress bar to show based on status filter
               const getProgressConfig = () => {
                 // Percentage is ALWAYS calculated from total ALL contracts (not filtered)
-                if (filterStatus === 'LANJUT' || filterStatus === 'all') {
+                if (filterStatus === 'DONE' || filterStatus === 'all') {
                   return {
                     label: 'Pencapaian Kontrak Lanjut / Done',
                     value: lanjutContracts,
                     color: 'green',
-                    percentage: totalAllContracts > 0 ? Math.round((lanjutContracts / totalAllContracts) * 100) : 0
+                    percentage: totalAllContracts > 0 ? Math.round((lanjutContracts / (totalAllContracts * 0.9)) * 100) : 0
                   };
                 } else if (filterStatus === 'LOSS') {
                   return {
@@ -1819,9 +1826,9 @@ export default function CrmDataManagementPage() {
                     percentage: totalAllContracts > 0 ? Math.round((waitingContracts / totalAllContracts) * 100) : 0
                   };
                 } else {
-                  // Default: show LANJUT
+                  // Default: show DONE
                   return {
-                    label: 'Pencapaian Kontrak Lanjut',
+                    label: 'Pencapaian Kontrak Done',
                     value: lanjutContracts,
                     color: 'green',
                     percentage: totalAllContracts > 0 ? Math.round((lanjutContracts / totalAllContracts) * 100) : 0
@@ -1894,7 +1901,7 @@ export default function CrmDataManagementPage() {
 
                       {/* Total Nilai Kontrak - Tanpa Card */}
                       <div className="text-right">
-                        <p className="text-3xl font-bold text-primary">Rp {totalAllContracts.toLocaleString('id-ID')}</p>
+                        <p className="text-3xl font-bold text-primary">Rp {Math.round(totalAllContracts * 0.9).toLocaleString('id-ID')}</p>
                         <p className="text-sm text-muted-foreground">Total Nilai Kontrak</p>
                       </div>
                     </div>
@@ -1920,31 +1927,31 @@ export default function CrmDataManagementPage() {
                     </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>
-                        Rp {progressConfig.value.toLocaleString('id-ID')} dari Rp {totalAllContracts.toLocaleString('id-ID')} (Total Semua Kontrak)
-                        {filterStatus !== 'all' && filterStatus !== 'LANJUT' && (
+                        Rp {progressConfig.value.toLocaleString('id-ID')} dari Rp {Math.round(totalAllContracts * 0.9).toLocaleString('id-ID')} (Total Semua Kontrak)
+                        {filterStatus !== 'all' && filterStatus !== 'DONE' && (
                           <span className="ml-2">• Filter: {filterStatus}</span>
                         )}
-                        <span className="ml-2">• {totalFilteredCompanies} dari {totalAllCompanies} Perusahaan</span>
+                        {/* <span className="ml-2">• {totalFilteredCompanies} dari {totalAllCompanies} Perusahaan</span> */}
                       </span>
                     </div>
                   </div>
 
                   {/* Detailed Breakdown */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 pt-4 border-t">
-                    {/* LANJUT */}
+                    {/* DONE */}
                     <div className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-green-50 rounded-lg border border-green-200">
                       {/* Left - Percentage Circle */}
                       <div className="flex-shrink-0">
                         <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-green-500 flex items-center justify-center">
-                          <span className="text-white text-xs sm:text-sm font-bold">{totalAllContracts > 0 ? Math.round((lanjutContracts / totalAllContracts) * 100) : 0}%</span>
+                          <span className="text-white text-xs sm:text-sm font-bold">{totalAllContracts > 0 ? Math.round((lanjutContracts / (totalAllContracts * 0.9)) * 100) : 0}%</span>
                         </div>
                       </div>
                       {/* Right - Info */}
                       <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[10px] sm:text-xs text-green-600 font-medium">LANJUT/DONE</span>
+                        <span className="text-[10px] sm:text-xs text-green-600 font-medium">DONE</span>
                         <div className="text-xs sm:text-sm font-bold text-green-700 truncate">Rp {Math.round(lanjutContracts).toLocaleString('id-ID')}</div>
                         <span className="text-[9px] sm:text-[10px] text-green-600">
-                          {filteredData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').length} Sertifikat
+                          {filteredData.filter(t => t.status === 'DONE').length} Sertifikat
                         </span>
                       </div>
                     </div>
@@ -2049,16 +2056,13 @@ export default function CrmDataManagementPage() {
               // Filter data based on status filter
               let filteredByStatus = (filteredTargets || []);
 
-              // When filterStatus is 'all', only show LANJUT/DONE contracts
+              // When filterStatus is 'all', only show DONE contracts
               // Otherwise, filter by the selected status
               if (filterStatus === 'all') {
-                filteredByStatus = filteredByStatus.filter(t => t.status === 'LANJUT' || t.status === 'DONE');
+                filteredByStatus = filteredByStatus.filter(t => t.status === 'DONE');
               } else {
                 const statusUpper = filterStatus?.toUpperCase() || '';
                 filteredByStatus = filteredByStatus.filter(t => {
-                  if (statusUpper === 'LANJUT') {
-                    return t.status === 'LANJUT' || t.status === 'DONE';
-                  }
                   return t.status === statusUpper;
                 });
               }
@@ -2068,7 +2072,9 @@ export default function CrmDataManagementPage() {
 
               filteredByStatus.forEach(target => {
                 const bulan = target.bulanExpDate || 'Unknown';
-                const amount = target.hargaKontrak || 0;
+                // Use hargaTerupdate for DONE, PROSES, SUSPEND, LOSS; use hargaKontrak for WAITING
+                const useHargaTerupdate = ['DONE', 'PROSES', 'SUSPEND', 'LOSS'].includes(target.status || '');
+                const amount = useHargaTerupdate ? (target.hargaTerupdate || 0) : (target.hargaKontrak || 0);
 
                 if (!monthlyData[bulan]) {
                   monthlyData[bulan] = {
@@ -2101,8 +2107,11 @@ export default function CrmDataManagementPage() {
                   return orderA - orderB;
                 });
 
-              // Calculate grand total
-              const grandTotal = Math.round(filteredByStatus.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+              // Calculate grand total using hargaTerupdate for DONE, PROSES, SUSPEND, LOSS; hargaKontrak for WAITING
+              const grandTotal = Math.round(filteredByStatus.reduce((sum, t) => {
+                const useHargaTerupdate = ['DONE', 'PROSES', 'SUSPEND', 'LOSS'].includes(t.status || '');
+                return sum + (useHargaTerupdate ? (t.hargaTerupdate || 0) : (t.hargaKontrak || 0));
+              }, 0));
 
               // Calculate total unique companies from filtered by status data
               const filteredByStatusCompanies = new Set(filteredByStatus.map(t => t.namaPerusahaan));
@@ -2110,7 +2119,7 @@ export default function CrmDataManagementPage() {
 
               // Determine status color - SAME LOGIC as Total Target progress bar
               const getStatusColor = () => {
-                if (filterStatus === 'LANJUT' || filterStatus === 'all') {
+                if (filterStatus === 'DONE' || filterStatus === 'all') {
                   return 'green';
                 } else if (filterStatus === 'LOSS') {
                   return 'red';
@@ -3341,15 +3350,22 @@ export default function CrmDataManagementPage() {
                 {(() => {
                   // Get MRC data from crmTargets (not filteredTargets) - shows all data regardless of filters (except PIC CRM filter)
                   const mrcData = (crmTargets || []).filter(t => (t.picCrm || '').toUpperCase() === 'MRC');
-                const mrcTotal = mrcData.length;
-                const mrcLanjut = mrcData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').length;
-                const mrcLoss = mrcData.filter(t => t.status === 'LOSS').length;
-                const mrcSuspend = mrcData.filter(t => t.status === 'SUSPEND').length;
-                const mrcProses = mrcData.filter(t => t.status === 'PROSES').length;
-                const mrcWaiting = mrcData.filter(t => t.status === 'WAITING').length;
-                const mrcTotalAmount = Math.round(mrcData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
-                const mrcLanjutAmount = Math.round(mrcData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
-                const targetVisits = 100; // Sesuaikan dengan target tahunan
+                  const mrcTotal = mrcData.length;
+                  const mrcLanjut = mrcData.filter(t => t.status === 'DONE').length;
+                  const mrcLoss = mrcData.filter(t => t.status === 'LOSS').length;
+                  const mrcSuspend = mrcData.filter(t => t.status === 'SUSPEND').length;
+                  const mrcProses = mrcData.filter(t => t.status === 'PROSES').length;
+                  const mrcWaiting = mrcData.filter(t => t.status === 'WAITING').length;
+                  const mrcTotalAmount = Math.round(mrcData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+
+                  // Calculate total by status from hargaTerupdate (except WAITING uses hargaKontrak)
+                  const mrcDoneAmount = Math.round(mrcData.filter(t => t.status === 'DONE').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                  const mrcProsesAmount = Math.round(mrcData.filter(t => t.status === 'PROSES').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                  const mrcSuspendAmount = Math.round(mrcData.filter(t => t.status === 'SUSPEND').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                  const mrcLossAmount = Math.round(mrcData.filter(t => t.status === 'LOSS').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                  const mrcWaitingAmount = Math.round(mrcData.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                  const mrcLanjutAmount = Math.round(mrcData.filter(t => t.status === 'DONE').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                  const targetVisits = 100; // Sesuaikan dengan target tahunan
 
                   return (
                     <div className="flex flex-col sm:flex-row gap-4">
@@ -3379,7 +3395,7 @@ export default function CrmDataManagementPage() {
                         <div className="space-y-1">
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-muted-foreground">Total Nilai Kontrak</span>
-                            <span className="text-sm font-bold text-primary">Rp {mrcTotalAmount.toLocaleString('id-ID')}</span>
+                            <span className="text-sm font-bold text-primary">Rp {Math.round(mrcTotalAmount * 0.9).toLocaleString('id-ID')}</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
@@ -3399,23 +3415,38 @@ export default function CrmDataManagementPage() {
                           <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 text-xs">
                             <div className="flex justify-between items-center">
                               <span className="text-green-600">✓ Lanjut</span>
-                              <span className="font-medium">{mrcLanjut}</span>
+                              <div className="text-right">
+                                <div className="font-medium">{mrcLanjut}</div>
+                                <div className="text-[9px] text-green-600">Rp {mrcDoneAmount.toLocaleString('id-ID')}</div>
+                              </div>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-red-600">✗ Loss</span>
-                              <span className="font-medium">{mrcLoss}</span>
+                              <div className="text-right">
+                                <div className="font-medium">{mrcLoss}</div>
+                                <div className="text-[9px] text-red-600">Rp {mrcLossAmount.toLocaleString('id-ID')}</div>
+                              </div>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-orange-600">⏸ Suspend</span>
-                              <span className="font-medium">{mrcSuspend}</span>
+                              <div className="text-right">
+                                <div className="font-medium">{mrcSuspend}</div>
+                                <div className="text-[9px] text-orange-600">Rp {mrcSuspendAmount.toLocaleString('id-ID')}</div>
+                              </div>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-blue-600">⏸ Proses</span>
-                              <span className="font-medium">{mrcProses}</span>
+                              <div className="text-right">
+                                <div className="font-medium">{mrcProses}</div>
+                                <div className="text-[9px] text-blue-600">Rp {mrcProsesAmount.toLocaleString('id-ID')}</div>
+                              </div>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-gray-600">⏳ Waiting</span>
-                              <span className="font-medium">{mrcWaiting}</span>
+                              <div className="text-right">
+                                <div className="font-medium">{mrcWaiting}</div>
+                                <div className="text-[9px] text-gray-600">Rp {mrcWaitingAmount.toLocaleString('id-ID')}</div>
+                              </div>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-purple-600">📊 Visits</span>
@@ -3440,13 +3471,20 @@ export default function CrmDataManagementPage() {
                   // Get DHA data from crmTargets (not filteredTargets) - shows all data regardless of filters (except PIC CRM filter)
                   const dhaData = (crmTargets || []).filter(t => (t.picCrm || '').toUpperCase() === 'DHA');
                 const dhaTotal = dhaData.length;
-                const dhaLanjut = dhaData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').length;
+                const dhaLanjut = dhaData.filter(t => t.status === 'DONE').length;
                 const dhaLoss = dhaData.filter(t => t.status === 'LOSS').length;
                 const dhaSuspend = dhaData.filter(t => t.status === 'SUSPEND').length;
                 const dhaProses = dhaData.filter(t => t.status === 'PROSES').length;
                 const dhaWaiting = dhaData.filter(t => t.status === 'WAITING').length;
                 const dhaTotalAmount = Math.round(dhaData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
-                const dhaLanjutAmount = Math.round(dhaData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+
+                // Calculate total by status from hargaTerupdate (except WAITING uses hargaKontrak)
+                const dhaDoneAmount = Math.round(dhaData.filter(t => t.status === 'DONE').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                const dhaProsesAmount = Math.round(dhaData.filter(t => t.status === 'PROSES').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                const dhaSuspendAmount = Math.round(dhaData.filter(t => t.status === 'SUSPEND').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                const dhaLossAmount = Math.round(dhaData.filter(t => t.status === 'LOSS').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                const dhaWaitingAmount = Math.round(dhaData.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                const dhaLanjutAmount = Math.round(dhaData.filter(t => t.status === 'DONE').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
                 const targetVisits = 100; // Sesuaikan dengan target tahunan
 
                   return (
@@ -3477,7 +3515,7 @@ export default function CrmDataManagementPage() {
                         <div className="space-y-1">
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-muted-foreground">Total Nilai Kontrak</span>
-                            <span className="text-sm font-bold text-primary">Rp {dhaTotalAmount.toLocaleString('id-ID')}</span>
+                            <span className="text-sm font-bold text-primary">Rp {Math.round(dhaTotalAmount * 0.9).toLocaleString('id-ID')}</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
@@ -3497,23 +3535,38 @@ export default function CrmDataManagementPage() {
                           <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 text-xs">
                             <div className="flex justify-between items-center">
                               <span className="text-green-600">✓ Lanjut</span>
-                              <span className="font-medium">{dhaLanjut}</span>
+                              <div className="text-right">
+                                <div className="font-medium">{dhaLanjut}</div>
+                                <div className="text-[9px] text-green-600">Rp {dhaDoneAmount.toLocaleString('id-ID')}</div>
+                              </div>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-red-600">✗ Loss</span>
-                              <span className="font-medium">{dhaLoss}</span>
+                              <div className="text-right">
+                                <div className="font-medium">{dhaLoss}</div>
+                                <div className="text-[9px] text-red-600">Rp {dhaLossAmount.toLocaleString('id-ID')}</div>
+                              </div>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-orange-600">⏸ Suspend</span>
-                              <span className="font-medium">{dhaSuspend}</span>
+                              <div className="text-right">
+                                <div className="font-medium">{dhaSuspend}</div>
+                                <div className="text-[9px] text-orange-600">Rp {dhaSuspendAmount.toLocaleString('id-ID')}</div>
+                              </div>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-blue-600">⏸ Proses</span>
-                              <span className="font-medium">{dhaProses}</span>
+                              <div className="text-right">
+                                <div className="font-medium">{dhaProses}</div>
+                                <div className="text-[9px] text-blue-600">Rp {dhaProsesAmount.toLocaleString('id-ID')}</div>
+                              </div>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-gray-600">⏳ Waiting</span>
-                              <span className="font-medium">{dhaWaiting}</span>
+                              <div className="text-right">
+                                <div className="font-medium">{dhaWaiting}</div>
+                                <div className="text-[9px] text-gray-600">Rp {dhaWaitingAmount.toLocaleString('id-ID')}</div>
+                              </div>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-purple-600">📊 Visits</span>
@@ -3564,12 +3617,12 @@ export default function CrmDataManagementPage() {
           {/* Show all 5 charts when filterStatus is 'all', otherwise show only selected status chart */}
           {filterStatus === 'all' ? (
             <div className="space-y-4">
-              {/* First row: LANJUT, LOSS, SUSPEND */}
+              {/* First row: DONE, LOSS, SUSPEND */}
               <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3">
                 {/* Lanjut Chart */}
                 <ChartCardCrmData
-                  title="Status - LANJUT"
-                  data={filteredTargets.filter(t => t.status === 'LANJUT' || t.status === 'DONE')}
+                  title="Status - DONE"
+                  data={filteredTargets.filter(t => t.status === 'DONE')}
                   statusColor="green"
                   chartType={selectedChartType}
                   filterTahun={filterTahun}
@@ -3637,10 +3690,10 @@ export default function CrmDataManagementPage() {
                 title={`Status - ${filterStatus?.toUpperCase()}`}
                 data={filteredTargets.filter(t => {
                   const statusUpper = filterStatus?.toUpperCase() || '';
-                  return t.status === statusUpper || (statusUpper === 'LANJUT' && t.status === 'DONE');
+                  return t.status === statusUpper;
                 })}
                 statusColor={
-                  filterStatus?.toUpperCase() === 'LANJUT' ? 'green' :
+                  filterStatus?.toUpperCase() === 'DONE' ? 'green' :
                   filterStatus?.toUpperCase() === 'LOSS' ? 'red' :
                   filterStatus?.toUpperCase() === 'SUSPEND' ? 'orange' : 'blue'
                 }
