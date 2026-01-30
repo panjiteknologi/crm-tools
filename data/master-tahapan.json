@@ -1,0 +1,24 @@
+{
+  "tahapan": [
+    {
+      "kode": "RC",
+      "nama": "RC"
+    },
+    {
+      "kode": "SV1",
+      "nama": "SV1"
+    },
+    {
+      "kode": "SV2",
+      "nama": "SV2"
+    },
+    {
+      "kode": "SV3",
+      "nama": "SV3"
+    },
+    {
+      "kode": "SV4",
+      "nama": "SV4"
+    }
+  ]
+}

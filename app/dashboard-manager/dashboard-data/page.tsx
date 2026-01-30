@@ -2653,7 +2653,7 @@ export default function CrmDataManagementPage() {
                                         <LabelList
                                           dataKey="total"
                                           position="top"
-                                          fontSize={10}
+                                          fontSize={13}
                                           fontWeight="bold"
                                           formatter={(value: number) => {
                                             if (value >= 1000000000) return (value / 1000000000).toFixed(1) + 'M';
@@ -2697,7 +2697,7 @@ export default function CrmDataManagementPage() {
                                         <LabelList
                                           dataKey="total"
                                           position="top"
-                                          fontSize={10}
+                                          fontSize={13}
                                           fontWeight="bold"
                                           fill="#3B82F6"
                                           formatter={(value: number) => {
@@ -2796,7 +2796,7 @@ export default function CrmDataManagementPage() {
                                         <LabelList
                                           dataKey="total"
                                           position="top"
-                                          fontSize={10}
+                                          fontSize={13}
                                           fontWeight="bold"
                                           fill="#3B82F6"
                                           formatter={(value: number) => {
@@ -2830,7 +2830,7 @@ export default function CrmDataManagementPage() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5" />
-                  Sales Performance Analytics - Top Sales
+                  Sales Performance Analytics - By Sales Person
                 </CardTitle>
                 <CardDescription className="mt-1">
                   Performa semua sales berdasarkan total harga kontrak
@@ -2951,7 +2951,7 @@ export default function CrmDataManagementPage() {
                                     <LabelList
                                       dataKey="total"
                                       position="top"
-                                      fontSize={9}
+                                      fontSize={13}
                                       fontWeight="bold"
                                       formatter={(value: number) => {
                                         if (value >= 1000000000) return (value / 1000000000).toFixed(1) + 'M';
@@ -3002,7 +3002,7 @@ export default function CrmDataManagementPage() {
                                     <LabelList
                                       dataKey="total"
                                       position="top"
-                                      fontSize={9}
+                                      fontSize={13}
                                       fontWeight="bold"
                                       fill="#F97316"
                                       formatter={(value: number) => {
@@ -3066,6 +3066,254 @@ export default function CrmDataManagementPage() {
 
                             default:
                               return <BarChart data={allSales} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="displayName" /><YAxis /><Bar dataKey="total" fill="#C2410C" /></BarChart>;
+                          }
+                        })()}
+                      </ResponsiveContainer>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tahapan Audit Distribution Analytics */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Tahapan Audit Distribution
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  Distribusi tahapan audit berdasarkan total harga kontrak
+                </CardDescription>
+              </div>
+              <Select value={selectedTopAssociateChartType} onValueChange={setSelectedTopAssociateChartType}>
+                <SelectTrigger className="w-32 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bar">Bar</SelectItem>
+                  <SelectItem value="line">Line</SelectItem>
+                  <SelectItem value="pie">Pie</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="relative overflow-hidden rounded-xl border border-teal-200/50 shadow-lg bg-gradient-to-br from-teal-50/50 to-cyan-50/30 p-6">
+              {/* Futuristic background overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/15 via-cyan-400/10 to-transparent opacity-80 pointer-events-none rounded-xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/5 via-transparent to-cyan-500/5 pointer-events-none rounded-xl"></div>
+
+              <div className="relative z-10">
+                {(() => {
+                  // Import master-tahapan.json for legend
+                  const masterTahapanData = require('@/data/master-tahapan.json');
+
+                  // Group by tahapAudit and get totals
+                  const tahapTotals: { [key: string]: { total: number; count: number; companies: Set<string> } } = {};
+
+                  (filteredTargets || []).forEach(target => {
+                    const tahap = target.tahapAudit || 'Unknown';
+                    const amount = target.hargaKontrak || 0;
+                    const company = target.namaPerusahaan;
+
+                    if (!tahapTotals[tahap]) {
+                      tahapTotals[tahap] = {
+                        total: 0,
+                        count: 0,
+                        companies: new Set()
+                      };
+                    }
+
+                    tahapTotals[tahap].total += amount;
+                    tahapTotals[tahap].count += 1;
+                    if (company) {
+                      tahapTotals[tahap].companies.add(company);
+                    }
+                  });
+
+                  // Sort and get all tahapan with their display names from master
+                  const allTahapan = Object.entries(tahapTotals)
+                    .map(([kode, data]) => {
+                      // Find display name from master-tahapan.json
+                      const masterTahap = masterTahapanData.tahapan?.find((t: any) => t.kode === kode);
+                      const displayName = masterTahap?.nama || kode;
+
+                      return {
+                        kode,
+                        displayName,
+                        total: data.total,
+                        count: data.count,
+                        companyCount: data.companies.size
+                      };
+                    })
+                    .sort((a, b) => b.total - a.total);
+
+                  // Generate colors for tahapan - Teal solid
+                  const generateTahapColors = (index: number) => {
+                    return '#0D9488'; // Teal 600 (teal tua) - same color for all
+                  };
+
+                  const hasData = allTahapan.length > 0;
+
+                  if (!hasData) {
+                    return (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>Tidak ada data tahapan audit</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="h-[400px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        {(() => {
+                          switch (selectedTopAssociateChartType) {
+                            case 'bar':
+                              return (
+                                <BarChart data={allTahapan} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                  <XAxis
+                                    dataKey="displayName"
+                                    tick={{ fontSize: 13, fontWeight: 700 }}
+                                    className="fill-foreground"
+                                  />
+                                  <YAxis tick={{ fontSize: 11 }} className="fill-muted-foreground" width={80} />
+                                  <Tooltip
+                                    content={({ active, payload }) => {
+                                      if (active && payload && payload.length) {
+                                        const data = payload[0].payload;
+                                        return (
+                                          <div className="bg-background border rounded-lg shadow-lg p-2">
+                                            <p className="font-semibold text-sm mb-1">{data.displayName}</p>
+                                            <p className="text-xs text-muted-foreground">{data.count} Sertifikat . {data.companyCount} Perusahaan</p>
+                                            <p className="text-sm font-bold">Rp {data.total.toLocaleString('id-ID')}</p>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    }}
+                                  />
+                                  <Bar dataKey="total" radius={[4, 4, 0, 0]} fill="#0D9488">
+                                    <LabelList
+                                      dataKey="total"
+                                      position="top"
+                                      fontSize={13}
+                                      fontWeight="bold"
+                                      formatter={(value: number) => {
+                                        if (value >= 1000000000) return (value / 1000000000).toFixed(1) + 'M';
+                                        else if (value >= 1000000) return (value / 1000000).toFixed(1) + 'Jt';
+                                        else return (value / 1000).toFixed(0) + 'rb';
+                                      }}
+                                    />
+                                  </Bar>
+                                </BarChart>
+                              );
+
+                            case 'line':
+                              return (
+                                <LineChart data={allTahapan} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                  <XAxis
+                                    dataKey="displayName"
+                                    tick={{ fontSize: 13, fontWeight: 700 }}
+                                    className="fill-foreground"
+                                  />
+                                  <YAxis tick={{ fontSize: 11 }} className="fill-muted-foreground" width={80} />
+                                  <Tooltip
+                                    content={({ active, payload }) => {
+                                      if (active && payload && payload.length) {
+                                        const data = payload[0].payload;
+                                        return (
+                                          <div className="bg-background border rounded-lg shadow-lg p-2">
+                                            <p className="font-semibold text-sm mb-1">{data.displayName}</p>
+                                            <p className="text-xs text-muted-foreground">{data.count} Sertifikat . {data.companyCount} Perusahaan</p>
+                                            <p className="text-sm font-bold">Rp {data.total.toLocaleString('id-ID')}</p>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    }}
+                                  />
+                                  <Line
+                                    type="monotone"
+                                    dataKey="total"
+                                    stroke="#0D9488"
+                                    strokeWidth={3}
+                                    dot={{ fill: '#0D9488', strokeWidth: 2, r: 6 }}
+                                    activeDot={{ r: 8 }}
+                                  >
+                                    <LabelList
+                                      dataKey="total"
+                                      position="top"
+                                      fontSize={13}
+                                      fontWeight="bold"
+                                      fill="#0D9488"
+                                      formatter={(value: number) => {
+                                        if (value >= 1000000000) return (value / 1000000000).toFixed(1) + 'M';
+                                        else if (value >= 1000000) return (value / 1000000).toFixed(1) + 'Jt';
+                                        else return (value / 1000).toFixed(0) + 'rb';
+                                      }}
+                                    />
+                                  </Line>
+                                </LineChart>
+                              );
+
+                            case 'pie':
+                              const pieData = allTahapan.map((tahap, index) => ({
+                                name: tahap.displayName,
+                                value: tahap.total,
+                                count: tahap.count,
+                                companyCount: tahap.companyCount,
+                                color: generateTahapColors(index)
+                              }));
+
+                              return (
+                                <PieChart width={400} height={400}>
+                                  <Pie
+                                    data={pieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={true}
+                                    label={(entry) => {
+                                      const value = entry.value;
+                                      let label = '';
+                                      if (value >= 1000000000) label = (value / 1000000000).toFixed(1) + 'M';
+                                      else if (value >= 1000000) label = (value / 1000000).toFixed(1) + 'Jt';
+                                      else label = (value / 1000).toFixed(0) + 'rb';
+                                      return `${entry.name}`;
+                                    }}
+                                    outerRadius={120}
+                                    dataKey="value"
+                                  >
+                                    {pieData.map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                  </Pie>
+                                  <Tooltip
+                                    content={({ active, payload }) => {
+                                      if (active && payload && payload.length) {
+                                        const data = payload[0].payload;
+                                        return (
+                                          <div className="bg-background border rounded-lg shadow-lg p-2">
+                                            <p className="font-semibold text-sm mb-1">{data.name}</p>
+                                            <p className="text-xs text-muted-foreground">{data.count} Sertifikat . {data.companyCount} Perusahaan</p>
+                                            <p className="text-sm font-bold">Rp {data.value.toLocaleString('id-ID')}</p>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    }}
+                                  />
+                                </PieChart>
+                              );
+
+                            default:
+                              return <BarChart data={allTahapan} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="displayName" /><YAxis /><Bar dataKey="total" fill="#0D9488" /></BarChart>;
                           }
                         })()}
                       </ResponsiveContainer>
