@@ -2823,6 +2823,260 @@ export default function CrmDataManagementPage() {
           </CardContent>
         </Card>
 
+        {/* Sales Performance Analytics */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Sales Performance Analytics - Top Sales
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  Performa semua sales berdasarkan total harga kontrak
+                </CardDescription>
+              </div>
+              <Select value={selectedTopAssociateChartType} onValueChange={setSelectedTopAssociateChartType}>
+                <SelectTrigger className="w-32 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bar">Bar</SelectItem>
+                  <SelectItem value="line">Line</SelectItem>
+                  <SelectItem value="pie">Pie</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="relative overflow-hidden rounded-xl border border-orange-200/50 shadow-lg bg-gradient-to-br from-orange-50/50 to-amber-50/30 p-6">
+              {/* Futuristic background overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/15 via-amber-400/10 to-transparent opacity-80 pointer-events-none rounded-xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/5 via-transparent to-amber-500/5 pointer-events-none rounded-xl"></div>
+
+              <div className="relative z-10">
+                {(() => {
+                  // Create lookup map for sales names from master-sales.json
+                  const salesLookupMap: { [key: string]: string } = {};
+                  masterSalesData.forEach((sales: any) => {
+                    salesLookupMap[sales.nama] = `${sales.nama} ${sales.nama_lengkap}`;
+                  });
+
+                  // Group by sales and get totals
+                  const salesTotals: { [key: string]: { total: number; count: number; companies: Set<string> } } = {};
+
+                  (filteredTargets || []).forEach(target => {
+                    const sales = target.sales || 'Unknown';
+                    const amount = target.hargaKontrak || 0;
+                    const company = target.namaPerusahaan;
+
+                    if (!salesTotals[sales]) {
+                      salesTotals[sales] = {
+                        total: 0,
+                        count: 0,
+                        companies: new Set()
+                      };
+                    }
+
+                    salesTotals[sales].total += amount;
+                    salesTotals[sales].count += 1;
+                    if (company) {
+                      salesTotals[sales].companies.add(company);
+                    }
+                  });
+
+                  // Sort all sales (not just top 10)
+                  const allSales = Object.entries(salesTotals)
+                    .map(([name, data]) => ({
+                      name,
+                      displayName: salesLookupMap[name] || name,
+                      total: data.total,
+                      count: data.count,
+                      companyCount: data.companies.size
+                    }))
+                    .sort((a, b) => b.total - a.total);
+
+                  // Generate colors for all sales - Orange tua solid
+                  const generateSalesColors = (index: number) => {
+                    return '#C2410C'; // Orange 700 (orange tua) - same color for all
+                  };
+
+                  const hasData = allSales.length > 0;
+
+                  if (!hasData) {
+                    return (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>Tidak ada data sales</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="h-[400px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        {(() => {
+                          switch (selectedTopAssociateChartType) {
+                            case 'bar':
+                              return (
+                                <BarChart data={allSales} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                  <XAxis
+                                    dataKey="displayName"
+                                    tick={{ fontSize: 11, fontWeight: 600 }}
+                                    className="fill-foreground"
+                                    angle={-45}
+                                    textAnchor="end"
+                                    height={80}
+                                  />
+                                  <YAxis tick={{ fontSize: 9 }} className="fill-muted-foreground" width={80} />
+                                  <Tooltip
+                                    content={({ active, payload }) => {
+                                      if (active && payload && payload.length) {
+                                        const data = payload[0].payload;
+                                        return (
+                                          <div className="bg-background border rounded-lg shadow-lg p-2">
+                                            <p className="font-semibold text-sm mb-1">{data.displayName}</p>
+                                            <p className="text-xs text-muted-foreground">{data.count} Sertifikat . {data.companyCount} Perusahaan</p>
+                                            <p className="text-sm font-bold">Rp {data.total.toLocaleString('id-ID')}</p>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    }}
+                                  />
+                                  <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+                                    {allSales.map((sales, index) => (
+                                      <Cell key={`cell-${index}`} fill={generateSalesColors(index)} />
+                                    ))}
+                                    <LabelList
+                                      dataKey="total"
+                                      position="top"
+                                      fontSize={9}
+                                      fontWeight="bold"
+                                      formatter={(value: number) => {
+                                        if (value >= 1000000000) return (value / 1000000000).toFixed(1) + 'M';
+                                        else if (value >= 1000000) return (value / 1000000).toFixed(1) + 'Jt';
+                                        else return (value / 1000).toFixed(0) + 'rb';
+                                      }}
+                                    />
+                                  </Bar>
+                                </BarChart>
+                              );
+
+                            case 'line':
+                              return (
+                                <LineChart data={allSales} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                  <XAxis
+                                    dataKey="displayName"
+                                    tick={{ fontSize: 11, fontWeight: 600 }}
+                                    className="fill-foreground"
+                                    angle={-45}
+                                    textAnchor="end"
+                                    height={80}
+                                  />
+                                  <YAxis tick={{ fontSize: 9 }} className="fill-muted-foreground" width={80} />
+                                  <Tooltip
+                                    content={({ active, payload }) => {
+                                      if (active && payload && payload.length) {
+                                        const data = payload[0].payload;
+                                        return (
+                                          <div className="bg-background border rounded-lg shadow-lg p-2">
+                                            <p className="font-semibold text-sm mb-1">{data.displayName}</p>
+                                            <p className="text-xs text-muted-foreground">{data.count} Sertifikat . {data.companyCount} Perusahaan</p>
+                                            <p className="text-sm font-bold">Rp {data.total.toLocaleString('id-ID')}</p>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    }}
+                                  />
+                                  <Line
+                                    type="monotone"
+                                    dataKey="total"
+                                    stroke="#F97316"
+                                    strokeWidth={3}
+                                    dot={{ fill: '#F97316', strokeWidth: 2, r: 6 }}
+                                    activeDot={{ r: 8 }}
+                                  >
+                                    <LabelList
+                                      dataKey="total"
+                                      position="top"
+                                      fontSize={9}
+                                      fontWeight="bold"
+                                      fill="#F97316"
+                                      formatter={(value: number) => {
+                                        if (value >= 1000000000) return (value / 1000000000).toFixed(1) + 'M';
+                                        else if (value >= 1000000) return (value / 1000000).toFixed(1) + 'Jt';
+                                        else return (value / 1000).toFixed(0) + 'rb';
+                                      }}
+                                    />
+                                  </Line>
+                                </LineChart>
+                              );
+
+                            case 'pie':
+                              const pieData = allSales.map((sales, index) => ({
+                                name: sales.displayName,
+                                value: sales.total,
+                                count: sales.count,
+                                companyCount: sales.companyCount,
+                                color: generateSalesColors(index)
+                              }));
+
+                              return (
+                                <PieChart width={400} height={400}>
+                                  <Pie
+                                    data={pieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={true}
+                                    label={(entry) => {
+                                      const value = entry.value;
+                                      let label = '';
+                                      if (value >= 1000000000) label = (value / 1000000000).toFixed(1) + 'M';
+                                      else if (value >= 1000000) label = (value / 1000000).toFixed(1) + 'Jt';
+                                      else label = (value / 1000).toFixed(0) + 'rb';
+                                      return `${entry.name}`;
+                                    }}
+                                    outerRadius={120}
+                                    dataKey="value"
+                                  >
+                                    {pieData.map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                  </Pie>
+                                  <Tooltip
+                                    content={({ active, payload }) => {
+                                      if (active && payload && payload.length) {
+                                        const data = payload[0].payload;
+                                        return (
+                                          <div className="bg-background border rounded-lg shadow-lg p-2">
+                                            <p className="font-semibold text-sm mb-1">{data.name}</p>
+                                            <p className="text-xs text-muted-foreground">{data.count} Sertifikat . {data.companyCount} Perusahaan</p>
+                                            <p className="text-sm font-bold">Rp {data.value.toLocaleString('id-ID')}</p>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    }}
+                                  />
+                                </PieChart>
+                              );
+
+                            default:
+                              return <BarChart data={allSales} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="displayName" /><YAxis /><Bar dataKey="total" fill="#C2410C" /></BarChart>;
+                          }
+                        })()}
+                      </ResponsiveContainer>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Disclaimer - Pencapaian PIC CRM Contract Base */}
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800 font-medium text-center">

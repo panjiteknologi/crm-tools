@@ -2,91 +2,85 @@
   {
     "id": 1,
     "kode": "001",
-    "nama": "NAC"
+    "nama": "AJT",
+    "nama_lengkap": "( Ajit )"
   },
   {
     "id": 2,
     "kode": "002",
-    "nama": "Ajit"
+    "nama": "ARH",
+    "nama_lengkap": "( Angga )"
   },
   {
     "id": 3,
     "kode": "003",
-    "nama": "ARH"
+    "nama": "BSC",
+    "nama_lengkap": "( BSC )"
   },
   {
     "id": 4,
     "kode": "004",
-    "nama": "BSC"
+    "nama": "CLN",
+    "nama_lengkap": "( Celine )"
   },
   {
     "id": 5,
     "kode": "005",
-    "nama": "CRM"
+    "nama": "CRM",
+    "nama_lengkap": "( CRM )"
   },
   {
     "id": 6,
     "kode": "006",
-    "nama": "Celine"
+    "nama": "DKI",
+    "nama_lengkap": "( Diki )"
   },
   {
     "id": 7,
     "kode": "007",
-    "nama": "Erick"
+    "nama": "EVS",
+    "nama_lengkap": "( Eva )"
   },
   {
     "id": 8,
     "kode": "008",
-    "nama": "Eva"
+    "nama": "JSF",
+    "nama_lengkap": "( Josef )"
   },
   {
     "id": 9,
     "kode": "009",
-    "nama": "Gatya"
+    "nama": "KRL",
+    "nama_lengkap": "( Karl )"
   },
   {
     "id": 10,
     "kode": "010",
-    "nama": "JSF"
+    "nama": "NAC",
+    "nama_lengkap": "( Nungky )"
   },
   {
     "id": 11,
     "kode": "011",
-    "nama": "Karl"
+    "nama": "OFC",
+    "nama_lengkap": "( Office )"
   },
   {
     "id": 12,
     "kode": "012",
-    "nama": "OFC"
+    "nama": "PRM",
+    "nama_lengkap": "( PRM )"
   },
   {
     "id": 13,
     "kode": "013",
-    "nama": "PRM"
+    "nama": "SRY",
+    "nama_lengkap": "( Surya )"
   },
   {
     "id": 14,
     "kode": "014",
-    "nama": "Surya"
-  },
-  {
-    "id": 15,
-    "kode": "015",
-    "nama": "Tata"
-  },
-  {
-    "id": 16,
-    "kode": "016",
-    "nama": "Tiara"
-  },
-  {
-    "id": 17,
-    "kode": "017",
-    "nama": "Tika"
-  },
-  {
-    "id": 18,
-    "kode": "018",
-    "nama": "Diki"
+    "nama": "TRA",
+    "nama_lengkap": "( Tiara )"
   }
 ]
