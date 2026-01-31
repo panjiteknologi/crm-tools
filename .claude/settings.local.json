@@ -23,7 +23,8 @@
       "Bash(npm uninstall:*)",
       "Bash(PORT=3001 npm run dev:*)",
       "Bash(mkdir:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
