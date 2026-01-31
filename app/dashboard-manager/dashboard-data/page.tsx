@@ -2973,7 +2973,7 @@ export default function CrmDataManagementPage() {
                   Sales Performance Analytics - By Sales Person
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  Performa semua sales berdasarkan total harga kontrak
+                  Performa semua sales berdasarkan bulan TTD Notif (status DONE & sertifikat terbit)
                 </CardDescription>
               </div>
               <Select value={selectedTopAssociateChartType} onValueChange={setSelectedTopAssociateChartType}>
@@ -3002,12 +3002,52 @@ export default function CrmDataManagementPage() {
                     salesLookupMap[sales.nama] = `${sales.nama} ${sales.nama_lengkap}`;
                   });
 
+                  // Filter data for Sales Performance Analytics - based on bulanTtdNotif, tahun, sertifikat terbit, and status DONE
+                  const dataWithSalesTtdNotif = (crmTargets || []).filter(t => {
+                    const matchesStatus = (t.statusSertifikat || '').trim().toLowerCase() === 'terbit';
+                    const matchesDoneStatus = t.status === 'DONE';
+
+                    // Parse bulanTtdNotif to get month and year
+                    let ttdMonth = 0;
+                    let ttdYear = null;
+
+                    if (t.bulanTtdNotif) {
+                      // Try to parse as date (format: YYYY-MM-DD)
+                      const dateParts = t.bulanTtdNotif.split('-');
+                      if (dateParts.length === 3) {
+                        const year = parseInt(dateParts[0]);
+                        const month = parseInt(dateParts[1]);
+
+                        if (!isNaN(month) && month >= 1 && month <= 12 && !isNaN(year)) {
+                          ttdMonth = month;
+                          ttdYear = year;
+                        }
+                      }
+                    }
+
+                    // Filter by tahun from bulanTtdNotif
+                    const matchesTahun = filterTahun === 'all' || (ttdYear && ttdYear.toString() === filterTahun);
+
+                    // Filter by bulan range from bulanTtdNotif
+                    let matchesBulanTtdNotif = true;
+                    if (ttdMonth > 0) {
+                      const fromMonth = parseInt(filterFromBulanTTD) || 1;
+                      const toMonth = parseInt(filterToBulanTTD) || 12;
+                      matchesBulanTtdNotif = ttdMonth >= fromMonth && ttdMonth <= toMonth;
+                    } else {
+                      // If no bulanTtdNotif, exclude the data
+                      matchesBulanTtdNotif = false;
+                    }
+
+                    return matchesStatus && matchesDoneStatus && matchesTahun && matchesBulanTtdNotif;
+                  });
+
                   // Group by sales and get totals
                   const salesTotals: { [key: string]: { total: number; count: number; companies: Set<string> } } = {};
 
-                  (filteredTargets || []).forEach(target => {
+                  dataWithSalesTtdNotif.forEach(target => {
                     const sales = target.sales || 'Unknown';
-                    const amount = target.hargaKontrak || 0;
+                    const amount = target.hargaTerupdate || 0;
                     const company = target.namaPerusahaan;
 
                     if (!salesTotals[sales]) {
