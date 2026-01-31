@@ -15,11 +15,13 @@ import { Search, Filter, BarChart3, ChevronDown, ChevronRight, Users, X } from '
 import indonesiaData from '@/data/indonesia-provinsi-kota.json';
 import masterSalesData from '@/data/master-sales.json';
 import masterStandarData from '@/data/master-standar.json';
+import masterEaCodeData from '@/data/master-ea-code.json';
 import { ChartCardCrmData } from '@/components/chart-card-crm-data';
 import { ChartCardPencapaianMonthly } from '@/components/chart-card-pencapaian-monthly'
 import { ChartCardKuadranMonthly } from '@/components/chart-card-kuadran-monthly';
 import { ChartCardAssociateMonthly } from '@/components/chart-card-associate-monthly';
 import { ChartCardStandarDistribution } from '@/components/chart-card-standar-distribution';
+import { ChartCardEaCodeDistribution } from '@/components/chart-card-ea-code-distribution';
 import { InfinityLoader } from '@/components/ui/infinity-loader';
 import { DashboardSkeleton } from '@/components/dashboard-skeleton';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LabelList } from 'recharts';
@@ -100,6 +102,7 @@ export default function CrmDataManagementPage() {
   const [selectedAssociateChartType, setSelectedAssociateChartType] = useState<string>('area');
   const [selectedTopAssociateChartType, setSelectedTopAssociateChartType] = useState<string>('bar');
   const [selectedStandarChartType, setSelectedStandarChartType] = useState<string>('bar');
+  const [selectedEaCodeChartType, setSelectedEaCodeChartType] = useState<string>('bar');
   const [activeFilterSheet, setActiveFilterSheet] = useState<string | null>(null);
 
   // Comprehensive Filters
@@ -3729,6 +3732,108 @@ export default function CrmDataManagementPage() {
                   title="Distribusi Standar"
                   data={allStandar}
                   chartType={selectedStandarChartType}
+                />
+              );
+            })()}
+          </CardContent>
+        </Card>
+
+        {/* EA Code Distribution Analytics */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  EA Code Distribution
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  Distribusi EA code berdasarkan jumlah sertifikat
+                </CardDescription>
+              </div>
+              <Select value={selectedEaCodeChartType} onValueChange={setSelectedEaCodeChartType}>
+                <SelectTrigger className="w-32 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="area">Area</SelectItem>
+                  <SelectItem value="bar">Bar</SelectItem>
+                  <SelectItem value="line">Line</SelectItem>
+                  <SelectItem value="pie">Pie</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              // Filter data: HANYA filter tahun dari ALL data (tanpa filter statusSertifikat)
+              const dataForEaCode = (crmTargets || []).filter(t => {
+                const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+                return matchesTahun;
+              });
+
+              // Get list of valid EA codes from master ea code - normalized
+              const validEaCodes = new Set(
+                masterEaCodeData.ea_code.map((e: any) => {
+                  // Normalize: trim, remove extra spaces, ensure consistent spacing
+                  return e.ea_code
+                    .trim()
+                    .replace(/\s*,\s*/g, ', ')  // Normalize comma spacing
+                    .replace(/\s+/g, ' ');       // Remove extra spaces
+                })
+              );
+
+              // Group by eaCode and get counts - HANYA yang ada di master ea code
+              const eaCodeTotals: { [key: string]: { count: number; companies: Set<string> } } = {};
+
+              dataForEaCode.forEach(target => {
+                const rawEaCode = target.eaCode;
+
+                if (!rawEaCode) {
+                  return;
+                }
+
+                // Normalize eaCode dari data untuk matching
+                const normalizedEaCode = rawEaCode
+                  .trim()
+                  .replace(/\s*,\s*/g, ', ')  // Normalize comma spacing
+                  .replace(/\s+/g, ' ');       // Remove extra spaces
+
+                // Skip jika tidak ada di master ea code
+                if (!validEaCodes.has(normalizedEaCode)) {
+                  return;
+                }
+
+                // Gunakan normalized eaCode sebagai key
+                const company = target.namaPerusahaan;
+
+                if (!eaCodeTotals[normalizedEaCode]) {
+                  eaCodeTotals[normalizedEaCode] = {
+                    count: 0,
+                    companies: new Set()
+                  };
+                }
+
+                eaCodeTotals[normalizedEaCode].count += 1;
+                if (company) {
+                  eaCodeTotals[normalizedEaCode].companies.add(company);
+                }
+              });
+
+              // Sort and get all EA codes - urutkan dari yang terbanyak
+              const allEaCodes = Object.entries(eaCodeTotals)
+                .map(([eaCode, data]) => ({
+                  eaCode,
+                  count: data.count,
+                  companyCount: data.companies.size
+                }))
+                .sort((a, b) => b.count - a.count);
+
+              return (
+                <ChartCardEaCodeDistribution
+                  title="Distribusi EA Code"
+                  data={allEaCodes}
+                  chartType={selectedEaCodeChartType}
                 />
               );
             })()}
