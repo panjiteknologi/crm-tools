@@ -476,7 +476,7 @@ export default function CrmDataManagementPage() {
       const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
       const isSertifikatTerbit = (t.statusSertifikat || '').trim().toLowerCase() === 'terbit';
       if (filterTahun !== 'all' && hasBulanTtdNotif && isSertifikatTerbit) {
-        const ttdDate = new Date(t.bulanTtdNotif);
+        const ttdDate = new Date(t.bulanTtdNotif!);
         const ttdYear = ttdDate.getFullYear();
         return ttdYear.toString() !== filterTahun;
       }
@@ -489,7 +489,7 @@ export default function CrmDataManagementPage() {
       console.log('   Contoh data:', wrongYear.slice(0, 3).map(t => ({
         nama: t.namaPerusahaan,
         ttdNotif: t.bulanTtdNotif,
-        tahunTTD: new Date(t.bulanTtdNotif).getFullYear(),
+        tahunTTD: new Date(t.bulanTtdNotif!).getFullYear(),
         hargaTerupdate: t.hargaTerupdate
       })));
     }
@@ -506,7 +506,7 @@ export default function CrmDataManagementPage() {
         if (filterTahun === 'all') {
           matchesTahun = true;
         } else {
-          const ttdDate = new Date(t.bulanTtdNotif);
+          const ttdDate = new Date(t.bulanTtdNotif!);
           const ttdYear = ttdDate.getFullYear();
           matchesTahun = ttdYear.toString() === filterTahun;
         }
@@ -1639,7 +1639,7 @@ export default function CrmDataManagementPage() {
                       if (filterTahun === 'all') {
                         matchesTahunTtdNotif = true;
                       } else {
-                        const ttdDate = new Date(t.bulanTtdNotif);
+                        const ttdDate = new Date(t.bulanTtdNotif!);
                         const ttdYear = ttdDate.getFullYear();
                         matchesTahunTtdNotif = ttdYear.toString() === filterTahun;
                       }
@@ -1843,7 +1843,7 @@ export default function CrmDataManagementPage() {
                               if (filterTahun === 'all') {
                                 matchesTahunTtdNotif = true;
                               } else {
-                                const ttdDate = new Date(t.bulanTtdNotif);
+                                const ttdDate = new Date(t.bulanTtdNotif!);
                                 const ttdYear = ttdDate.getFullYear();
                                 matchesTahunTtdNotif = ttdYear.toString() === filterTahun;
                               }
@@ -2491,7 +2491,7 @@ export default function CrmDataManagementPage() {
                   if (filterTahun === 'all') {
                     matchesTahun = true;
                   } else {
-                    const ttdDate = new Date(t.bulanTtdNotif);
+                    const ttdDate = new Date(t.bulanTtdNotif!);
                     const ttdYear = ttdDate.getFullYear();
                     matchesTahun = ttdYear.toString() === filterTahun;
                   }

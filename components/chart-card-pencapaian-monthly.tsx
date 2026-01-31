@@ -201,7 +201,7 @@ function ChartCardPencapaianMonthly({
           <div className="font-semibold text-black/70">
             Target: Rp {totalTarget.toLocaleString('id-ID')} | Pencapaian: Rp {totalPencapaian.toLocaleString('id-ID')}
           </div>
-          <div className={`text-lg sm:text-xl font-extrabold ${parseFloat(achievementPercentage) >= 90 ? 'text-green-600' : parseFloat(achievementPercentage) >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
+          <div className={`text-lg sm:text-xl font-extrabold ${achievementPercentage >= 90 ? 'text-green-600' : achievementPercentage >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
             {achievementPercentage}%
           </div>
         </CardDescription>

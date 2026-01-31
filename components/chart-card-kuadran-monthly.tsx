@@ -463,7 +463,6 @@ function ChartCardKuadranMonthly({
                           outerRadius={100}
                           fill="#8884d8"
                           dataKey="value"
-                          labelStyle={{ fontSize: '11px', fontWeight: '600' }}
                         >
                           {pieData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -472,11 +471,13 @@ function ChartCardKuadranMonthly({
                         <Tooltip
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
-                              const percentage = totalCount > 0 ? Math.round((payload[0].value / totalCount) * 100) : 0;
+                              const value = payload[0].value as number;
+                              const name = payload[0].name as string;
+                              const percentage = totalCount > 0 ? Math.round((value / totalCount) * 100) : 0;
                               return (
                                 <div className="bg-background border rounded-lg shadow-lg p-3">
-                                  <p className="font-semibold text-sm">{payload[0].name}</p>
-                                  <p className="text-base font-bold">{payload[0].value} Data ({percentage}%)</p>
+                                  <p className="font-semibold text-sm">{name}</p>
+                                  <p className="text-base font-bold">{value} Data ({percentage}%)</p>
                                 </div>
                               );
                             }
