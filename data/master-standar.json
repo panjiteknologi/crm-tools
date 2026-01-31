@@ -1,6 +1,96 @@
 {
   "standar": [
     {
+      "kode": "9001",
+      "nama": "ISO 9001",
+      "kategori_produk": "ISO",
+      "deskripsi": "Sistem manajemen mutu"
+    },
+    {
+      "kode": "14001",
+      "nama": "ISO 14001",
+      "kategori_produk": "ISO",
+      "deskripsi": "Sistem manajemen lingkungan"
+    },
+    {
+      "kode": "27001",
+      "nama": "ISO 27001",
+      "kategori_produk": "ISO",
+      "deskripsi": "Sistem manajemen keamanan informasi"
+    },
+    {
+      "kode": "45001",
+      "nama": "ISO 45001",
+      "kategori_produk": "ISO",
+      "deskripsi": "Sistem manajemen kesehatan dan keselamatan kerja"
+    },
+    {
+      "kode": "22000",
+      "nama": "ISO 22000",
+      "kategori_produk": "ISO",
+      "deskripsi": "Sistem manajemen keamanan pangan"
+    },
+    {
+      "kode": "21000",
+      "nama": "ISO 21000",
+      "kategori_produk": "ISO",
+      "deskripsi": "Manajemen aset organisasi"
+    },
+    {
+      "kode": "ISPO",
+      "nama": "ISPO",
+      "kategori_produk": "SUSTAIN",
+      "deskripsi": "Indonesian Sustainable Palm Oil"
+    },
+    {
+      "kode": "ISCC",
+      "nama": "ISCC",
+      "kategori_produk": "SUSTAIN",
+      "deskripsi": "International Sustainability and Carbon Certification"
+    },
+    {
+      "kode": "HACCP",
+      "nama": "HACCP",
+      "kategori_produk": "GMP",
+      "deskripsi": "Hazard Analysis Critical Control Point"
+    },
+    {
+      "kode": "SMK3",
+      "nama": "Sistem Manajemen K3",
+      "kategori_produk": "SMK3",
+      "deskripsi": "Sistem manajemen kesehatan dan keselamatan kerja"
+    },
+    {
+      "kode": "22301",
+      "nama": "ISO 22301",
+      "kategori_produk": "ISO",
+      "deskripsi": "Sistem manajemen kelangsungan bisnis"
+    },
+    {
+      "kode": "27701",
+      "nama": "ISO 27701",
+      "kategori_produk": "ISO",
+      "deskripsi": "Sistem manajemen privasi informasi"
+    },
+    {
+      "kode": "37001",
+      "nama": "ISO 37001",
+      "kategori_produk": "ISO",
+      "deskripsi": "Sistem manajemen anti penyuapan"
+    },
+    {
+      "kode": "20000-1",
+      "nama": "ISO 20000-1",
+      "kategori_produk": "ISO",
+      "deskripsi": "Sistem manajemen layanan teknologi informasi - Bagian 1"
+    },
+    {
+      "kode": "31000",
+      "nama": "ISO 31000",
+      "kategori_produk": "ISO",
+      "deskripsi": "Sistem manajemen risiko"
+    },
+    {
       "kode": "9994",
       "nama": "SNI ISO 9994",
       "kategori_produk": "ISO",
@@ -13,142 +103,34 @@
       "deskripsi": "Sistem manajemen mutu untuk perangkat medis"
     },
     {
-      "kode": "20000",
-      "nama": "ISO 20000",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen layanan teknologi informasi"
+      "kode": "ISCC PLUS",
+      "nama": "ISCC PLUS",
+      "kategori_produk": "SUSTAIN",
+      "deskripsi": "ISCC PLUS Certification"
     },
     {
-      "kode": "21000",
-      "nama": "ISO 21000",
-      "kategori_produk": "ISO",
-      "deskripsi": "Manajemen aset organisasi"
+      "kode": "ISCC EU",
+      "nama": "ISCC EU",
+      "kategori_produk": "SUSTAIN",
+      "deskripsi": "ISCC EU Certification"
     },
     {
-      "kode": "22000",
-      "nama": "ISO 22000",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen keamanan pangan"
-    },
-    {
-      "kode": "22301",
-      "nama": "ISO 22301",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen kelangsungan bisnis"
-    },
-    {
-      "kode": "27001",
-      "nama": "ISO 27001",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen keamanan informasi"
-    },
-    {
-      "kode": "27701",
-      "nama": "ISO 27701",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen privasi informasi"
-    },
-    {
-      "kode": "31000",
-      "nama": "ISO 31000",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen risiko"
-    },
-    {
-      "kode": "37301",
-      "nama": "ISO 37301",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen kepatuhan"
-    },
-    {
-      "kode": "20000-1",
-      "nama": "ISO 20000-1",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen layanan teknologi informasi - Bagian 1"
-    },
-    {
-      "kode": "37001",
-      "nama": "ISO 37001",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen anti penyuapan"
-    },
-    {
-      "kode": "14001",
-      "nama": "ISO 14001",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen lingkungan"
+      "kode": "ISCC CORSIA",
+      "nama": "ISCC CORSIA",
+      "kategori_produk": "SUSTAIN",
+      "deskripsi": "ISCC CORSIA Certification"
     },
     {
       "kode": "GDP",
       "nama": "Good Distribution Practice",
-      "kategori_produk": "ISO",
+      "kategori_produk": "GMP",
       "deskripsi": "Praktik distribusi yang baik"
     },
     {
       "kode": "GMP",
       "nama": "Good Manufacturing Practice",
-      "kategori_produk": "ISO",
+      "kategori_produk": "GMP",
       "deskripsi": "Cara pembuatan yang baik"
-    },
-    {
-      "kode": "HACCP",
-      "nama": "HACCP",
-      "kategori_produk": "ISO",
-      "deskripsi": "Hazard Analysis Critical Control Point"
-    },
-    {
-      "kode": "45001",
-      "nama": "ISO 45001",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen kesehatan dan keselamatan kerja"
-    },
-    {
-      "kode": "9001",
-      "nama": "ISO 9001",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen mutu"
-    },
-    {
-      "kode": "SMK3",
-      "nama": "Sistem Manajemen K3",
-      "kategori_produk": "ISO",
-      "deskripsi": "Sistem manajemen kesehatan dan keselamatan kerja"
-    },
-    {
-      "kode": "AB",
-      "nama": "Anti Bribery",
-      "kategori_produk": "ISO",
-      "deskripsi": "Anti Bribery"
-    },
-    {
-      "kode": "ISPO",
-      "nama": "ISPO",
-      "kategori_produk": "SUSTAIN",
-      "deskripsi": "ISPO"
-    },
-    {
-      "kode": "ISCC_EU",
-      "nama": "ISCC_EU",
-      "kategori_produk": "SUSTAIN",
-      "deskripsi": "ISCC_EU"
-    },
-    {
-      "kode": "ISCC_PLUS",
-      "nama": "ISCC_PLUS",
-      "kategori_produk": "SUSTAIN",
-      "deskripsi": "ISCC_PLUS"
-    },
-    {
-      "kode": "ISCC_CORSIA",
-      "nama": "ISCC_CORSIA",
-      "kategori_produk": "SUSTAIN",
-      "deskripsi": "ISCC_CORSIA"
-    },
-    {
-      "kode": "RSPO",
-      "nama": "RSPO",
-      "kategori_produk": "SUSTAIN",
-      "deskripsi": "RSPO"
     }
   ]
 }

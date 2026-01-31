@@ -3689,43 +3689,67 @@ export default function CrmDataManagementPage() {
                 return matchesTahun;
               });
 
-              // Get list of valid codes from master standar
-              const validStandarCodes = new Set(masterStandarData.standar.map((s: any) => s.kode));
-
-              // Group by std and get counts - HANYA yang ada di master standar
+              // Group by std and get counts
               const standarTotals: { [key: string]: { count: number; companies: Set<string> } } = {};
 
               dataForStandar.forEach(target => {
-                const stdCode = target.std;
+                const rawStdCode = target.std;
 
-                // Skip jika tidak ada std atau tidak ada di master standar
-                if (!stdCode || !validStandarCodes.has(stdCode)) {
+                if (!rawStdCode) {
+                  return;
+                }
+
+                // Normalize stdCode dari data - handle variasi format
+                let normalizedStdCode = rawStdCode.trim();
+
+                // Handle variasi format - ubah underscore/hyphen ke spasi
+                const underscoreToSpace = normalizedStdCode.replace(/_/g, ' ');
+                const hyphenToSpace = normalizedStdCode.replace(/-/g, ' ');
+                const noSpace = normalizedStdCode.replace(/\s+/g, '');
+
+                // Cek semua variasi dan gunakan yang ada di master
+                let matchedCode = null;
+                const allVariations = [normalizedStdCode, underscoreToSpace, hyphenToSpace, noSpace];
+
+                for (const variation of allVariations) {
+                  const foundInMaster = masterStandarData.standar.find((s: any) => s.kode.trim() === variation);
+                  if (foundInMaster) {
+                    matchedCode = foundInMaster.kode.trim();
+                    break;
+                  }
+                }
+
+                // Skip jika tidak ada di master standar
+                if (!matchedCode) {
                   return;
                 }
 
                 const company = target.namaPerusahaan;
 
-                if (!standarTotals[stdCode]) {
-                  standarTotals[stdCode] = {
+                if (!standarTotals[matchedCode]) {
+                  standarTotals[matchedCode] = {
                     count: 0,
                     companies: new Set()
                   };
                 }
 
-                standarTotals[stdCode].count += 1;
+                standarTotals[matchedCode].count += 1;
                 if (company) {
-                  standarTotals[stdCode].companies.add(company);
+                  standarTotals[matchedCode].companies.add(company);
                 }
               });
 
-              // Sort and get all standar
-              const allStandar = Object.entries(standarTotals)
-                .map(([std, data]) => ({
-                  std,
-                  count: data.count,
-                  companyCount: data.companies.size
-                }))
-                .sort((a, b) => b.count - a.count);
+              // Ambil SEMUA standar dari master dan isi dengan 0 jika tidak ada data
+              const allStandar = masterStandarData.standar.map((s: any) => {
+                const kode = s.kode.trim();
+                const existingData = standarTotals[kode];
+
+                return {
+                  std: kode,
+                  count: existingData ? existingData.count : 0,
+                  companyCount: existingData ? existingData.companies.size : 0
+                };
+              }).sort((a, b) => b.count - a.count);
 
               return (
                 <ChartCardStandarDistribution
