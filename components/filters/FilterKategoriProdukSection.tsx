@@ -24,7 +24,7 @@ export function FilterKategoriProdukSection({
   const kategoriOptions: { value: KategoriProduk; label: string; color: string }[] = [
     { value: "SEMUA", label: "Semua", color: "bg-gray-100 hover:bg-gray-200 text-black-700 border-gray-300" },
     { value: "ISO", label: "ISO", color: "bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-300" },
-    { value: "SUSTAIN", label: "Sustain", color: "bg-green-100 hover:bg-green-200 text-green-700 border-green-300" },
+    { value: "SUSTAIN", label: "SUSTAIN", color: "bg-green-100 hover:bg-green-200 text-green-700 border-green-300" },
   ]
 
   return (

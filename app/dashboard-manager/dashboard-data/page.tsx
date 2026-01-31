@@ -659,7 +659,7 @@ export default function CrmDataManagementPage() {
                 </Button>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 max-h-[calc(100vh-250px)] overflow-y-auto px-2">
               
               {/* Section Kategori Produk */}
               <FilterSection
@@ -1005,7 +1005,7 @@ export default function CrmDataManagementPage() {
                   {/* Sertifikat Section */}
 
                   {/* Sertifikat Section */}
-                  <div className="border rounded-lg overflow-hidden mx-4">
+                  <div className="border border-purple-200 rounded-lg overflow-hidden mx-4 bg-white shadow-sm">
                     <button
                       onClick={() => {
                         const newSections = expandedFilterSections.includes('sertifikat')
@@ -1013,17 +1013,17 @@ export default function CrmDataManagementPage() {
                           : [...expandedFilterSections, 'sertifikat'];
                         setExpandedFilterSections(newSections);
                       }}
-                      className="w-full flex items-center justify-between p-3 bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                      className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 transition-all cursor-pointer"
                     >
-                      <span className="font-medium text-xs">Filter Sertifikat</span>
+                      <span className="font-medium text-xs text-purple-900">Filter Sertifikat</span>
                       {expandedFilterSections.includes('sertifikat') ? (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-4 w-4 text-purple-600" />
                       ) : (
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-4 w-4 text-purple-600" />
                       )}
                     </button>
                     {expandedFilterSections.includes('sertifikat') && (
-                      <div className="p-3 space-y-3 border-t">
+                      <div className="p-3 space-y-3 border-t border-purple-200 bg-gradient-to-b from-white to-purple-50/30">
                         {/* Standar */}
                         <div>
                           <Label className="mb-1.5 block text-xs">Standar</Label>
@@ -1161,7 +1161,7 @@ export default function CrmDataManagementPage() {
                   </div>
 
                   {/* Pembayaran Section */}
-                  <div className="border rounded-lg overflow-hidden mx-4">
+                  <div className="border border-purple-200 rounded-lg overflow-hidden mx-4 bg-white shadow-sm">
                     <button
                       onClick={() => {
                         const newSections = expandedFilterSections.includes('pembayaran')
@@ -1169,17 +1169,17 @@ export default function CrmDataManagementPage() {
                           : [...expandedFilterSections, 'pembayaran'];
                         setExpandedFilterSections(newSections);
                       }}
-                      className="w-full flex items-center justify-between p-3 bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                      className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 transition-all cursor-pointer"
                     >
-                      <span className="font-medium text-xs">Filter Pembayaran</span>
+                      <span className="font-medium text-xs text-purple-900">Filter Pembayaran</span>
                       {expandedFilterSections.includes('pembayaran') ? (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-4 w-4 text-purple-600" />
                       ) : (
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-4 w-4 text-purple-600" />
                       )}
                     </button>
                     {expandedFilterSections.includes('pembayaran') && (
-                      <div className="p-3 space-y-3 border-t">
+                      <div className="p-3 space-y-3 border-t border-purple-200 bg-gradient-to-b from-white to-purple-50/30">
                         {/* Termin */}
                         <div>
                           <Label className="mb-1.5 block text-xs">Termin</Label>
