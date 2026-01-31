@@ -3370,10 +3370,10 @@ export default function CrmDataManagementPage() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5" />
-                  Tahapan Audit Distribution
+                  Distribusi Tahapan Audit 
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  Distribusi tahapan audit berdasarkan total harga kontrak
+                  Distribusi tahapan audit berdasarkan total harga kontrak (bulan EXP)
                 </CardDescription>
               </div>
               <Select value={selectedTopAssociateChartType} onValueChange={setSelectedTopAssociateChartType}>
@@ -3399,10 +3399,17 @@ export default function CrmDataManagementPage() {
                   // Import master-tahapan.json for legend
                   const masterTahapanData = require('@/data/master-tahapan.json');
 
+                  // Filter data: HANYA filter tahun dan statusSertifikat dari ALL data (tanpa filter lain)
+                  const dataForTahapan = (crmTargets || []).filter(t => {
+                    const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+                    const matchesStatus = (t.statusSertifikat || '').trim().toLowerCase() === 'terbit';
+                    return matchesTahun && matchesStatus;
+                  });
+
                   // Group by tahapAudit and get totals
                   const tahapTotals: { [key: string]: { total: number; count: number; companies: Set<string> } } = {};
 
-                  (filteredTargets || []).forEach(target => {
+                  dataForTahapan.forEach(target => {
                     const tahap = target.tahapAudit || 'Unknown';
                     const amount = target.hargaKontrak || 0;
                     const company = target.namaPerusahaan;
@@ -3441,7 +3448,7 @@ export default function CrmDataManagementPage() {
 
                   // Generate colors for tahapan - Teal solid
                   const generateTahapColors = (index: number) => {
-                    return '#0D9488'; // Teal 600 (teal tua) - same color for all
+                    return '#7de9e0'; // Teal 600 (teal tua) - same color for all
                   };
 
                   const hasData = allTahapan.length > 0;
@@ -3461,14 +3468,16 @@ export default function CrmDataManagementPage() {
                           switch (selectedTopAssociateChartType) {
                             case 'bar':
                               return (
-                                <BarChart data={allTahapan} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                                <BarChart data={allTahapan} layout="vertical" margin={{ top: 5, right: 120, left:0, bottom: 5 }}>
                                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                                  <XAxis
+                                  <XAxis type="number" tick={{ fontSize: 11 }} className="fill-muted-foreground" />
+                                  <YAxis
+                                    type="category"
                                     dataKey="displayName"
                                     tick={{ fontSize: 13, fontWeight: 700 }}
                                     className="fill-foreground"
+                                    width={90}
                                   />
-                                  <YAxis tick={{ fontSize: 11 }} className="fill-muted-foreground" width={80} />
                                   <Tooltip
                                     content={({ active, payload }) => {
                                       if (active && payload && payload.length) {
@@ -3484,18 +3493,47 @@ export default function CrmDataManagementPage() {
                                       return null;
                                     }}
                                   />
-                                  <Bar dataKey="total" radius={[4, 4, 0, 0]} fill="#0D9488">
+                                  <defs>
+                                    {allTahapan.map((entry, index) => {
+                                      const colors = [
+                                        ['#0D9488', '#02423b'],  // Teal
+                                        ['#06B6D4', '#055e6b'],  // Cyan
+                                        ['#8B5CF6', '#1e0569'],  // Purple
+                                        ['#D946EF', '#5a0468'],  // Fuchsia
+                                        ['#F59E0B', '#4d3c05'],  // Yellow
+                                        ['#EF4444', '#5c0606'],  // Red
+                                        // Tambahkan warna lain sesuai kebutuhan
+                                      ];
+                                      const [startColor, endColor] = colors[index % colors.length];
+                                      
+                                      return (
+                                        <linearGradient key={`gradient-${index}`} id={`gradient${index}`} x1="0" y1="0" x2="1" y2="0">
+                                          <stop offset="0%" stopColor={startColor} stopOpacity={0.8} />
+                                          <stop offset="100%" stopColor={endColor} stopOpacity={1} />
+                                        </linearGradient>
+                                      );
+                                    })}
+                                  </defs>
+                                  <Bar dataKey="total" radius={[0, 4, 4, 0]}>
                                     <LabelList
                                       dataKey="total"
-                                      position="top"
-                                      fontSize={13}
+                                      position="right"
+                                      fontSize={15}
                                       fontWeight="bold"
+                                      fill="#04434e"  // Warna text label (slate-700)
                                       formatter={(value: number) => {
-                                        if (value >= 1000000000) return (value / 1000000000).toFixed(1) + 'M';
-                                        else if (value >= 1000000) return (value / 1000000).toFixed(1) + 'Jt';
-                                        else return (value / 1000).toFixed(0) + 'rb';
+                                        const rounded = Math.round(value / 1000) * 1000;
+                                        const dataPoint = allTahapan.find(d => d.total === value);
+                                        const count = dataPoint?.count || 0;
+                                        return `${rounded.toLocaleString('id-ID')} (${count})`;
                                       }}
                                     />
+                                    {allTahapan.map((entry, index) => (
+                                      <Cell 
+                                        key={`cell-${index}`} 
+                                        fill={`url(#gradient${index})`} 
+                                      />
+                                    ))}
                                   </Bar>
                                 </BarChart>
                               );
