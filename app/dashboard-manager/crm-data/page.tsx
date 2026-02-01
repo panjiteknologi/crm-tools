@@ -1435,7 +1435,7 @@ export default function CrmDataManagementPage() {
       return `${year}-${String(month).padStart(2, '0')}-01`; // Default to day 1
     }
 
-    // Handle month names (Jan-2024, January 2024, etc.)
+    // Handle month names (Jan-2024, January 2024, etc.) - 4 digit year
     const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
     const monthNameMatch = cleaned.match(/^([a-zA-Z]+)[\/\-\s]*(\d{4})$/i);
     if (monthNameMatch) {
@@ -1443,6 +1443,20 @@ export default function CrmDataManagementPage() {
       const monthIndex = monthNames.findIndex(m => monthName.toLowerCase().startsWith(m));
       if (monthIndex !== -1) {
         return `${year}-${String(monthIndex + 1).padStart(2, '0')}-01`;
+      }
+    }
+
+    // Handle month names with 2-digit year (Jan-26, Feb-26, etc.)
+    const monthNameMatch2Digit = cleaned.match(/^([a-zA-Z]+)[\/\-\s]*(\d{2})$/i);
+    if (monthNameMatch2Digit) {
+      const [, monthName, shortYear] = monthNameMatch2Digit;
+      const monthIndex = monthNames.findIndex(m => monthName.toLowerCase().startsWith(m));
+      if (monthIndex !== -1) {
+        // Convert 2-digit year to 4-digit year
+        // Assuming 00-29 = 2000-2029, 30-99 = 1930-1999
+        const yearNum = parseInt(shortYear);
+        const fullYear = yearNum <= 29 ? 2000 + yearNum : 1900 + yearNum;
+        return `${fullYear}-${String(monthIndex + 1).padStart(2, '0')}-01`;
       }
     }
 
