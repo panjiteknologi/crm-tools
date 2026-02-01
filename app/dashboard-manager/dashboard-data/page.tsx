@@ -149,6 +149,24 @@ export default function CrmDataManagementPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Scroll to top function
+  const scrollToTop = () => {
+    // Scroll the main container div (not window) because layout uses overflow-auto
+    const scrollContainer = document.getElementById('main-scroll-container');
+    if (scrollContainer) {
+      scrollContainer.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    } else {
+      // Fallback to window scroll if container not found
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   // Filter options - Dynamic from crmTargets data
   const tahunOptions = ['2024', '2025', '2026', '2027', '2028', '2029', '2030', '2031', '2032', '2033', '2034'];
   const bulanOptions = [
@@ -1180,19 +1198,17 @@ export default function CrmDataManagementPage() {
         {crmTargets && (
           <>
             {/* Mobile Header - Only visible on mobile */}
-            <div className="lg:hidden bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-2xl p-6 mb-1 shadow-lg">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <BarChart3 className="h-5 w-5 text-white" />
-                </div>
+            <div className="lg:hidden p-4 mb-1">
+              <div className="flex items-center gap-3 mb-2">
+                <BarChart3 className="h-6 w-6 text-purple-600" />
                 <div className="flex-1">
-                  <h1 className="text-lg font-bold text-white leading-tight">CRM - Tools</h1>
-                  <p className="text-xs text-blue-100 font-medium">Dashboard Pencapaian</p>
+                  <h1 className="text-xl font-bold text-purple-600 leading-tight">CRM - Tools</h1>
+                  <p className="text-sm text-purple-500 font-medium">Dashboard Pencapaian</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-white/90 text-xs">
+              <div className="flex items-center justify-between text-purple-500 text-xs">
                 <span>Real-time Analytics</span>
-                <span className="px-2 py-1 bg-white/20 rounded-full backdrop-blur-sm">
+                <span className="px-2 py-1 bg-purple-100 rounded-lg">
                   {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </span>
               </div>
@@ -4665,6 +4681,15 @@ export default function CrmDataManagementPage() {
         </div>
       </div>
       </div>
+
+      {/* Back to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className="fixed bottom-20 lg:bottom-8 right-4 z-50 bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        aria-label="Back to top"
+      >
+        <ArrowUp className="h-5 w-5" />
+      </button>
     </div>
   );
 }

@@ -96,7 +96,7 @@ export default function ManagerDashboardLayout({ children }: ManagerDashboardLay
             />
           </div>
           <main className="flex-1 overflow-hidden px-4 lg:px-0 pb-4">
-            <div className="h-full overflow-auto">
+            <div id="main-scroll-container" className="h-full overflow-auto">
               {children}
             </div>
           </main>
