@@ -3112,7 +3112,7 @@ export default function CrmDataManagementPage() {
                                                   height={110}
                                                   requiredExtensions="http://www.w3.org/1999/xhtml"
                                                 >
-                                                  <div xmlns="http://www.w3.org/1999/xhtml">
+                                                  <div>
                                                     <div
                                                       style={{
                                                         display: 'flex',
