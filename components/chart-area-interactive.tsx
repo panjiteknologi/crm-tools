@@ -540,15 +540,6 @@ export function ChartAreaInteractive({ selectedStaff, selectedYear, selectedStat
   const chartDataLoss = (selectedStatus === 'all' || selectedStatus === 'visited' || selectedStatus === 'loss') ? generateChartData(selectedStaff, selectedYear, allVisitData, 'loss', dateRange) : [];
   const chartDataSuspend = (selectedStatus === 'all' || selectedStatus === 'visited' || selectedStatus === 'suspend') ? generateChartData(selectedStaff, selectedYear, allVisitData, 'suspend', dateRange) : [];
 
-  // Debug: Log generated data
-  if (typeof window !== 'undefined' && dateRange) {
-    console.log('Chart Data Debug:', {
-      dateRange,
-      chartDataLanjut,
-      chartDataLoss,
-      chartDataSuspend
-    });
-  }
 
   const staffLabel = selectedStaff === 'all' ? 'All Team' : selectedStaff === '1' ? 'Mercy' : 'Dhea';
 

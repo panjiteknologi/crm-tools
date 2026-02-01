@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Search, Filter, BarChart3, ChevronDown, ChevronRight, Users, X } from 'lucide-react';
+import { Search, Filter, BarChart3, ChevronDown, ChevronRight, Users, X, SlidersHorizontal, RotateCcw, ArrowUp } from 'lucide-react';
 import indonesiaData from '@/data/indonesia-provinsi-kota.json';
 import masterSalesData from '@/data/master-sales.json';
 import masterStandarData from '@/data/master-standar.json';
@@ -178,9 +178,6 @@ export default function CrmDataManagementPage() {
 
   // Get unique provinsi values from actual data (for debugging)
   const provinsiFromData = [...new Set(crmTargets?.map(t => t.provinsi).filter(Boolean) || [])].sort();
-  console.log('Provinsi from JSON (first 5):', provinsiOptions.slice(0, 5));
-  console.log('Provinsi from Data (first 5):', provinsiFromData.slice(0, 5));
-  console.log('Sample data provinsi values:', crmTargets?.slice(0, 3).map(t => ({ provinsi: t.provinsi, kota: t.kota })));
 
   // Get kota options based on selected provinsi from Indonesia data
   const kotaOptions = filterProvinsi !== 'all' && (indonesiaData as any)[filterProvinsi]
@@ -436,23 +433,10 @@ export default function CrmDataManagementPage() {
     // DEBUG: Group all DONE data
     const allDoneData = crmTargets.filter(t => t.status === 'DONE');
 
-    console.log('=== DEBUG lanjutContracts ===');
-    console.log(`Filter Tahun: ${filterTahun}`);
-    console.log(`Total SEMUA data DONE: ${allDoneData.length}`);
-
     // Group 1: DONE yang TIDAK punya bulanTtdNotif
     const noBulanTtd = allDoneData.filter(t => !t.bulanTtdNotif || t.bulanTtdNotif === '');
     const totalNoBulanTtd = Math.round(noBulanTtd.reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
-    console.log(`\n1. DONE TANPA bulanTtdNotif: ${noBulanTtd.length} data`);
-    console.log(`   Total: Rp ${totalNoBulanTtd.toLocaleString('id-ID')}`);
-    if (noBulanTtd.length > 0) {
-      console.log('   Contoh data:', noBulanTtd.slice(0, 3).map(t => ({
-        nama: t.namaPerusahaan,
-        sertifikat: t.statusSertifikat,
-        hargaTerupdate: t.hargaTerupdate
-      })));
-    }
-
+    
     // Group 2: DONE dengan bulanTtdNotif tapi statusSertifikat BUKAN "Terbit"
     const withBulanTtdNotTerbit = allDoneData.filter(t => {
       const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
@@ -460,16 +444,8 @@ export default function CrmDataManagementPage() {
       return hasBulanTtdNotif && !isSertifikatTerbit;
     });
     const totalNotTerbit = Math.round(withBulanTtdNotTerbit.reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
-    console.log(`\n2. DONE dengan bulanTtdNotif tapi statusSertifikat BUKAN "Terbit": ${withBulanTtdNotTerbit.length} data`);
-    console.log(`   Total: Rp ${totalNotTerbit.toLocaleString('id-ID')}`);
-    if (withBulanTtdNotTerbit.length > 0) {
-      console.log('   Contoh data:', withBulanTtdNotTerbit.slice(0, 3).map(t => ({
-        nama: t.namaPerusahaan,
-        sertifikat: t.statusSertifikat,
-        ttdNotif: t.bulanTtdNotif,
-        hargaTerupdate: t.hargaTerupdate
-      })));
-    }
+    
+    
 
     // Group 3: DONE dengan bulanTtdNotif, statusSertifikat "Terbit", tapi TAHUN TIDAK SESUAI
     const wrongYear = allDoneData.filter(t => {
@@ -483,16 +459,6 @@ export default function CrmDataManagementPage() {
       return false;
     });
     const totalWrongYear = Math.round(wrongYear.reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
-    console.log(`\n3. DONE dengan bulanTtdNotif, Sertifikat "Terbit", tapi TAHUN TIDAK SESUAI: ${wrongYear.length} data`);
-    console.log(`   Total: Rp ${totalWrongYear.toLocaleString('id-ID')}`);
-    if (wrongYear.length > 0) {
-      console.log('   Contoh data:', wrongYear.slice(0, 3).map(t => ({
-        nama: t.namaPerusahaan,
-        ttdNotif: t.bulanTtdNotif,
-        tahunTTD: new Date(t.bulanTtdNotif!).getFullYear(),
-        hargaTerupdate: t.hargaTerupdate
-      })));
-    }
 
     // Group 4: YANG LOLOS FILTER (Done, Terbit, Ada bulanTtdNotif, Tahun sesuai)
     const doneDataWithTerbit = crmTargets.filter(t => {
@@ -515,9 +481,6 @@ export default function CrmDataManagementPage() {
       return isDone && isSertifikatTerbit && hasBulanTtdNotif && matchesTahun;
     });
     const total = Math.round(doneDataWithTerbit.reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
-    console.log(`\n4. YANG LOLOS FILTER (Done + Terbit + Ada TTD + Tahun sesuai): ${doneDataWithTerbit.length} data`);
-    console.log(`   Total: Rp ${total.toLocaleString('id-ID')}`);
-    console.log('========================\n');
 
     return total;
   }, [crmTargets, filterTahun]);
@@ -637,7 +600,12 @@ export default function CrmDataManagementPage() {
   }
 
   return (
-    <div className="lg:flex lg:flex-row gap-6 py-4 lg:py-8 px-4 lg:px-6 pb-20 lg:pb-8">
+    <div className="min-h-screen bg-background lg:bg-gray-50/50">
+
+      {/* MAIN CONTAINER - Centered with max-width for desktop */}
+      <div className="mx-auto w-full lg:px-6">
+        {/* MAIN CONTENT WRAPPER - Mobile-first with max-width */}
+        <div className="lg:flex lg:flex-row gap-6 py-2 lg:py-8 pb-20 lg:pb-8">
       {/* LEFT SIDEBAR - FILTERS */}
       <div className="hidden lg:block lg:w-80 flex-shrink-0">
         <div className="sticky top-6 space-y-4">
@@ -733,51 +701,87 @@ export default function CrmDataManagementPage() {
 
       {/* MOBILE FILTERS - Bottom Tab Bar */}
       <div className="lg:hidden">
-        {/* Bottom Tab Bar */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border lg:hidden safe-area-bottom">
-          <div className="flex items-center justify-around px-2 py-1">
+        {/* Bottom Tab Bar - Compact and Clean */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border/50 shadow-[0_-2px_8px_rgba(0,0,0,0.08)] lg:hidden safe-area-bottom">
+          <div className="flex items-stretch justify-around h-14">
             {/* Date Filter */}
             <button
               onClick={() => setActiveFilterSheet(activeFilterSheet === 'date' ? null : 'date')}
-              className={`flex flex-col items-center justify-center py-1 px-2 min-w-0 flex-1 ${
-                activeFilterSheet === 'date' ? 'text-primary' : 'text-muted-foreground'
+              className={`flex flex-col items-center justify-center py-1 px-1 min-w-0 flex-1 relative transition-all duration-200 ${
+                activeFilterSheet === 'date'
+                  ? 'text-primary bg-primary/5'
+                  : 'text-muted-foreground hover:bg-muted/50'
               }`}
             >
-              <Filter className="h-5 w-5 mb-0.5" />
-              <span className="text-[10px] font-medium leading-none">Date</span>
+              <div className="relative">
+                <Filter className={`h-4 w-4 transition-transform duration-200 ${
+                  activeFilterSheet === 'date' ? 'scale-110' : ''
+                }`} />
+                {(filterTahun !== 'all' || filterFromBulanExp !== 'all' || filterToBulanExp !== 'all') && (
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-red-500 rounded-full border-2 border-background"></span>
+                )}
+              </div>
+              <span className="text-[10px] font-medium leading-tight mt-0.5">Date</span>
             </button>
 
             {/* Status */}
             <button
               onClick={() => setActiveFilterSheet(activeFilterSheet === 'status' ? null : 'status')}
-              className={`flex flex-col items-center justify-center py-1 px-2 min-w-0 flex-1 ${
-                activeFilterSheet === 'status' ? 'text-primary' : 'text-muted-foreground'
+              className={`flex flex-col items-center justify-center py-1 px-1 min-w-0 flex-1 relative transition-all duration-200 ${
+                activeFilterSheet === 'status'
+                  ? 'text-primary bg-primary/5'
+                  : 'text-muted-foreground hover:bg-muted/50'
               }`}
             >
-              <BarChart3 className="h-5 w-5 mb-0.5" />
-              <span className="text-[10px] font-medium leading-none">Status</span>
+              <div className="relative">
+                <BarChart3 className={`h-4 w-4 transition-transform duration-200 ${
+                  activeFilterSheet === 'status' ? 'scale-110' : ''
+                }`} />
+                {filterStatus !== 'all' && (
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-red-500 rounded-full border-2 border-background"></span>
+                )}
+              </div>
+              <span className="text-[10px] font-medium leading-tight mt-0.5">Status</span>
             </button>
 
             {/* PIC CRM */}
             <button
               onClick={() => setActiveFilterSheet(activeFilterSheet === 'picCrm' ? null : 'picCrm')}
-              className={`flex flex-col items-center justify-center py-1 px-2 min-w-0 flex-1 ${
-                activeFilterSheet === 'picCrm' ? 'text-primary' : 'text-muted-foreground'
+              className={`flex flex-col items-center justify-center py-1 px-1 min-w-0 flex-1 relative transition-all duration-200 ${
+                activeFilterSheet === 'picCrm'
+                  ? 'text-primary bg-primary/5'
+                  : 'text-muted-foreground hover:bg-muted/50'
               }`}
             >
-              <Users className="h-5 w-5 mb-0.5" />
-              <span className="text-[10px] font-medium leading-none">PIC</span>
+              <div className="relative">
+                <Users className={`h-4 w-4 transition-transform duration-200 ${
+                  activeFilterSheet === 'picCrm' ? 'scale-110' : ''
+                }`} />
+                {filterPicCrm !== 'all' && (
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-red-500 rounded-full border-2 border-background"></span>
+                )}
+              </div>
+              <span className="text-[10px] font-medium leading-tight mt-0.5">PIC</span>
             </button>
 
             {/* More Filters */}
             <button
               onClick={() => setActiveFilterSheet(activeFilterSheet === 'more' ? null : 'more')}
-              className={`flex flex-col items-center justify-center py-1 px-2 min-w-0 flex-1 ${
-                activeFilterSheet === 'more' ? 'text-primary' : 'text-muted-foreground'
+              className={`flex flex-col items-center justify-center py-1 px-1 min-w-0 flex-1 relative transition-all duration-200 ${
+                activeFilterSheet === 'more'
+                  ? 'text-primary bg-primary/5'
+                  : 'text-muted-foreground hover:bg-muted/50'
               }`}
             >
-              <ChevronDown className="h-5 w-5 mb-0.5" />
-              <span className="text-[10px] font-medium leading-none">More</span>
+              <div className="relative">
+                <SlidersHorizontal className={`h-4 w-4 transition-transform duration-200 ${
+                  activeFilterSheet === 'more' ? 'scale-110' : ''
+                }`} />
+                {(filterStandar !== 'all' || filterAkreditasi !== 'all' || filterStatusSertifikatTerbit !== 'all' || filterKategoriProduk !== 'SEMUA') && (
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-red-500 rounded-full border-2 border-background"></span>
+                )}
+              </div>
+              <span className="text-[10px] font-medium leading-tight mt-0.5">Filter</span>
             </button>
 
             {/* Reset */}
@@ -786,28 +790,48 @@ export default function CrmDataManagementPage() {
                 resetAllFilters();
                 setActiveFilterSheet(null);
               }}
-              className="flex flex-col items-center justify-center py-1 px-2 min-w-0 flex-1 text-red-600"
+              className="flex flex-col items-center justify-center py-1 px-1 min-w-0 flex-1 text-red-600 hover:bg-red-50 transition-colors"
             >
-              <X className="h-5 w-5 mb-0.5" />
-              <span className="text-[10px] font-medium leading-none">Reset</span>
+              <RotateCcw className="h-4 w-4" />
+              <span className="text-[10px] font-medium leading-tight mt-0.5">Reset</span>
             </button>
           </div>
         </div>
 
-        {/* Action Sheet Overlay */}
+        {/* Action Sheet Overlay - Modern Bottom Sheet */}
         {activeFilterSheet && (
-          <div
-            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-            onClick={() => setActiveFilterSheet(null)}
-          >
+          <>
             <div
-              className="absolute bottom-[53px] left-0 right-0 bg-background border-t border-border rounded-t-2xl shadow-2xl max-h-[70vh] overflow-y-auto"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden animate-in fade-in duration-200"
+              onClick={() => setActiveFilterSheet(null)}
+            />
+            <div
+              className="fixed bottom-[56px] left-0 right-0 z-50 bg-background lg:hidden rounded-t-2xl shadow-2xl max-h-[75vh] overflow-hidden animate-in slide-in-from-bottom-10 duration-300 ease-out"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Handle Bar */}
-              <div className="flex justify-center py-2 border-b border-border/50 sticky top-0 bg-background z-10">
-                <div className="w-10 h-1 bg-muted-foreground/30 rounded-full"></div>
+              {/* Handle Bar & Header */}
+              <div className="flex flex-col sticky top-0 bg-background z-10 border-b border-border/50">
+                <div className="flex justify-center py-2">
+                  <div className="w-10 h-1 bg-muted-foreground/40 rounded-full"></div>
+                </div>
+                <div className="flex items-center justify-between px-3 pb-2">
+                  <h2 className="text-sm font-semibold">
+                    {activeFilterSheet === 'date' && 'Date Filters'}
+                    {activeFilterSheet === 'status' && 'Status Filters'}
+                    {activeFilterSheet === 'picCrm' && 'PIC CRM Filters'}
+                    {activeFilterSheet === 'more' && 'More Filters'}
+                  </h2>
+                  <button
+                    onClick={() => setActiveFilterSheet(null)}
+                    className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
+
+              {/* Scrollable Content */}
+              <div className="overflow-y-auto max-h-[calc(75vh-60px)] pb-safe-bottom">
 
               {/* Date Filter Sheet */}
               {activeFilterSheet === 'date' && (
@@ -1254,21 +1278,25 @@ export default function CrmDataManagementPage() {
                     )}
                   </div>
 
-                  <button
-                    onClick={() => setActiveFilterSheet(null)}
-                    className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-medium text-sm mx-4 mb-4"
-                  >
-                    Done
-                  </button>
+                  {/* Apply Button - Fixed at bottom */}
+                  <div className="sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent pt-4 pb-6 px-4 border-t border-border/50 mt-4">
+                    <button
+                      onClick={() => setActiveFilterSheet(null)}
+                      className="w-full py-3.5 bg-primary text-primary-foreground rounded-xl font-semibold text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+                    >
+                      Apply Filters
+                    </button>
+                  </div>
                 </div>
               )}
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 min-w-0 space-y-6">
+      {/* MAIN CONTENT - Mobile-first container */}
+      <div className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden space-y-2 sm:space-y-4">
         {/* Loading State - Show Skeleton */}
         {(crmTargets === undefined || crmTargets === null) && (
           <DashboardSkeleton />
@@ -1277,8 +1305,8 @@ export default function CrmDataManagementPage() {
         {/* Actual Content - Only render when data is loaded */}
         {crmTargets && (
           <>
-            {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            {/* Header - Desktop Only */}
+            <div className="hidden lg:flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">
               CRM Dashboard Pencapaian
@@ -1731,53 +1759,72 @@ export default function CrmDataManagementPage() {
 
               return (
                 <div className="space-y-4">
-                  {/* Header */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
-                        <BarChart3 className="h-6 w-6 text-white" />
+                  {/* Header - Desktop: Original Style, Mobile: Compact */}
+                  <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-4">
+                    <div className="flex items-center gap-2 lg:gap-3">
+                      <div className="h-9 w-9 lg:h-12 lg:w-12 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center flex-shrink-0">
+                        <BarChart3 className="h-4 w-4 lg:h-6 lg:w-6 text-white" />
                       </div>
-                      <div>
-                        <h3 className="text-lg font-bold">Total Target ( Contract Base )</h3>
-                        <p className="text-sm text-muted-foreground">
+                      <div className="min-w-0">
+                        <h3 className="text-sm lg:text-lg font-bold truncate">Total Target ( Contract Base )</h3>
+                        <p className="text-[11px] lg:text-sm text-muted-foreground">
                           Combined MRC & DHA
                           {filterKategoriProduk !== 'SEMUA' && ` (${filterKategoriProduk})`}
                           {filterTahun !== 'all' && ` - ${filterTahun}`}
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
-                      
 
-                      {/* Total Sertifikat Card */}
-                      <div className="flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-2 rounded-lg border border-green-200">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-white">📜</span>
+                    {/* Stats Cards - Mobile: 2 columns grid, Desktop: horizontal flex */}
+                    <div className="grid grid-cols-2 lg:flex items-center gap-2 lg:gap-3 w-full lg:w-auto">
+
+                      {/* Total Sertifikat Card - Mobile Compact, Desktop Original */}
+                      <div className="flex items-center gap-1.5 lg:gap-2 bg-gradient-to-r from-green-50 to-emerald-50 px-2 lg:px-3 py-1.5 lg:py-2 rounded-lg border border-green-200">
+                        <div className="h-7 w-7 lg:h-8 lg:w-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
+                          <span className="text-[11px] lg:text-sm font-bold text-white">📜</span>
                         </div>
-                        <div>
-                          <p className="text-[10px] text-green-600 font-bold leading-tight">Total Sertifikat</p>
-                          <p className="text-lg font-bold text-green-700 leading-tight">{allData.length}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[9px] lg:text-[10px] text-green-600 font-bold leading-tight">Total Sertifikat</p>
+                          <p className="text-base lg:text-lg font-bold text-green-700 leading-tight truncate">{allData.length}</p>
                         </div>
                       </div>
 
-                      {/* Total Perusahaan Card */}
-                      <div className="flex items-center gap-2 bg-gradient-to-r from-orange-50 to-amber-50 px-3 py-2 rounded-lg border border-orange-200">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-white">🏢</span>
+                      {/* Total Perusahaan Card - Mobile Compact, Desktop Original */}
+                      <div className="flex items-center gap-1.5 lg:gap-2 bg-gradient-to-r from-orange-50 to-amber-50 px-2 lg:px-3 py-1.5 lg:py-2 rounded-lg border border-orange-200">
+                        <div className="h-7 w-7 lg:h-8 lg:w-8 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-center flex-shrink-0">
+                          <span className="text-[11px] lg:text-sm font-bold text-white">🏢</span>
                         </div>
-                        <div>
-                          <p className="text-[10px] text-orange-600 font-bold leading-tight">Total Perusahaan</p>
-                          <p className="text-lg font-bold text-orange-700 leading-tight">{totalAllCompanies}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[9px] lg:text-[10px] text-orange-600 font-bold leading-tight">Total Perusahaan</p>
+                          <p className="text-base lg:text-lg font-bold text-orange-700 leading-tight truncate">{totalAllCompanies}</p>
                         </div>
                       </div>
 
-                      {/* Total Nilai Kontrak - Filtered by Status Sertifikat */}
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-primary">Rp {Math.round(totalNilaiKontrak * 0.9).toLocaleString('id-ID')}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Total Nilai Kontrak
-                        </p>
+                      {/* Total Nilai Kontrak - Mobile: Card with background, Desktop: Inline (no background) */}
+                      <div className="col-span-2 lg:col-span-auto">
+                        {/* Mobile version with card background */}
+                        <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-50 to-indigo-50 px-3 py-2 rounded-lg border border-purple-200 lg:hidden">
+                          <div className="h-7 w-7 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                            <span className="text-[11px] font-bold text-white">💰</span>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-purple-700 leading-tight">
+                              Rp {Math.round(totalNilaiKontrak * 0.9).toLocaleString('id-ID')}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Desktop version - no background, inline text */}
+                        <div className="hidden lg:block text-left">
+                          <p className="text-3xl font-bold text-primary leading-tight">
+                            Rp {Math.round(totalNilaiKontrak * 0.9).toLocaleString('id-ID')}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Total Nilai Kontrak
+                          </p>
+                        </div>
                       </div>
+
                     </div>
                   </div>
 
@@ -1819,21 +1866,21 @@ export default function CrmDataManagementPage() {
                     </div>
                   </div>
 
-                  {/* Detailed Breakdown */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 pt-4 border-t">
+                  {/* Detailed Breakdown - Compact for mobile, Large for desktop */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 sm:gap-3 pt-3 border-t">
                     {/* DONE */}
-                    <div className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex flex-row items-center gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-green-50 to-green-100/50 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
                       {/* Left - Percentage Circle */}
                       <div className="flex-shrink-0">
-                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-green-500 flex items-center justify-center">
-                          <span className="text-white text-xs sm:text-sm font-bold">{totalNilaiKontrak > 0 ? Math.round((filteredLanjutContracts / (totalNilaiKontrak * 0.9)) * 100) : 0}%</span>
+                        <div className="h-11 w-11 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow">
+                          <span className="text-white text-xs md:text-sm lg:text-base font-bold">{totalNilaiKontrak > 0 ? Math.round((filteredLanjutContracts / (totalNilaiKontrak * 0.9)) * 100) : 0}%</span>
                         </div>
                       </div>
                       {/* Right - Info */}
                       <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[10px] sm:text-xs text-green-600 font-medium">DONE</span>
-                        <div className="text-xs sm:text-sm font-bold text-green-700 truncate">Rp {Math.round(filteredLanjutContracts).toLocaleString('id-ID')}</div>
-                        <span className="text-[9px] sm:text-[10px] text-green-600">
+                        <span className="text-[10px] md:text-xs lg:text-sm text-green-700 font-semibold">DONE</span>
+                        <div className="text-xs md:text-sm lg:text-base font-bold text-green-800 truncate leading-tight">Rp {Math.round(filteredLanjutContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] md:text-[10px] lg:text-xs text-green-600 block">
                           {allData.filter(t => {
                             const isDone = t.status === 'DONE';
                             const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
@@ -1849,22 +1896,22 @@ export default function CrmDataManagementPage() {
                               }
                             }
                             return isDone && isSertifikatMatch && hasBulanTtdNotif && matchesTahunTtdNotif;
-                          }).length} Sertifikat (base on TTD NOTIF)
+                          }).length} Sertifikat (base TTD NOTIF)
                         </span>
                       </div>
                     </div>
 
                     {/* PROSES */}
-                    <div className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex flex-row items-center gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg border border-blue-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
                       <div className="flex-shrink-0">
-                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-blue-500 flex items-center justify-center">
-                          <span className="text-white text-xs sm:text-sm font-bold">{totalNilaiKontrak > 0 ? Math.round((prosesContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                        <div className="h-11 w-11 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow">
+                          <span className="text-white text-xs md:text-sm lg:text-base font-bold">{totalNilaiKontrak > 0 ? Math.round((prosesContracts / totalNilaiKontrak) * 100) : 0}%</span>
                         </div>
                       </div>
                       <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[10px] sm:text-xs text-blue-600 font-medium">PROSES</span>
-                        <div className="text-xs sm:text-sm font-bold text-blue-700 truncate">Rp {Math.round(prosesContracts).toLocaleString('id-ID')}</div>
-                        <span className="text-[9px] sm:text-[10px] text-blue-600">
+                        <span className="text-[10px] md:text-xs lg:text-sm text-blue-700 font-semibold">PROSES</span>
+                        <div className="text-xs md:text-sm lg:text-base font-bold text-blue-800 truncate leading-tight">Rp {Math.round(prosesContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] md:text-[10px] lg:text-xs text-blue-600 block">
                           {allData.filter(t => {
                             const matchesStatus = t.status === 'PROSES';
                             const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
@@ -1876,16 +1923,16 @@ export default function CrmDataManagementPage() {
                     </div>
 
                     {/* SUSPEND */}
-                    <div className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="flex flex-row items-center gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-lg border border-orange-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
                       <div className="flex-shrink-0">
-                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-orange-500 flex items-center justify-center">
-                          <span className="text-white text-xs sm:text-sm font-bold">{totalNilaiKontrak > 0 ? Math.round((suspendContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                        <div className="h-11 w-11 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow">
+                          <span className="text-white text-xs md:text-sm lg:text-base font-bold">{totalNilaiKontrak > 0 ? Math.round((suspendContracts / totalNilaiKontrak) * 100) : 0}%</span>
                         </div>
                       </div>
                       <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[10px] sm:text-xs text-orange-600 font-medium">SUSPEND</span>
-                        <div className="text-xs sm:text-sm font-bold text-orange-700 truncate">Rp {Math.round(suspendContracts).toLocaleString('id-ID')}</div>
-                        <span className="text-[9px] sm:text-[10px] text-orange-600">
+                        <span className="text-[10px] md:text-xs lg:text-sm text-orange-700 font-semibold">SUSPEND</span>
+                        <div className="text-xs md:text-sm lg:text-base font-bold text-orange-800 truncate leading-tight">Rp {Math.round(suspendContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] md:text-[10px] lg:text-xs text-orange-600 block">
                           {allData.filter(t => {
                             const matchesStatus = t.status === 'SUSPEND';
                             const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
@@ -1897,16 +1944,16 @@ export default function CrmDataManagementPage() {
                     </div>
 
                     {/* LOSS */}
-                    <div className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-red-50 rounded-lg border border-red-200">
+                    <div className="flex flex-row items-center gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-red-50 to-red-100/50 rounded-lg border border-red-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
                       <div className="flex-shrink-0">
-                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-red-500 flex items-center justify-center">
-                          <span className="text-white text-xs sm:text-sm font-bold">{totalNilaiKontrak > 0 ? Math.round((lossContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                        <div className="h-11 w-11 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow">
+                          <span className="text-white text-xs md:text-sm lg:text-base font-bold">{totalNilaiKontrak > 0 ? Math.round((lossContracts / totalNilaiKontrak) * 100) : 0}%</span>
                         </div>
                       </div>
                       <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[10px] sm:text-xs text-red-600 font-medium">LOSS</span>
-                        <div className="text-xs sm:text-sm font-bold text-red-700 truncate">Rp {Math.round(lossContracts).toLocaleString('id-ID')}</div>
-                        <span className="text-[9px] sm:text-[10px] text-red-600">
+                        <span className="text-[10px] md:text-xs lg:text-sm text-red-700 font-semibold">LOSS</span>
+                        <div className="text-xs md:text-sm lg:text-base font-bold text-red-800 truncate leading-tight">Rp {Math.round(lossContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] md:text-[10px] lg:text-xs text-red-600 block">
                           {allData.filter(t => {
                             const matchesStatus = t.status === 'LOSS';
                             const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
@@ -1918,16 +1965,16 @@ export default function CrmDataManagementPage() {
                     </div>
 
                     {/* WAITING */}
-                    <div className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex flex-row items-center gap-2 md:gap-3 p-2 md:p-3 bg-gray-50 rounded-lg border border-gray-200">
                       <div className="flex-shrink-0">
-                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gray-500 flex items-center justify-center">
-                          <span className="text-white text-xs sm:text-sm font-bold">{totalNilaiKontrak > 0 ? Math.round((waitingContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                        <div className="h-11 w-11 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gray-500 flex items-center justify-center">
+                          <span className="text-white text-xs md:text-sm lg:text-base font-bold">{totalNilaiKontrak > 0 ? Math.round((waitingContracts / totalNilaiKontrak) * 100) : 0}%</span>
                         </div>
                       </div>
                       <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[10px] sm:text-xs text-gray-600 font-medium">WAITING</span>
-                        <div className="text-xs sm:text-sm font-bold text-gray-700 truncate">Rp {Math.round(waitingContracts).toLocaleString('id-ID')}</div>
-                        <span className="text-[9px] sm:text-[10px] text-gray-600">
+                        <span className="text-[10px] md:text-xs lg:text-sm text-gray-600 font-medium">WAITING</span>
+                        <div className="text-xs md:text-sm lg:text-base font-bold text-gray-700 truncate">Rp {Math.round(waitingContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] md:text-[10px] lg:text-xs text-gray-600">
                           {allData.filter(t => {
                             const matchesStatus = t.status === 'WAITING';
                             const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
@@ -2240,35 +2287,35 @@ export default function CrmDataManagementPage() {
               const colors = colorClasses[statusColor as keyof typeof colorClasses] || colorClasses.green;
 
               return (
-                <div className="space-y-6">
-                  {/* Summary Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-3 sm:space-y-6">
+                  {/* Summary Cards - Compact for mobile, Large for desktop */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
 
                     {/* Target Card */}
-                    <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                      <p className="text-sm text-blue-600 font-medium">Total Target</p>
-                      <p className="text-2xl font-bold text-blue-700 mt-1">
+                    <div className="p-2.5 sm:p-5 bg-gradient-to-br from-blue-50 to-blue-100/80 rounded-lg border border-blue-200 shadow-sm">
+                      <p className="text-xs sm:text-sm text-blue-600 font-semibold">Total Target</p>
+                      <p className="text-base sm:text-2xl lg:text-3xl font-bold text-blue-700 mt-1 sm:mt-2 leading-tight">
                         Rp {Math.round(grandTotalTarget * 0.9).toLocaleString('id-ID')}
                       </p>
-                      <p className="text-xs text-blue-600 mt-1">( 90% dari total Rp {Math.round(grandTotalTarget).toLocaleString('id-ID')} )</p>
+                      <p className="text-[10px] sm:text-xs text-blue-600 mt-1">(90% dari Rp {Math.round(grandTotalTarget).toLocaleString('id-ID')})</p>
                     </div>
 
                     {/* Pencapaian Card */}
-                    <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-                      <p className="text-sm text-green-600 font-medium">Total Pencapaian</p>
-                      <p className="text-2xl font-bold text-green-700 mt-1">
+                    <div className="p-2.5 sm:p-5 bg-gradient-to-br from-green-50 to-green-100/80 rounded-lg border border-green-200 shadow-sm">
+                      <p className="text-xs sm:text-sm text-green-600 font-semibold">Total Pencapaian</p>
+                      <p className="text-base sm:text-2xl lg:text-3xl font-bold text-green-700 mt-1 sm:mt-2 leading-tight">
                         Rp {grandTotalPencapaian.toLocaleString('id-ID')}
                       </p>
-                      <p className="text-xs text-green-600 mt-1">Dari hargaTerupdate</p>
+                      <p className="text-[10px] sm:text-xs text-green-600 mt-1">Dari hargaTerupdate</p>
                     </div>
 
                     {/* Companies Card */}
-                    <div className="p-4 bg-white rounded-lg border border-gray-200">
-                      <p className="text-sm text-gray-600 font-medium">Total Perusahaan</p>
-                      <p className="text-2xl font-bold text-primary mt-1">
+                    <div className="p-2.5 sm:p-5 bg-white rounded-lg border border-gray-200 shadow-sm">
+                      <p className="text-xs sm:text-sm text-gray-600 font-semibold">Total Perusahaan</p>
+                      <p className="text-base sm:text-2xl lg:text-3xl font-bold text-primary mt-1 sm:mt-2 leading-tight">
                         {totalFilteredCompanies}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">Perusahaan</p>
+                      <p className="text-[10px] sm:text-xs text-gray-500 mt-1">Perusahaan</p>
                     </div>
                   </div>
 
@@ -2385,9 +2432,9 @@ export default function CrmDataManagementPage() {
               };
 
               return (
-                <div className="space-y-6">
-                  {/* Summary Cards per Kuadran */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-3 sm:space-y-6">
+                  {/* Summary Cards per Kuadran - Compact */}
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
                     {kuadranOrder.map(kuadran => {
                       const kuadranTotal = Object.values(monthlyKuadranData).reduce((sum, month) => {
                         return sum + (month[kuadran]?.total || 0);
@@ -2411,18 +2458,18 @@ export default function CrmDataManagementPage() {
                       const percentage = grandTotal > 0 ? Math.round((kuadranTotal / grandTotal) * 100) : 0;
 
                       return (
-                        <div key={kuadran} className={`bg-gradient-to-br ${colors.bg} rounded-lg border ${colors.border} p-4`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-xl font-bold" style={{ color: colors.color }}>{kuadran}</h4>
-                            <div className={`h-8 w-8 rounded-full bg-gradient-to-r ${colors.gradient} flex items-center justify-center`}>
-                              <span className="text-white text-xs font-bold">{percentage}%</span>
+                        <div key={kuadran} className={`bg-gradient-to-br ${colors.bg} rounded-lg border ${colors.border} p-2 sm:p-4 shadow-sm`}>
+                          <div className="flex items-center justify-between mb-1 sm:mb-2">
+                            <h4 className="text-base sm:text-xl lg:text-2xl font-bold" style={{ color: colors.color }}>{kuadran}</h4>
+                            <div className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-r ${colors.gradient} flex items-center justify-center shadow`}>
+                              <span className="text-white text-[10px] sm:text-xs font-bold">{percentage}%</span>
                             </div>
                           </div>
-                          <div className="space-y-1">
-                            <p className="text-sm font-semibold" style={{ color: colors.color }}>
+                          <div className="space-y-0.5 sm:space-y-1">
+                            <p className="text-xs sm:text-sm lg:text-base font-semibold" style={{ color: colors.color }}>
                               Rp {kuadranTotal.toLocaleString('id-ID')}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-[10px] sm:text-xs text-muted-foreground">
                               {kuadranCount} Sertifikat . {kuadranCompanyCount} Perusahaan
                             </p>
                           </div>
@@ -4276,6 +4323,8 @@ export default function CrmDataManagementPage() {
         </Card>
         </>
         )}
+      </div>
+      </div>
       </div>
     </div>
   );

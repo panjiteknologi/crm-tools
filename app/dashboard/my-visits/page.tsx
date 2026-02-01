@@ -877,16 +877,12 @@ export default function MyVisitsPage() {
         return;
       }
 
-      console.log('Data imported to Convex. Triggering re-fetch...');
-
       setShowImportModal(false);
       setImportPreview([]);
       setImportError('');
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-
-      console.log('Import completed:', result);
 
     } catch (error) {
       console.error('Import error:', error);

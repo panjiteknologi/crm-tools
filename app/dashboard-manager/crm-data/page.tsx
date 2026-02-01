@@ -633,10 +633,7 @@ export default function CrmDataManagementPage() {
 
   // Get unique provinsi values from actual data (for debugging)
   const provinsiFromData = [...new Set(crmTargets?.map(t => t.provinsi).filter(Boolean) || [])].sort();
-  console.log('Provinsi from JSON (first 5):', provinsiOptions.slice(0, 5));
-  console.log('Provinsi from Data (first 5):', provinsiFromData.slice(0, 5));
-  console.log('Sample data provinsi values:', crmTargets?.slice(0, 3).map(t => ({ provinsi: t.provinsi, kota: t.kota })));
-
+ 
   // Get kota options based on selected provinsi from Indonesia data
   const kotaOptions = filterProvinsi !== 'all' && (indonesiaData as any)[filterProvinsi]
     ? [...new Set((indonesiaData as any)[filterProvinsi].kabupaten_kota)].sort() as string[] // Remove duplicates with Set
@@ -1193,7 +1190,7 @@ export default function CrmDataManagementPage() {
 
   // Handle Excel import
   const handleExcelImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('📂 Import triggered');
+    
 
     const file = event.target.files?.[0];
     if (!file) {
@@ -1202,11 +1199,11 @@ export default function CrmDataManagementPage() {
       return;
     }
 
-    console.log('✅ File selected:', file.name, file.size, file.type);
+    
 
     // Get current logged in user
     const currentUser = getCurrentUser();
-    console.log('👤 Current user:', currentUser);
+    
 
     if (!currentUser || !currentUser._id) {
       console.error('❌ No user logged in');
@@ -1217,22 +1214,22 @@ export default function CrmDataManagementPage() {
 
     // Start importing
     setIsImporting(true);
-    console.log('🔄 Starting import process...');
+    
 
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        console.log('✅ FileReader onload triggered');
-        console.log('📊 Result type:', e.target?.result);
+        
+        
 
         // Show initial loading toast
         toast.loading('📂 Reading Excel file...', { id: 'import-toast', duration: Infinity });
 
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        console.log('📦 Data length:', data.length);
+        
 
         const workbook = XLSX.read(data, { type: 'array' });
-        console.log('📖 Workbook loaded, sheet names:', workbook.SheetNames);
+        
 
         // Update progress
         toast.loading('📊 Parsing Excel data...', { id: 'import-toast', duration: Infinity });
@@ -1243,8 +1240,8 @@ export default function CrmDataManagementPage() {
 
         // Convert to JSON
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
-        console.log('📋 JSON data length:', jsonData.length);
-        console.log('📋 First row (headers):', jsonData[0]);
+        
+        
 
         if (jsonData.length < 2) {
           console.error('❌ Excel file is empty or invalid');
@@ -1255,7 +1252,7 @@ export default function CrmDataManagementPage() {
 
         // Get headers from first row
         const headers = jsonData[0].map((h: any) => String(h).trim());
-        console.log('🏷️ Headers:', headers);
+        
         const targets: any[] = [];
 
         // Update progress
@@ -1314,7 +1311,7 @@ export default function CrmDataManagementPage() {
           targets.push(target);
         }
 
-        console.log(`✅ Processed ${targets.length} valid targets`);
+        
 
         if (targets.length === 0) {
           console.error('❌ No valid data found');
@@ -1325,11 +1322,11 @@ export default function CrmDataManagementPage() {
 
         // Update progress - uploading to database
         toast.loading(`💾 Uploading ${targets.length} records to database...`, { id: 'import-toast', duration: Infinity });
-        console.log('💾 Starting bulk insert...');
+        
 
         // Bulk insert
         const result = await createBulkInsert({ targets });
-        console.log('✅ Bulk insert result:', result);
+        
 
         // Success!
         toast.success(
@@ -1347,7 +1344,7 @@ export default function CrmDataManagementPage() {
         // Reset file input
         event.target.value = '';
         setIsImporting(false);
-        console.log('✅ Import completed successfully');
+        
       } catch (error: any) {
         console.error('❌ Error importing Excel:', error);
         console.error('❌ Error stack:', error.stack);
@@ -1383,9 +1380,9 @@ export default function CrmDataManagementPage() {
       setIsImporting(false);
     };
 
-    console.log('📖 Starting to read file as ArrayBuffer...');
+    
     reader.readAsArrayBuffer(file);
-    console.log('✅ FileReader.readAsArrayBuffer called');
+    
   };
 
   // Helper functions

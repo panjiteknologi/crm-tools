@@ -195,22 +195,22 @@ function ChartCardPencapaianMonthly({
       <div className={`absolute inset-0 ${getBackgroundGradient()} opacity-60`}></div>
       <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-transparent to-purple-500/5"></div>
 
-      <CardHeader className="relative z-10 pb-2">
-        <CardTitle className="text-sm font-semibold text-center">{title}</CardTitle>
-        <CardDescription className="text-xs sm:text-sm text-center space-y-1">
-          <div className="font-semibold text-black/70">
+      <CardHeader className="relative z-10 pb-1 sm:pb-2">
+        <CardTitle className="text-[10px] sm:text-xs font-semibold text-center">{title}</CardTitle>
+        <CardDescription className="text-[9px] sm:text-[10px] text-center space-y-0.5 sm:space-y-1">
+          <div className="font-medium text-black/70 text-[8px] sm:text-[9px]">
             Target: Rp {totalTarget.toLocaleString('id-ID')} | Pencapaian: Rp {totalPencapaian.toLocaleString('id-ID')}
           </div>
-          <div className={`text-lg sm:text-xl font-extrabold ${achievementPercentage >= 90 ? 'text-green-600' : achievementPercentage >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
+          <div className={`text-sm sm:text-xl font-extrabold ${achievementPercentage >= 90 ? 'text-green-600' : achievementPercentage >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
             {achievementPercentage}%
           </div>
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="px-2 pt-2 relative z-10">
+      <CardContent className="px-0.5 sm:px-2 pt-0.5 sm:pt-2 relative z-10">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[200px] sm:h-[220px] md:h-[250px] w-full"
+          className="aspect-auto h-[160px] sm:h-[220px] md:h-[250px] w-full"
         >
           {(() => {
             if (!hasData) {
@@ -226,25 +226,25 @@ function ChartCardPencapaianMonthly({
             switch (chartType) {
               case 'bar':
                 return (
-                  <BarChart data={chartData} margin={{ top: 20, right: 20, left: 10, bottom: 40 }}>
+                  <BarChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 30 }}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis
                       dataKey="month"
                       tickLine={false}
                       axisLine={false}
-                      tickMargin={6}
-                      minTickGap={20}
-                      tick={{ fontSize: 10 }}
+                      tickMargin={4}
+                      minTickGap={15}
+                      tick={{ fontSize: 9 }}
                       className="fill-muted-foreground"
                     />
                     <YAxis
                       tickLine={false}
                       axisLine={false}
-                      tickMargin={8}
-                      tick={{ fontSize: 9 }}
+                      tickMargin={6}
+                      tick={{ fontSize: 8 }}
                       className="fill-muted-foreground"
                       domain={[0, 'dataMax']}
-                      width={60}
+                      width={45}
                     />
                     <ChartTooltip
                       cursor={true}
@@ -296,25 +296,25 @@ function ChartCardPencapaianMonthly({
 
               case 'line':
                 return (
-                  <LineChart data={chartData} margin={{ top: 20, right: 20, left: 10, bottom: 40 }}>
+                  <LineChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 30 }}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis
                       dataKey="month"
                       tickLine={false}
                       axisLine={false}
-                      tickMargin={6}
-                      minTickGap={20}
-                      tick={{ fontSize: 10 }}
+                      tickMargin={4}
+                      minTickGap={15}
+                      tick={{ fontSize: 9 }}
                       className="fill-muted-foreground"
                     />
                     <YAxis
                       tickLine={false}
                       axisLine={false}
-                      tickMargin={8}
-                      tick={{ fontSize: 9 }}
+                      tickMargin={6}
+                      tick={{ fontSize: 8 }}
                       className="fill-muted-foreground"
                       domain={[0, 'dataMax']}
-                      width={60}
+                      width={45}
                     />
                     <ChartTooltip
                       cursor={true}
@@ -380,7 +380,7 @@ function ChartCardPencapaianMonthly({
 
               default: // area chart
                 return (
-                  <AreaChart data={chartData} margin={{ top: 20, right: 20, left: 10, bottom: 40 }}>
+                  <AreaChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 30 }}>
                     <defs>
                       <linearGradient id="colorTarget" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="hsl(210, 80%, 50%)" stopOpacity={0.8}/>
@@ -396,19 +396,19 @@ function ChartCardPencapaianMonthly({
                       dataKey="month"
                       tickLine={false}
                       axisLine={false}
-                      tickMargin={6}
-                      minTickGap={20}
-                      tick={{ fontSize: 10 }}
+                      tickMargin={4}
+                      minTickGap={15}
+                      tick={{ fontSize: 9 }}
                       className="fill-muted-foreground"
                     />
                     <YAxis
                       tickLine={false}
                       axisLine={false}
-                      tickMargin={8}
-                      tick={{ fontSize: 9 }}
+                      tickMargin={6}
+                      tick={{ fontSize: 8 }}
                       className="fill-muted-foreground"
                       domain={[0, 'dataMax']}
-                      width={60}
+                      width={45}
                     />
                     <ChartTooltip
                       cursor={true}

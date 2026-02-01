@@ -55,7 +55,6 @@ const parseNumber = (value: string): number | null => {
 
 // Main import function
 async function importCrmTargets() {
-  console.log("🚀 Starting CRM Targets import...\n");
 
   // Read CSV file
   const csvPath = join(__dirname, "../data/data-crm.csv");
@@ -69,7 +68,7 @@ async function importCrmTargets() {
   });
 
   const records = parseResult.data as any[];
-  console.log(`📊 Found ${records.length} records in CSV\n`);
+  
 
   // Transform data ke format Convex
   const transformedData = records.map((record, index) => {
@@ -136,7 +135,7 @@ async function importCrmTargets() {
     };
   }).filter(Boolean); // Remove null values
 
-  console.log(`✅ Transformed ${transformedData.length} valid records\n`);
+  
 
   // TODO: Uncomment ini untuk insert ke Convex
   // try {
@@ -144,21 +143,21 @@ async function importCrmTargets() {
   //     targets: transformedData,
   //   });
 
-  //   console.log(`✅ Successfully imported ${result.insertedCount} CRM targets!`);
-  //   console.log(`📝 Inserted IDs:`, result.ids);
+  //   
+  //   
   // } catch (error) {
   //   console.error("❌ Error importing CRM targets:", error);
   // }
 
   // Sementara hanya log data
-  console.log("📋 Sample data (first 3 records):");
+  
   transformedData.slice(0, 3).forEach((record: any, idx) => {
-    console.log(`\n${idx + 1}. ${record.namaPerusahaan}`);
-    console.log(`   Status: ${record.status}, Kunjungan: ${record.statusKunjungan}`);
-    console.log(`   Nilai 2026: Rp ${record.totalNilai2026?.toLocaleString("id-ID") || "N/A"}`);
+    
+    
+    
   });
 
-  console.log("\n\n⚠️  TODO: Uncomment the Convex mutation code in this script to actually insert data!");
+  
 }
 
 // Run import

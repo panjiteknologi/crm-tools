@@ -235,15 +235,7 @@ export default function DashboardKunjunganPage() {
   // Filter data
   const filteredData = React.useMemo(() => {
     // Debug: Log current filter values
-    console.log('🔍 Current Filters:', {
-      filterProvinsi,
-      filterKota,
-      filterStatusKunjungan,
-      filterStatusCrm,
-      filterCategory,
-      filterAlasan
-    })
-
+   
     return crmTargets.filter(target => {
       // Filter by PIC CRM
       if (filterPic !== "all" && target.picCrm !== filterPic) return false
@@ -265,7 +257,7 @@ export default function DashboardKunjunganPage() {
         const targetProvinsi = (target.provinsi || "").trim().toLowerCase()
         const filterProvinsiLower = filterProvinsi.trim().toLowerCase()
         if (targetProvinsi !== filterProvinsiLower) {
-          console.log(`❌ Provinsi mismatch: "${target.provinsi}" vs "${filterProvinsi}"`)
+          
           return false
         }
       }
@@ -275,7 +267,7 @@ export default function DashboardKunjunganPage() {
         const targetKota = (target.kota || "").trim().toLowerCase()
         const filterKotaLower = filterKota.trim().toLowerCase()
         if (targetKota !== filterKotaLower) {
-          console.log(`❌ Kota mismatch: "${target.kota}" vs "${filterKota}"`)
+          
           return false
         }
       }
@@ -414,11 +406,11 @@ export default function DashboardKunjunganPage() {
 
   // Debug: log data
   // React.useEffect(() => {
-  //   console.log('📊 CRM Targets:', crmTargets.length)
-  //   console.log('🔍 Filtered Data:', filteredData.length)
-  //   console.log('📅 Display Tasks:', displayTasks.length)
-  //   console.log('🗓️ Selected Date:', selectedDate)
-  //   console.log('📆 Filter Month:', filterMonth)
+  //   
+  //   
+  //   
+  //   
+  //   
   // }, [crmTargets, filteredData, displayTasks, selectedDate, filterMonth])
 
   // Reset page when filters change
