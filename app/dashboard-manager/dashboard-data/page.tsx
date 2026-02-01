@@ -598,6 +598,11 @@ export default function CrmDataManagementPage() {
     }
   };
 
+  const formatCurrency = (amount: number): string => {
+    if (!amount || isNaN(amount)) return 'Rp 0';
+    return `Rp ${amount.toLocaleString('id-ID')}`;
+  };
+
   if (crmTargets === undefined) {
     return (
       <div className="flex flex-col items-center justify-center h-64">
@@ -1428,10 +1433,387 @@ export default function CrmDataManagementPage() {
           </div>
         </div>
 
-        {/* Total Target Card - Combined MRC & DHA */}
-        <Card>
-          <CardContent className="px-6">
-            {(() => {
+        {/* Total Target Card & PIC CRM Cards - In same row */}
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+          {/* MRC Card - Takes 1 column */}
+          {(filterPicCrm === 'all' || filterPicCrm === 'MRC') && (
+            <div className="lg:col-span-1 order-1">
+              <Card>
+                <CardContent className="p-3">
+                  {(() => {
+                    // Get allData with kategori produk filter (same as Total Target)
+                    let filteredByKategori = (crmTargets || []);
+                    if (filterKategoriProduk !== 'SEMUA') {
+                      filteredByKategori = filteredByKategori.filter(t => {
+                        const stdCode = (t.std || '').trim();
+                        const standar = masterStandarData.standar.find((s: any) => s.kode === stdCode);
+                        return standar && standar.kategori_produk === filterKategoriProduk;
+                      });
+                    }
+                    const allData = filteredByKategori;
+
+                    // Filter MRC data from allData (not filteredTargets)
+                    const mrcData = allData.filter(t => (t.picCrm || '').toUpperCase() === 'MRC');
+                    const mrcTotal = mrcData.length;
+
+                    // Total Nilai Kontrak: sertifikat match + hargaKontrak + tahun
+                    const mrcTotalAmount = Math.round(
+                      mrcData
+                        .filter(t => {
+                          const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
+                          const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+                          return matchesSertifikat && matchesTahun;
+                        })
+                        .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0)
+                    );
+
+                    // DONE: filter with bulanTtdNotif + sertifikat + tahun (same as Total Target logic)
+                    const mrcDoneAmount = Math.round(
+                      mrcData
+                        .filter(t => {
+                          const isDone = t.status === 'DONE';
+                          const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
+                          const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
+                          const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+
+                          // Filter tahun dari bulanTtdNotif
+                          let matchesTahunTtdNotif = false;
+                          if (hasBulanTtdNotif) {
+                            if (filterTahun === 'all') {
+                              matchesTahunTtdNotif = true;
+                            } else {
+                              const ttdDate = new Date(t.bulanTtdNotif!);
+                              const ttdYear = ttdDate.getFullYear();
+                              matchesTahunTtdNotif = ttdYear.toString() === filterTahun;
+                            }
+                          }
+
+                          return isDone && isSertifikatMatch && hasBulanTtdNotif && matchesTahun && matchesTahunTtdNotif;
+                        })
+                        .reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0)
+                    );
+                    const mrcDone = mrcData.filter(t => {
+                      const isDone = t.status === 'DONE';
+                      const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
+                      const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
+                      const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+
+                      let matchesTahunTtdNotif = false;
+                      if (hasBulanTtdNotif) {
+                        if (filterTahun === 'all') {
+                          matchesTahunTtdNotif = true;
+                        } else {
+                          const ttdDate = new Date(t.bulanTtdNotif!);
+                          const ttdYear = ttdDate.getFullYear();
+                          matchesTahunTtdNotif = ttdYear.toString() === filterTahun;
+                        }
+                      }
+
+                      return isDone && isSertifikatMatch && hasBulanTtdNotif && matchesTahun && matchesTahunTtdNotif;
+                    }).length;
+
+                    const mrcProses = mrcData.filter(t => t.status === 'PROSES').length;
+                    const mrcProsesAmount = Math.round(mrcData.filter(t => t.status === 'PROSES').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const mrcLoss = mrcData.filter(t => t.status === 'LOSS').length;
+                    const mrcLossAmount = Math.round(mrcData.filter(t => t.status === 'LOSS').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const mrcSuspend = mrcData.filter(t => t.status === 'SUSPEND').length;
+                    const mrcSuspendAmount = Math.round(mrcData.filter(t => t.status === 'SUSPEND').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const mrcWaiting = mrcData.filter(t => t.status === 'WAITING').length;
+                    const mrcWaitingAmount = Math.round(mrcData.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                    const mrcVisits = mrcData.filter(t => t.tanggalKunjungan).length;
+
+                    return (
+                      <div className="space-y-3">
+                        {/* Profile */}
+                        <div className="flex flex-col items-center text-center">
+                          <img
+                            src="/images/mercy.jpeg"
+                            onError={(e) => (e.currentTarget.src = "https://api.dicebear.com/7.x/avataaars/svg?seed=MRC")}
+                            className="w-23 h-23 rounded-full object-cover border-2 border-green-500"
+                            alt="MRC"
+                          />
+                          <p className="text-sm font-bold mt-2">Mercy</p>
+                          <p className="text-[10px] text-muted-foreground">PIC CRM</p>
+                        </div>
+
+                        {/* TARGET Progress Bar - Total Rupiah */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[10px]">
+                            <span className="text-emerald-600 font-semibold">TARGET</span>
+                            <span className="font-bold">{formatCurrency(Math.round(mrcTotalAmount * 0.9))}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3 relative">
+                            <div
+                              className="bg-gradient-to-r from-emerald-500 to-green-600 h-3 rounded-full transition-all duration-500 flex items-center justify-center"
+                              style={{ width: `${mrcTotalAmount > 0 ? Math.min((mrcDoneAmount / (mrcTotalAmount * 0.9)) * 100, 100) : 0}%` }}
+                            >
+                            </div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className={`text-[11px] font-bold ${mrcTotalAmount > 0 && mrcDoneAmount > 0 ? 'text-black' : 'text-gray-500'}`}>
+                                {mrcTotalAmount > 0 && mrcDoneAmount > 0 ? Math.round((mrcDoneAmount / (mrcTotalAmount * 0.9)) * 100) : 0}%
+                              </span>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 gap-1">
+                            <div className="text-[10px] font-bold text-emerald-600 text-left">
+                              {formatCurrency(mrcDoneAmount)}
+                            </div>
+
+                          </div>
+                        </div>
+
+                        {/* Status Count Cards - Grid */}
+                        <div className="grid grid-cols-2 gap-1">
+                          {/* DONE Card */}
+                          <div className="flex flex-col items-center p-1.5 bg-green-50 rounded border border-green-200">
+                            <span className="text-[8px] text-green-700 font-semibold">DONE</span>
+                            <span className="text-sm font-bold text-green-600">{mrcDone}</span>
+                          </div>
+
+                          {/* PROSES Card */}
+                          <div className="flex flex-col items-center p-1.5 bg-blue-50 rounded border border-blue-200">
+                            <span className="text-[8px] text-blue-700 font-semibold">PROSES</span>
+                            <span className="text-sm font-bold text-blue-600">{mrcProses}</span>
+                          </div>
+
+                          {/* SUSPEND Card */}
+                          <div className="flex flex-col items-center p-1.5 bg-orange-50 rounded border border-orange-200">
+                            <span className="text-[8px] text-orange-700 font-semibold">SUSPEND</span>
+                            <span className="text-sm font-bold text-orange-600">{mrcSuspend}</span>
+                          </div>
+
+                          {/* LOSS Card */}
+                          <div className="flex flex-col items-center p-1.5 bg-red-50 rounded border border-red-200">
+                            <span className="text-[8px] text-red-700 font-semibold">LOSS</span>
+                            <span className="text-sm font-bold text-red-600">{mrcLoss}</span>
+                          </div>
+
+                          {/* WAITING Card */}
+                          <div className="flex flex-col items-center p-1.5 bg-gray-50 rounded border border-gray-200">
+                            <span className="text-[8px] text-gray-700 font-semibold">WAITING</span>
+                            <span className="text-sm font-bold text-gray-600">{mrcWaiting}</span>
+                          </div>
+                        </div>
+
+                        {/* Visits Progress Bar - Target VISITS */}
+                        <div className="space-y-1 pt-2 border-t">
+                          <div className="flex items-center justify-between text-[10px]">
+                            <span className="text-purple-600 font-semibold">TARGET VISITS</span>
+                            <span className="font-bold">{mrcVisits}/{mrcTotal}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3 relative">
+                            <div
+                              className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500 flex items-center justify-center"
+                              style={{ width: `${mrcTotal > 0 ? Math.min((mrcVisits / mrcTotal) * 100, 100) : 0}%` }}
+                            >
+                            </div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className={`text-[11px] font-bold ${mrcTotal > 0 && mrcVisits > 0 ? 'text-black' : 'text-gray-500'}`}>
+                                {mrcTotal > 0 && mrcVisits > 0 ? Math.round((mrcVisits / mrcTotal) * 100) : 0}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* DHA Card - Takes 1 column */}
+          {(filterPicCrm === 'all' || filterPicCrm === 'DHA') && (
+            <div className="lg:col-span-1 order-2">
+              <Card>
+                <CardContent className="p-3">
+                  {(() => {
+                    // Get allData with kategori produk filter (same as Total Target)
+                    let filteredByKategori = (crmTargets || []);
+                    if (filterKategoriProduk !== 'SEMUA') {
+                      filteredByKategori = filteredByKategori.filter(t => {
+                        const stdCode = (t.std || '').trim();
+                        const standar = masterStandarData.standar.find((s: any) => s.kode === stdCode);
+                        return standar && standar.kategori_produk === filterKategoriProduk;
+                      });
+                    }
+                    const allData = filteredByKategori;
+
+                    // Filter DHA data from allData (not filteredTargets)
+                    const dhaData = allData.filter(t => (t.picCrm || '').toUpperCase() === 'DHA');
+                    const dhaTotal = dhaData.length;
+
+                    // Total Nilai Kontrak: sertifikat match + hargaKontrak + tahun
+                    const dhaTotalAmount = Math.round(
+                      dhaData
+                        .filter(t => {
+                          const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
+                          const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+                          return matchesSertifikat && matchesTahun;
+                        })
+                        .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0)
+                    );
+
+                    // DONE: filter with bulanTtdNotif + sertifikat + tahun (same as Total Target logic)
+                    const dhaDoneAmount = Math.round(
+                      dhaData
+                        .filter(t => {
+                          const isDone = t.status === 'DONE';
+                          const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
+                          const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
+                          const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+
+                          // Filter tahun dari bulanTtdNotif
+                          let matchesTahunTtdNotif = false;
+                          if (hasBulanTtdNotif) {
+                            if (filterTahun === 'all') {
+                              matchesTahunTtdNotif = true;
+                            } else {
+                              const ttdDate = new Date(t.bulanTtdNotif!);
+                              const ttdYear = ttdDate.getFullYear();
+                              matchesTahunTtdNotif = ttdYear.toString() === filterTahun;
+                            }
+                          }
+
+                          return isDone && isSertifikatMatch && hasBulanTtdNotif && matchesTahun && matchesTahunTtdNotif;
+                        })
+                        .reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0)
+                    );
+                    const dhaDone = dhaData.filter(t => {
+                      const isDone = t.status === 'DONE';
+                      const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
+                      const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
+                      const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+
+                      let matchesTahunTtdNotif = false;
+                      if (hasBulanTtdNotif) {
+                        if (filterTahun === 'all') {
+                          matchesTahunTtdNotif = true;
+                        } else {
+                          const ttdDate = new Date(t.bulanTtdNotif!);
+                          const ttdYear = ttdDate.getFullYear();
+                          matchesTahunTtdNotif = ttdYear.toString() === filterTahun;
+                        }
+                      }
+
+                      return isDone && isSertifikatMatch && hasBulanTtdNotif && matchesTahun && matchesTahunTtdNotif;
+                    }).length;
+
+                    const dhaProses = dhaData.filter(t => t.status === 'PROSES').length;
+                    const dhaProsesAmount = Math.round(dhaData.filter(t => t.status === 'PROSES').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const dhaLoss = dhaData.filter(t => t.status === 'LOSS').length;
+                    const dhaLossAmount = Math.round(dhaData.filter(t => t.status === 'LOSS').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const dhaSuspend = dhaData.filter(t => t.status === 'SUSPEND').length;
+                    const dhaSuspendAmount = Math.round(dhaData.filter(t => t.status === 'SUSPEND').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const dhaWaiting = dhaData.filter(t => t.status === 'WAITING').length;
+                    const dhaWaitingAmount = Math.round(dhaData.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                    const dhaVisits = dhaData.filter(t => t.tanggalKunjungan).length;
+
+                    return (
+                      <div className="space-y-3">
+                        {/* Profile */}
+
+                        <div className="flex flex-col items-center text-center">
+                          <img
+                            src="/images/dhea.jpeg"
+                            onError={(e) => (e.currentTarget.src = "https://api.dicebear.com/7.x/avataaars/svg?seed=DHA")}
+                            className="w-23 h-23 rounded-full object-cover border-2 border-green-500"
+                            alt="DHA"
+                          />
+                          <p className="text-sm font-bold mt-2">Dhea</p>
+                          <p className="text-[10px] text-muted-foreground">PIC CRM</p>
+                        </div>
+
+                        {/* TARGET Progress Bar - Total Rupiah */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[10px]">
+                            <span className="text-emerald-600 font-semibold">TARGET</span>
+                            <span className="font-bold">{formatCurrency(Math.round(dhaTotalAmount * 0.9))}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3 relative">
+                            <div
+                              className="bg-gradient-to-r from-emerald-500 to-green-600 h-3 rounded-full transition-all duration-500 flex items-center justify-center"
+                              style={{ width: `${dhaTotalAmount > 0 ? Math.min((dhaDoneAmount / (dhaTotalAmount * 0.9)) * 100, 100) : 0}%` }}
+                            >
+                            </div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className={`text-[11px] font-bold ${dhaTotalAmount > 0 && dhaDoneAmount > 0 ? 'text-black' : 'text-gray-500'}`}>
+                                {dhaTotalAmount > 0 && dhaDoneAmount > 0 ? Math.round((dhaDoneAmount / (dhaTotalAmount * 0.9)) * 100) : 0}%
+                              </span>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 gap-1">
+                            <div className="text-[10px] font-bold text-emerald-600 text-left">
+                              {formatCurrency(dhaDoneAmount)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status Count Cards - Grid */}
+                        <div className="grid grid-cols-2 gap-1">
+                          {/* DONE Card */}
+                          <div className="flex flex-col items-center p-1.5 bg-green-50 rounded border border-green-200">
+                            <span className="text-[8px] text-green-700 font-semibold">DONE</span>
+                            <span className="text-sm font-bold text-green-600">{dhaDone}</span>
+                          </div>
+
+                          {/* PROSES Card */}
+                          <div className="flex flex-col items-center p-1.5 bg-blue-50 rounded border border-blue-200">
+                            <span className="text-[8px] text-blue-700 font-semibold">PROSES</span>
+                            <span className="text-sm font-bold text-blue-600">{dhaProses}</span>
+                          </div>
+
+                          {/* SUSPEND Card */}
+                          <div className="flex flex-col items-center p-1.5 bg-orange-50 rounded border border-orange-200">
+                            <span className="text-[8px] text-orange-700 font-semibold">SUSPEND</span>
+                            <span className="text-sm font-bold text-orange-600">{dhaSuspend}</span>
+                          </div>
+
+                          {/* LOSS Card */}
+                          <div className="flex flex-col items-center p-1.5 bg-red-50 rounded border border-red-200">
+                            <span className="text-[8px] text-red-700 font-semibold">LOSS</span>
+                            <span className="text-sm font-bold text-red-600">{dhaLoss}</span>
+                          </div>
+
+                          {/* WAITING Card */}
+                          <div className="flex flex-col items-center p-1.5 bg-gray-50 rounded border border-gray-200">
+                            <span className="text-[8px] text-gray-700 font-semibold">WAITING</span>
+                            <span className="text-sm font-bold text-gray-600">{dhaWaiting}</span>
+                          </div>
+                        </div>
+
+                        {/* Visits Progress Bar - Target VISITS */}
+                        <div className="space-y-1 pt-2 border-t">
+                          <div className="flex items-center justify-between text-[10px]">
+                            <span className="text-purple-600 font-semibold">TARGET VISITS</span>
+                            <span className="font-bold">{dhaVisits}/{dhaTotal}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3 relative">
+                            <div
+                              className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500 flex items-center justify-center"
+                              style={{ width: `${dhaTotal > 0 ? Math.min((dhaVisits / dhaTotal) * 100, 100) : 0}%` }}
+                            >
+                            </div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className={`text-[11px] font-bold ${dhaTotal > 0 && dhaVisits > 0 ? 'text-black' : 'text-gray-500'}`}>
+                                {dhaTotal > 0 && dhaVisits > 0 ? Math.round((dhaVisits / dhaTotal) * 100) : 0}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Total Target Card - Dynamically adjusts width based on visible PIC cards */}
+          <div className={`col-span-2 order-3 ${filterPicCrm === 'all' ? 'lg:col-span-4' : 'lg:col-span-5'}`}>
+            <Card>
+              <CardContent className="px-6">
+                {(() => {
               // Calculate TOTAL with filter kategori produk
               // Tidak filter by tahun di sini, karena setiap status punya field tanggal yang berbeda
               let filteredByKategori = (crmTargets || []);
@@ -1736,18 +2118,31 @@ export default function CrmDataManagementPage() {
                   {/* Detailed Breakdown - Compact for mobile, Large for desktop */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 sm:gap-3 pt-3 border-t">
                     {/* DONE */}
-                    <div className="flex flex-row items-center gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-green-50 to-green-100/50 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
-                      {/* Left - Percentage Circle */}
-                      <div className="flex-shrink-0">
-                        <div className="h-11 w-11 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow">
-                          <span className="text-white text-xs md:text-sm lg:text-base font-bold">{totalNilaiKontrak > 0 ? Math.round((filteredLanjutContracts / (totalNilaiKontrak * 0.9)) * 100) : 0}%</span>
+                    <div className="flex md:flex-col flex-row items-center md:items-stretch gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-green-50 to-green-100/50 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
+                      {/* Mobile - Percentage Circle */}
+                      <div className="flex-shrink-0 md:hidden">
+                        <div className="h-11 w-11 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow">
+                          <span className="text-white text-xs font-bold">{totalNilaiKontrak > 0 ? Math.round((filteredLanjutContracts / (totalNilaiKontrak * 0.9)) * 100) : 0}%</span>
                         </div>
                       </div>
-                      {/* Right - Info */}
-                      <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[10px] md:text-xs lg:text-sm text-green-700 font-semibold">DONE</span>
-                        <div className="text-xs md:text-sm lg:text-base font-bold text-green-800 truncate leading-tight">Rp {Math.round(filteredLanjutContracts).toLocaleString('id-ID')}</div>
-                        <span className="text-[9px] md:text-[10px] lg:text-xs text-green-600 block">
+
+                      {/* Desktop - Status Label (TOP) */}
+                      <div className="hidden md:block">
+                        <div className="text-xl font-bold text-green-700 text-center mb-3">DONE</div>
+                      </div>
+
+                      {/* Desktop - Percentage Badge (MIDDLE) */}
+                      <div className="hidden md:flex justify-center mb-4">
+                        <div className="h-20 w-20 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-md">
+                          <span className="text-white text-2xl font-bold">{totalNilaiKontrak > 0 ? Math.round((filteredLanjutContracts / (totalNilaiKontrak * 0.9)) * 100) : 0}%</span>
+                        </div>
+                      </div>
+
+                      {/* Info (BOTTOM) */}
+                      <div className="flex-1 min-w-0 text-left md:text-center">
+                        <span className="text-[10px] md:text-sm text-green-700 font-semibold block md:hidden">DONE</span>
+                        <div className="text-xs md:text-lg lg:text-lg font-bold text-green-800 truncate leading-tight">Rp {Math.round(filteredLanjutContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] md:text-sm text-green-600 block mt-1 md:mt-2">
                           {allData.filter(t => {
                             const isDone = t.status === 'DONE';
                             const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
@@ -1763,91 +2158,156 @@ export default function CrmDataManagementPage() {
                               }
                             }
                             return isDone && isSertifikatMatch && hasBulanTtdNotif && matchesTahunTtdNotif;
-                          }).length} Sertifikat (base TTD NOTIF)
+                          }).length} Sertifikat
+                          <span className="hidden md:inline"> (base TTD NOTIF)</span>
                         </span>
                       </div>
                     </div>
 
                     {/* PROSES */}
-                    <div className="flex flex-row items-center gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg border border-blue-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
-                      <div className="flex-shrink-0">
-                        <div className="h-11 w-11 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow">
-                          <span className="text-white text-xs md:text-sm lg:text-base font-bold">{totalNilaiKontrak > 0 ? Math.round((prosesContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                    <div className="flex md:flex-col flex-row items-center md:items-stretch gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg border border-blue-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
+                      {/* Mobile - Percentage Circle */}
+                      <div className="flex-shrink-0 md:hidden">
+                        <div className="h-11 w-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow">
+                          <span className="text-white text-xs font-bold">{totalNilaiKontrak > 0 ? Math.round((prosesContracts / totalNilaiKontrak) * 100) : 0}%</span>
                         </div>
                       </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[10px] md:text-xs lg:text-sm text-blue-700 font-semibold">PROSES</span>
-                        <div className="text-xs md:text-sm lg:text-base font-bold text-blue-800 truncate leading-tight">Rp {Math.round(prosesContracts).toLocaleString('id-ID')}</div>
-                        <span className="text-[9px] md:text-[10px] lg:text-xs text-blue-600 block">
+
+                      {/* Desktop - Status Label (TOP) */}
+                      <div className="hidden md:block">
+                        <div className="text-xl font-bold text-blue-700 text-center mb-3">PROSES</div>
+                      </div>
+
+                      {/* Desktop - Percentage Badge (MIDDLE) */}
+                      <div className="hidden md:flex justify-center mb-4">
+                        <div className="h-20 w-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
+                          <span className="text-white text-2xl font-bold">{totalNilaiKontrak > 0 ? Math.round((prosesContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                        </div>
+                      </div>
+
+                      {/* Info (BOTTOM) */}
+                      <div className="flex-1 min-w-0 text-left md:text-center">
+                        <span className="text-[10px] md:text-sm text-blue-700 font-semibold block md:hidden">PROSES</span>
+                        <div className="text-xs md:text-lg lg:text-lg font-bold text-blue-800 truncate leading-tight">Rp {Math.round(prosesContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] md:text-sm text-blue-600 block mt-1 md:mt-2">
                           {filteredTargets.filter(t => {
                             const matchesStatus = t.status === 'PROSES';
                             const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
                             const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
                             return matchesStatus && matchesSertifikat && matchesTahun;
-                          }).length} Sertifikat  (base on EXP)
+                          }).length} Sertifikat
+                          <span className="hidden md:inline"> (base on EXP)</span>
                         </span>
                       </div>
                     </div>
 
                     {/* SUSPEND */}
-                    <div className="flex flex-row items-center gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-lg border border-orange-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
-                      <div className="flex-shrink-0">
-                        <div className="h-11 w-11 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow">
-                          <span className="text-white text-xs md:text-sm lg:text-base font-bold">{totalNilaiKontrak > 0 ? Math.round((suspendContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                    <div className="flex md:flex-col flex-row items-center md:items-stretch gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-lg border border-orange-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
+                      {/* Mobile - Percentage Circle */}
+                      <div className="flex-shrink-0 md:hidden">
+                        <div className="h-11 w-11 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow">
+                          <span className="text-white text-xs font-bold">{totalNilaiKontrak > 0 ? Math.round((suspendContracts / totalNilaiKontrak) * 100) : 0}%</span>
                         </div>
                       </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[10px] md:text-xs lg:text-sm text-orange-700 font-semibold">SUSPEND</span>
-                        <div className="text-xs md:text-sm lg:text-base font-bold text-orange-800 truncate leading-tight">Rp {Math.round(suspendContracts).toLocaleString('id-ID')}</div>
-                        <span className="text-[9px] md:text-[10px] lg:text-xs text-orange-600 block">
+
+                      {/* Desktop - Status Label (TOP) */}
+                      <div className="hidden md:block">
+                        <div className="text-xl font-bold text-orange-700 text-center mb-3">SUSPEND</div>
+                      </div>
+
+                      {/* Desktop - Percentage Badge (MIDDLE) */}
+                      <div className="hidden md:flex justify-center mb-4">
+                        <div className="h-20 w-20 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md">
+                          <span className="text-white text-2xl font-bold">{totalNilaiKontrak > 0 ? Math.round((suspendContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                        </div>
+                      </div>
+
+                      {/* Info (BOTTOM) */}
+                      <div className="flex-1 min-w-0 text-left md:text-center">
+                        <span className="text-[10px] md:text-sm text-orange-700 font-semibold block md:hidden">SUSPEND</span>
+                        <div className="text-xs md:text-lg lg:text-lg font-bold text-orange-800 truncate leading-tight">Rp {Math.round(suspendContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] md:text-sm text-orange-600 block mt-1 md:mt-2">
                           {filteredTargets.filter(t => {
                             const matchesStatus = t.status === 'SUSPEND';
                             const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
                             const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
                             return matchesStatus && matchesSertifikat && matchesTahun;
-                          }).length} Sertifikat  (base on EXP)
+                          }).length} Sertifikat
+                          <span className="hidden md:inline"> (base on EXP)</span>
                         </span>
                       </div>
                     </div>
 
                     {/* LOSS */}
-                    <div className="flex flex-row items-center gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-red-50 to-red-100/50 rounded-lg border border-red-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
-                      <div className="flex-shrink-0">
-                        <div className="h-11 w-11 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow">
-                          <span className="text-white text-xs md:text-sm lg:text-base font-bold">{totalNilaiKontrak > 0 ? Math.round((lossContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                    <div className="flex md:flex-col flex-row items-center md:items-stretch gap-2 md:gap-3 p-2 md:p-3 bg-gradient-to-br from-red-50 to-red-100/50 rounded-lg border border-red-200 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
+                      {/* Mobile - Percentage Circle */}
+                      <div className="flex-shrink-0 md:hidden">
+                        <div className="h-11 w-11 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow">
+                          <span className="text-white text-xs font-bold">{totalNilaiKontrak > 0 ? Math.round((lossContracts / totalNilaiKontrak) * 100) : 0}%</span>
                         </div>
                       </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[10px] md:text-xs lg:text-sm text-red-700 font-semibold">LOSS</span>
-                        <div className="text-xs md:text-sm lg:text-base font-bold text-red-800 truncate leading-tight">Rp {Math.round(lossContracts).toLocaleString('id-ID')}</div>
-                        <span className="text-[9px] md:text-[10px] lg:text-xs text-red-600 block">
+
+                      {/* Desktop - Status Label (TOP) */}
+                      <div className="hidden md:block">
+                        <div className="text-xl font-bold text-red-700 text-center mb-3">LOSS</div>
+                      </div>
+
+                      {/* Desktop - Percentage Badge (MIDDLE) */}
+                      <div className="hidden md:flex justify-center mb-4">
+                        <div className="h-20 w-20 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-md">
+                          <span className="text-white text-2xl font-bold">{totalNilaiKontrak > 0 ? Math.round((lossContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                        </div>
+                      </div>
+
+                      {/* Info (BOTTOM) */}
+                      <div className="flex-1 min-w-0 text-left md:text-center">
+                        <span className="text-[10px] md:text-sm text-red-700 font-semibold block md:hidden">LOSS</span>
+                        <div className="text-xs md:text-lg lg:text-lg font-bold text-red-800 truncate leading-tight">Rp {Math.round(lossContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] md:text-sm text-red-600 block mt-1 md:mt-2">
                           {filteredTargets.filter(t => {
                             const matchesStatus = t.status === 'LOSS';
                             const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
                             const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
                             return matchesStatus && matchesSertifikat && matchesTahun;
-                          }).length} Sertifikat  (base on EXP)
+                          }).length} Sertifikat
+                          <span className="hidden md:inline"> (base on EXP)</span>
                         </span>
                       </div>
                     </div>
 
                     {/* WAITING */}
-                    <div className="flex flex-row items-center gap-2 md:gap-3 p-2 md:p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex-shrink-0">
-                        <div className="h-11 w-11 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gray-500 flex items-center justify-center">
-                          <span className="text-white text-xs md:text-sm lg:text-base font-bold">{totalNilaiKontrak > 0 ? Math.round((waitingContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                    <div className="flex md:flex-col flex-row items-center md:items-stretch gap-2 md:gap-3 p-2 md:p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      {/* Mobile - Percentage Circle */}
+                      <div className="flex-shrink-0 md:hidden">
+                        <div className="h-11 w-11 rounded-full bg-gray-500 flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">{totalNilaiKontrak > 0 ? Math.round((waitingContracts / totalNilaiKontrak) * 100) : 0}%</span>
                         </div>
                       </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[10px] md:text-xs lg:text-sm text-gray-600 font-medium">WAITING</span>
-                        <div className="text-xs md:text-sm lg:text-base font-bold text-gray-700 truncate">Rp {Math.round(waitingContracts).toLocaleString('id-ID')}</div>
-                        <span className="text-[9px] md:text-[10px] lg:text-xs text-gray-600">
+
+                      {/* Desktop - Status Label (TOP) */}
+                      <div className="hidden md:block">
+                        <div className="text-xl font-bold text-gray-700 text-center mb-3">WAITING</div>
+                      </div>
+
+                      {/* Desktop - Percentage Badge (MIDDLE) */}
+                      <div className="hidden md:flex justify-center mb-4">
+                        <div className="h-20 w-20 rounded-full bg-gray-500 flex items-center justify-center shadow-md">
+                          <span className="text-white text-2xl font-bold">{totalNilaiKontrak > 0 ? Math.round((waitingContracts / totalNilaiKontrak) * 100) : 0}%</span>
+                        </div>
+                      </div>
+
+                      {/* Info (BOTTOM) */}
+                      <div className="flex-1 min-w-0 text-left md:text-center">
+                        <span className="text-[10px] md:text-sm text-gray-600 font-medium block md:hidden">WAITING</span>
+                        <div className="text-xs md:text-lg lg:text-lg font-bold text-gray-700 truncate">Rp {Math.round(waitingContracts).toLocaleString('id-ID')}</div>
+                        <span className="text-[9px] md:text-sm text-gray-600 block mt-1 md:mt-2">
                           {filteredTargets.filter(t => {
                             const matchesStatus = t.status === 'WAITING';
                             const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
                             const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
                             return matchesStatus && matchesSertifikat && matchesTahun;
-                          }).length} Sertifikat  (base on EXP)
+                          }).length} Sertifikat
+                          <span className="hidden md:inline"> (base on EXP)</span>
                         </span>
                       </div>
                     </div>
@@ -1857,6 +2317,8 @@ export default function CrmDataManagementPage() {
             })()}
           </CardContent>
         </Card>
+          </div>
+        </div>
 
         {/* Pencapaian Chart - Monthly Breakdown */}
         <Card>
@@ -4038,12 +4500,36 @@ export default function CrmDataManagementPage() {
                   const mrcTotalAmount = Math.round(mrcData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
 
                   // Calculate total by status from hargaTerupdate (except WAITING uses hargaKontrak)
-                  const mrcDoneAmount = Math.round(mrcData.filter(t => t.status === 'DONE').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                  // DONE amount: filter with bulanTtdNotif requirement + tahun (same as Total Target logic)
+                  const mrcDoneAmount = Math.round(
+                    mrcData
+                      .filter(t => {
+                        const isDone = t.status === 'DONE';
+                        const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
+                        const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
+                        const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+
+                        // Filter tahun dari bulanTtdNotif
+                        let matchesTahunTtdNotif = false;
+                        if (hasBulanTtdNotif) {
+                          if (filterTahun === 'all') {
+                            matchesTahunTtdNotif = true;
+                          } else {
+                            const ttdDate = new Date(t.bulanTtdNotif!);
+                            const ttdYear = ttdDate.getFullYear();
+                            matchesTahunTtdNotif = ttdYear.toString() === filterTahun;
+                          }
+                        }
+
+                        return isDone && isSertifikatMatch && hasBulanTtdNotif && matchesTahun && matchesTahunTtdNotif;
+                      })
+                      .reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0)
+                  );
                   const mrcProsesAmount = Math.round(mrcData.filter(t => t.status === 'PROSES').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
                   const mrcSuspendAmount = Math.round(mrcData.filter(t => t.status === 'SUSPEND').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
                   const mrcLossAmount = Math.round(mrcData.filter(t => t.status === 'LOSS').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
                   const mrcWaitingAmount = Math.round(mrcData.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
-                  const mrcLanjutAmount = Math.round(mrcData.filter(t => t.status === 'DONE').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                  const mrcLanjutAmount = mrcDoneAmount; // Use same value as doneAmount
                   const targetVisits = 100; // Sesuaikan dengan target tahunan
 
                   return (
@@ -4158,12 +4644,36 @@ export default function CrmDataManagementPage() {
                 const dhaTotalAmount = Math.round(dhaData.reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
 
                 // Calculate total by status from hargaTerupdate (except WAITING uses hargaKontrak)
-                const dhaDoneAmount = Math.round(dhaData.filter(t => t.status === 'DONE').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                // DONE amount: filter with bulanTtdNotif requirement + tahun (same as Total Target logic)
+                const dhaDoneAmount = Math.round(
+                  dhaData
+                    .filter(t => {
+                      const isDone = t.status === 'DONE';
+                      const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
+                      const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
+                      const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+
+                      // Filter tahun dari bulanTtdNotif
+                      let matchesTahunTtdNotif = false;
+                      if (hasBulanTtdNotif) {
+                        if (filterTahun === 'all') {
+                          matchesTahunTtdNotif = true;
+                        } else {
+                          const ttdDate = new Date(t.bulanTtdNotif!);
+                          const ttdYear = ttdDate.getFullYear();
+                          matchesTahunTtdNotif = ttdYear.toString() === filterTahun;
+                        }
+                      }
+
+                      return isDone && isSertifikatMatch && hasBulanTtdNotif && matchesTahun && matchesTahunTtdNotif;
+                    })
+                    .reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0)
+                );
                 const dhaProsesAmount = Math.round(dhaData.filter(t => t.status === 'PROSES').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
                 const dhaSuspendAmount = Math.round(dhaData.filter(t => t.status === 'SUSPEND').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
                 const dhaLossAmount = Math.round(dhaData.filter(t => t.status === 'LOSS').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
                 const dhaWaitingAmount = Math.round(dhaData.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
-                const dhaLanjutAmount = Math.round(dhaData.filter(t => t.status === 'DONE').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                const dhaLanjutAmount = dhaDoneAmount; // Use same value as doneAmount
                 const targetVisits = 100; // Sesuaikan dengan target tahunan
 
                   return (
