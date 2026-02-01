@@ -1179,6 +1179,25 @@ export default function CrmDataManagementPage() {
         {/* Actual Content - Only render when data is loaded */}
         {crmTargets && (
           <>
+            {/* Mobile Header - Only visible on mobile */}
+            <div className="lg:hidden bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-2xl p-6 mb-1 shadow-lg">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <BarChart3 className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h1 className="text-lg font-bold text-white leading-tight">CRM - Tools</h1>
+                  <p className="text-xs text-blue-100 font-medium">Dashboard Pencapaian</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-white/90 text-xs">
+                <span>Real-time Analytics</span>
+                <span className="px-2 py-1 bg-white/20 rounded-full backdrop-blur-sm">
+                  {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+              </div>
+            </div>
+
             {/* Header - Desktop Only */}
             <div className="hidden lg:flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -1434,7 +1453,7 @@ export default function CrmDataManagementPage() {
         </div>
 
         {/* Total Target Card & PIC CRM Cards - In same row */}
-        <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-2">
           {/* MRC Card - Takes 1 column */}
           {(filterPicCrm === 'all' || filterPicCrm === 'MRC') && (
             <div className="lg:col-span-1 order-1">
