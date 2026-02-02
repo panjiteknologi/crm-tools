@@ -139,6 +139,7 @@ export default defineSchema({
     alasan: v.optional(v.string()), // ALASAN
     category: v.optional(v.string()), // CATEGORY (GOLD, SILVER, BRONZE)
     kuadran: v.optional(v.string()), // KUADRAN
+    luarKota: v.optional(v.string()), // LUAR KOTA
     provinsi: v.string(), // PROVINSI
     kota: v.string(), // KOTA
     alamat: v.string(), // ALAMAT lengkap

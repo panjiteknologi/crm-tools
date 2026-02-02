@@ -14,6 +14,7 @@ export const insertCrmTarget = mutation({
     status: v.string(),
     alasan: v.optional(v.string()),
     category: v.optional(v.string()),
+    luarKota: v.optional(v.string()),
     provinsi: v.string(),
     kota: v.string(),
     alamat: v.string(),

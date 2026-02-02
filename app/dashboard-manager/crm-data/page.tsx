@@ -48,6 +48,7 @@ interface CrmTarget {
   alasan?: string;
   category?: string;
   kuadran?: string;
+  luarKota?: string;
   provinsi: string;
   kota: string;
   alamat: string;
@@ -86,6 +87,7 @@ interface CrmFormData {
   alasan?: string;
   category?: string;
   kuadran?: string;
+  luarKota?: string;
   provinsi: string;
   kota: string;
   alamat: string;
@@ -359,6 +361,15 @@ const FormDataRow = ({ row, index, onFieldChange, onRemove, totalRows, staffUser
           <option value="K3">K3</option>
           <option value="K4">K4</option>
         </select>
+      </td>
+      <td className="border border-border p-1 min-w-[100px]">
+        <input
+          type="text"
+          defaultValue={row.luarKota}
+          onChange={(e) => handleChange('luarKota', e.target.value)}
+          placeholder="Luar Kota"
+          className="w-full px-2 py-1.5 text-xs border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-primary rounded"
+        />
       </td>
       <td className="border border-border p-1 min-w-[100px]">
         <select
@@ -697,6 +708,7 @@ export default function CrmDataManagementPage() {
     alasan: '',
     category: '',
     kuadran: '',
+    luarKota: undefined,
     provinsi: '',
     kota: '',
     alamat: '',
@@ -1036,6 +1048,7 @@ export default function CrmDataManagementPage() {
       alasan: '',
       category: '',
       kuadran: '',
+      luarKota: '',
       provinsi: '',
       kota: '',
       alamat: '',
@@ -1114,6 +1127,7 @@ export default function CrmDataManagementPage() {
             alasan: row.alasan || undefined,
             category: row.category || undefined,
             kuadran: row.kuadran || undefined,
+            luarKota: row.luarKota || undefined,
             provinsi: row.provinsi,
             kota: row.kota,
             alamat: row.alamat,
@@ -1159,6 +1173,7 @@ export default function CrmDataManagementPage() {
         alasan: '',
         category: '',
         kuadran: '',
+        luarKota: '',
         provinsi: '',
         kota: '',
         alamat: '',
@@ -1214,25 +1229,14 @@ export default function CrmDataManagementPage() {
 
     // Start importing
     setIsImporting(true);
-    
+    toast.loading(`⏳ Processing ${file.name}...`, { id: 'import-toast', duration: Infinity });
 
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        
-        
-
-        // Show initial loading toast
-        toast.loading('📂 Reading Excel file...', { id: 'import-toast', duration: Infinity });
-
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        
 
         const workbook = XLSX.read(data, { type: 'array' });
-        
-
-        // Update progress
-        toast.loading('📊 Parsing Excel data...', { id: 'import-toast', duration: Infinity });
 
         // Get first sheet
         const sheetName = workbook.SheetNames[0];
@@ -1254,9 +1258,6 @@ export default function CrmDataManagementPage() {
         const headers = jsonData[0].map((h: any) => String(h).trim());
         
         const targets: any[] = [];
-
-        // Update progress
-        toast.loading(`🔄 Processing ${jsonData.length - 1} rows...`, { id: 'import-toast', duration: Infinity });
 
         // Process data rows
         for (let i = 1; i < jsonData.length; i++) {
@@ -1285,6 +1286,7 @@ export default function CrmDataManagementPage() {
             alasan: obj['alasan'] || obj['ALASAN'] || undefined,
             category: obj['category'] || obj['CATEGORY'] || undefined,
             kuadran: obj['kuadran'] || obj['KUADRAN'] || undefined,
+            luarKota: obj['luarKota'] || obj['LUAR KOTA'] || undefined,
             provinsi: obj['provinsi'] || obj['PROVINSI'] || '',
             kota: obj['kota'] || obj['KOTA'] || '',
             alamat: obj['alamat'] || obj['ALAMAT'] || '',
@@ -2084,6 +2086,7 @@ export default function CrmDataManagementPage() {
                     <TableHead>Alasan</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Kuadran</TableHead>
+                    <TableHead>Luar Kota</TableHead>
                     <TableHead>Provinsi</TableHead>
                     <TableHead>Kota</TableHead>
                     <TableHead>Alamat</TableHead>
@@ -2159,6 +2162,7 @@ export default function CrmDataManagementPage() {
                           ) : '-'}
                         </TableCell>
                         <TableCell>{target.kuadran || '-'}</TableCell>
+                        <TableCell>{target.luarKota || '-'}</TableCell>
                         <TableCell>{target.provinsi || '-'}</TableCell>
                         <TableCell>{target.kota || '-'}</TableCell>
                         <TableCell className="max-w-xs truncate" title={target.alamat}>{target.alamat || '-'}</TableCell>
@@ -2339,6 +2343,7 @@ export default function CrmDataManagementPage() {
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[100px]">STD</th>
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[100px]">Category</th>
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[100px]">Kuadran</th>
+                      <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[100px]">Luar Kota</th>
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[100px]">Akreditasi</th>
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[100px]">Cat Akre</th>
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[100px]">EA Code</th>
@@ -2563,6 +2568,8 @@ export default function CrmDataManagementPage() {
                     status: '',
                     alasan: '',
                     category: '',
+                    kuadran: '',
+                    luarKota: '',
                     provinsi: '',
                     kota: '',
                     alamat: '',

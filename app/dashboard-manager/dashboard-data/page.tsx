@@ -1546,7 +1546,7 @@ export default function CrmDataManagementPage() {
                     const mrcWaitingAmount = Math.round(mrcData.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
 
                     // Calculate visits - mrcData already has all filters from filteredTargets
-                    const mrcVisitsTarget = mrcData.length / 2;
+                    const mrcVisitsTarget = Math.round(mrcData.length / 2);
                     const mrcVisits = mrcData.filter(t => (t.statusKunjungan || '').trim().toUpperCase() === 'VISITED').length;
 
                     return (
@@ -1725,7 +1725,7 @@ export default function CrmDataManagementPage() {
                     const dhaWaitingAmount = Math.round(dhaData.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
 
                     // Calculate visits - dhaData already has all filters from filteredTargets
-                    const dhaVisitsTarget = dhaData.length /2;
+                    const dhaVisitsTarget = Math.round(dhaData.length /2);
                     const dhaVisits = dhaData.filter(t => (t.statusKunjungan || '').trim().toUpperCase() === 'VISITED').length;
 
                     return (
