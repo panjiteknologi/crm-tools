@@ -1307,6 +1307,8 @@ export default function CrmDataManagementPage() {
             statusSertifikat: obj['statusSertifikat'] || obj['STATUS SERTIFIKAT'] || undefined,
             tanggalKunjungan: parseDate(obj['tanggalKunjungan'] || obj['TANGGAL KUNJUNGAN']),
             statusKunjungan: obj['statusKunjungan'] || obj['STATUS KUNJUNGAN'] || undefined,
+            catatanKunjungan: obj['catatanKunjungan'] || obj['CATATAN KUNJUNGAN'] || undefined,
+            fotoBuktiKunjungan: obj['fotoBuktiKunjungan'] || obj['FOTO BUKTI KUNJUNGAN'] || undefined,
             created_by: currentUser?._id, // Add current user ID
           };
 
@@ -1584,40 +1586,43 @@ export default function CrmDataManagementPage() {
       return;
     }
 
-    // Define Excel headers
+    // Define Excel headers (matching field names in Convex schema)
     const headers = [
-      'TAHUN',
-      'BULAN EXP DATE',
-      'PRODUK',
-      'PIC CRM',
-      'SALES',
-      'NAMA ASSOSIATE',
-      'DIRECT OR ASSOCIATE',
-      'NAMA PERUSAHAAN',
-      'STATUS',
-      'ALASAN',
-      'CATEGORY',
-      'KUADRAN',
-      'PROVINSI',
-      'KOTA',
-      'ALAMAT',
-      'AKREDITASI',
-      'CAT AKRE',
-      'EA CODE',
-      'STD',
-      'IA DATE',
-      'EXP DATE',
-      'TAHAP AUDIT',
-      'HARGA KONTRAK',
-      'BULAN TTD NOTIF',
-      'HARGA TERUPDATE',
-      'TRIMMING VALUE',
-      'LOSS VALUE',
-      'CASHBACK',
-      'TERMIN PEMBAYARAN',
-      'STATUS SERTIFIKAT',
-      'TANGGAL KUNJUNGAN',
-      'STATUS KUNJUNGAN',
+      'tahun',
+      'bulanExpDate',
+      'produk',
+      'picCrm',
+      'sales',
+      'namaAssociate',
+      'directOrAssociate',
+      'namaPerusahaan',
+      'status',
+      'alasan',
+      'category',
+      'kuadran',
+      'luarKota',
+      'provinsi',
+      'kota',
+      'alamat',
+      'akreditasi',
+      'catAkre',
+      'eaCode',
+      'std',
+      'iaDate',
+      'expDate',
+      'tahapAudit',
+      'hargaKontrak',
+      'bulanTtdNotif',
+      'hargaTerupdate',
+      'trimmingValue',
+      'lossValue',
+      'cashback',
+      'terminPembayaran',
+      'statusSertifikat',
+      'tanggalKunjungan',
+      'statusKunjungan',
+      'catatanKunjungan',
+      'fotoBuktiKunjungan',
     ];
 
     // Convert data to Excel format
@@ -1636,6 +1641,7 @@ export default function CrmDataManagementPage() {
         target.alasan || '',
         target.category || '',
         target.kuadran || '',
+        target.luarKota || '',
         target.provinsi || '',
         target.kota || '',
         target.alamat || '',
@@ -1656,6 +1662,8 @@ export default function CrmDataManagementPage() {
         target.statusSertifikat || '',
         target.tanggalKunjungan || '',
         target.statusKunjungan || '',
+        target.catatanKunjungan || '',
+        target.fotoBuktiKunjungan || '',
       ])
     ];
 
@@ -1664,38 +1672,41 @@ export default function CrmDataManagementPage() {
 
     // Set column widths
     const colWidths = [
-      { wch: 10 }, // TAHUN
-      { wch: 15 }, // BULAN EXP DATE
-      { wch: 10 }, // PRODUK
-      { wch: 10 }, // PIC CRM
-      { wch: 10 }, // SALES
-      { wch: 15 }, // NAMA ASSOSIATE
-      { wch: 18 }, // DIRECT OR ASSOCIATE
-      { wch: 40 }, // NAMA PERUSAHAAN
-      { wch: 12 }, // STATUS
-      { wch: 30 }, // ALASAN
-      { wch: 10 }, // CATEGORY
-      { wch: 10 }, // KUADRAN
-      { wch: 15 }, // PROVINSI
-      { wch: 20 }, // KOTA
-      { wch: 50 }, // ALAMAT
-      { wch: 12 }, // AKREDITASI
-      { wch: 10 }, // CAT AKRE
-      { wch: 10 }, // EA CODE
-      { wch: 10 }, // STD
-      { wch: 12 }, // IA DATE
-      { wch: 12 }, // EXP DATE
-      { wch: 12 }, // TAHAP AUDIT
-      { wch: 15 }, // HARGA KONTRAK
-      { wch: 15 }, // BULAN TTD NOTIF
-      { wch: 15 }, // HARGA TERUPDATE
-      { wch: 15 }, // TRIMMING VALUE
-      { wch: 12 }, // LOSS VALUE
-      { wch: 12 }, // CASHBACK
-      { wch: 18 }, // TERMIN PEMBAYARAN
-      { wch: 15 }, // STATUS SERTIFIKAT
-      { wch: 15 }, // TANGGAL KUNJUNGAN
-      { wch: 15 }, // STATUS KUNJUNGAN
+      { wch: 10 }, // tahun
+      { wch: 15 }, // bulanExpDate
+      { wch: 10 }, // produk
+      { wch: 10 }, // picCrm
+      { wch: 10 }, // sales
+      { wch: 15 }, // namaAssociate
+      { wch: 18 }, // directOrAssociate
+      { wch: 40 }, // namaPerusahaan
+      { wch: 12 }, // status
+      { wch: 30 }, // alasan
+      { wch: 10 }, // category
+      { wch: 10 }, // kuadran
+      { wch: 12 }, // luarKota
+      { wch: 15 }, // provinsi
+      { wch: 20 }, // kota
+      { wch: 50 }, // alamat
+      { wch: 12 }, // akreditasi
+      { wch: 10 }, // catAkre
+      { wch: 10 }, // eaCode
+      { wch: 10 }, // std
+      { wch: 12 }, // iaDate
+      { wch: 12 }, // expDate
+      { wch: 12 }, // tahapAudit
+      { wch: 15 }, // hargaKontrak
+      { wch: 15 }, // bulanTtdNotif
+      { wch: 15 }, // hargaTerupdate
+      { wch: 15 }, // trimmingValue
+      { wch: 12 }, // lossValue
+      { wch: 12 }, // cashback
+      { wch: 18 }, // terminPembayaran
+      { wch: 15 }, // statusSertifikat
+      { wch: 15 }, // tanggalKunjungan
+      { wch: 15 }, // statusKunjungan
+      { wch: 30 }, // catatanKunjungan
+      { wch: 40 }, // fotoBuktiKunjungan
     ];
     worksheet['!cols'] = colWidths;
 
@@ -2001,14 +2012,26 @@ export default function CrmDataManagementPage() {
                 Delete ({selectedIds.size})
               </Button>
             )}
-            <Button onClick={handleExcelExport} variant="outline" size="sm" disabled={isImporting || selectedIds.size > 0}>
+            <Button
+              onClick={handleExcelExport}
+              variant="outline"
+              size="sm"
+              disabled={isImporting || selectedIds.size > 0}
+              className="border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700 hover:text-green-700"
+            >
               <Download className="h-4 w-4 mr-2" />
-              Export
+              Download All Data
             </Button>
-            <Button variant="outline" size="sm" asChild disabled={isImporting || selectedIds.size > 0}>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              disabled={isImporting || selectedIds.size > 0}
+              className="border-blue-600 text-blue-600 hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700"
+            >
               <label htmlFor="excel-upload" className={`cursor-pointer ${isImporting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 <Upload className="h-4 w-4 mr-2" />
-                {isImporting ? '...' : 'Import'}
+                {isImporting ? '...' : 'Import Data'}
                 <input
                   id="excel-upload"
                   type="file"
@@ -2026,36 +2049,147 @@ export default function CrmDataManagementPage() {
           </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription className="text-xs">Total Records</CardDescription>
-              <CardTitle className="text-2xl">{crmTargets?.length || 0}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription className="text-xs">Filtered Results</CardDescription>
-              <CardTitle className="text-2xl">{filteredTargets.length}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription className="text-xs">Visited</CardDescription>
-              <CardTitle className="text-2xl text-green-600">
-                {crmTargets?.filter(t => t.tanggalKunjungan).length || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription className="text-xs">Pending Visit</CardDescription>
-              <CardTitle className="text-2xl text-orange-600">
-                {crmTargets?.filter(t => !t.tanggalKunjungan).length || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
+        {/* Statistics Cards - 2 Column Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Left Column */}
+          <div className="space-y-3">
+            {/* Main Metrics */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">📊 Main Metrics:</span>
+              <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                <div className="bg-blue-50 rounded px-2 py-1 border border-blue-200 text-center">
+                  <p className="text-xs text-blue-700 font-semibold">Records <span className="font-bold">({crmTargets?.length || 0})</span></p>
+                </div>
+                <div className="bg-purple-50 rounded px-2 py-1 border border-purple-200 text-center">
+                  <p className="text-xs text-purple-700 font-semibold">Companies <span className="font-bold">({new Set((crmTargets || []).map(t => t.namaPerusahaan)).size})</span></p>
+                </div>
+              </div>
+            </div>
+
+            {/* Status */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">📋 Status:</span>
+              <div className="flex-1 grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                <div className="bg-purple-50 rounded px-2 py-1 border border-purple-200 text-center">
+                  <p className="text-xs text-purple-700 font-semibold">DONE <span className="font-bold">({(crmTargets || []).filter(t => t.status && t.status.toUpperCase() === 'DONE').length})</span></p>
+                </div>
+                <div className="bg-blue-50 rounded px-2 py-1 border border-blue-200 text-center">
+                  <p className="text-xs text-blue-700 font-semibold">PROSES <span className="font-bold">({(crmTargets || []).filter(t => t.status && t.status.toUpperCase() === 'PROSES').length})</span></p>
+                </div>
+                <div className="bg-orange-50 rounded px-2 py-1 border border-orange-200 text-center">
+                  <p className="text-xs text-orange-700 font-semibold">SUSPEND <span className="font-bold">({(crmTargets || []).filter(t => t.status && t.status.toUpperCase() === 'SUSPEND').length})</span></p>
+                </div>
+                <div className="bg-red-50 rounded px-2 py-1 border border-red-200 text-center">
+                  <p className="text-xs text-red-700 font-semibold">LOSS <span className="font-bold">({(crmTargets || []).filter(t => t.status && t.status.toUpperCase() === 'LOSS').length})</span></p>
+                </div>
+                <div className="bg-gray-50 rounded px-2 py-1 border border-gray-200 text-center">
+                  <p className="text-xs text-gray-700 font-semibold">WAITING <span className="font-bold">({(crmTargets || []).filter(t => t.status && t.status.toUpperCase() === 'WAITING').length})</span></p>
+                </div>
+              </div>
+            </div>
+
+            {/* Direct/Associate */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">👥 Direct/Associate:</span>
+              <div className="flex-1 grid grid-cols-2 gap-1.5">
+                <div className="bg-cyan-50 rounded px-2 py-1 border border-cyan-200 text-center">
+                  <p className="text-xs text-cyan-700 font-semibold">Direct <span className="font-bold">({(crmTargets || []).filter(t => t.directOrAssociate && t.directOrAssociate.toUpperCase() === 'DIRECT').length})</span></p>
+                </div>
+                <div className="bg-pink-50 rounded px-2 py-1 border border-pink-200 text-center">
+                  <p className="text-xs text-pink-700 font-semibold">Associate <span className="font-bold">({(crmTargets || []).filter(t => t.directOrAssociate && t.directOrAssociate.toUpperCase() === 'ASSOCIATE').length})</span></p>
+                </div>
+              </div>
+            </div>
+
+            {/* Kuadran */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">🎯 Kuadran:</span>
+              <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                <div className="bg-violet-50 rounded px-2 py-1 border border-violet-200 text-center">
+                  <p className="text-xs text-violet-700 font-semibold">K1 <span className="font-bold">({(crmTargets || []).filter(t => t.kuadran && t.kuadran.toUpperCase() === 'K1').length})</span></p>
+                </div>
+                <div className="bg-fuchsia-50 rounded px-2 py-1 border border-fuchsia-200 text-center">
+                  <p className="text-xs text-fuchsia-700 font-semibold">K2 <span className="font-bold">({(crmTargets || []).filter(t => t.kuadran && t.kuadran.toUpperCase() === 'K2').length})</span></p>
+                </div>
+                <div className="bg-violet-50 rounded px-2 py-1 border border-violet-200 text-center hidden sm:block">
+                  <p className="text-xs text-violet-700 font-semibold">K3 <span className="font-bold">({(crmTargets || []).filter(t => t.kuadran && t.kuadran.toUpperCase() === 'K3').length})</span></p>
+                </div>
+                <div className="bg-fuchsia-50 rounded px-2 py-1 border border-fuchsia-200 text-center hidden sm:block">
+                  <p className="text-xs text-fuchsia-700 font-semibold">K4 <span className="font-bold">({(crmTargets || []).filter(t => t.kuadran && t.kuadran.toUpperCase() === 'K4').length})</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-3">
+            {/* Lokasi */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">📍 Lokasi:</span>
+              <div className="flex-1 grid grid-cols-2 gap-1.5">
+                <div className="bg-amber-50 rounded px-2 py-1 border border-amber-200 text-center">
+                  <p className="text-xs text-amber-700 font-semibold">Luar Kota <span className="font-bold">({(crmTargets || []).filter(t => t.luarKota && t.luarKota.toUpperCase().includes('LUAR')).length})</span></p>
+                </div>
+                <div className="bg-yellow-50 rounded px-2 py-1 border border-yellow-200 text-center">
+                  <p className="text-xs text-yellow-700 font-semibold">Dalam Kota <span className="font-bold">({(crmTargets || []).filter(t => !t.luarKota || !t.luarKota.toUpperCase().includes('LUAR')).length})</span></p>
+                </div>
+              </div>
+            </div>
+
+            {/* Kategori Akreditasi */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">🏅 Kategori Akreditasi:</span>
+              <div className="flex-1 grid grid-cols-3 gap-1.5">
+                <div className="bg-emerald-50 rounded px-2 py-1 border border-emerald-200 text-center">
+                  <p className="text-xs text-emerald-700 font-semibold">KAN <span className="font-bold">({(crmTargets || []).filter(t => t.catAkre && t.catAkre.toUpperCase() === 'KAN').length})</span></p>
+                </div>
+                <div className="bg-slate-50 rounded px-2 py-1 border border-slate-200 text-center">
+                  <p className="text-xs text-slate-700 font-semibold">NON AKRE <span className="font-bold">({(crmTargets || []).filter(t => t.catAkre && t.catAkre.toUpperCase() === 'NON AKRE').length})</span></p>
+                </div>
+                <div className="bg-blue-50 rounded px-2 py-1 border border-blue-200 text-center">
+                  <p className="text-xs text-blue-900 font-semibold">INTERNASIONAL <span className="font-bold">({(crmTargets || []).filter(t => t.catAkre && t.catAkre.toUpperCase() === 'INTERNASIONAL').length})</span></p>
+                </div>
+              </div>
+            </div>
+
+            {/* Status Terbit */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">📜 Status Terbit:</span>
+              <div className="flex-1 grid grid-cols-2 gap-1.5">
+                <div className="bg-green-50 rounded px-2 py-1 border border-green-200 text-center">
+                  <p className="text-xs text-green-700 font-semibold">Terbit <span className="font-bold">({(crmTargets || []).filter(t => t.statusSertifikat && t.statusSertifikat.toUpperCase().includes('TERBIT')).length})</span></p>
+                </div>
+                <div className="bg-red-50 rounded px-2 py-1 border border-red-200 text-center">
+                  <p className="text-xs text-red-700 font-semibold">Belum <span className="font-bold">({(crmTargets || []).filter(t => !t.statusSertifikat || t.statusSertifikat.toUpperCase().includes('BELUM')).length})</span></p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tahapan Audit */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">🔍 Tahapan Audit:</span>
+              <div className="flex-1 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-1.5">
+                <div className="bg-indigo-50 rounded px-2 py-1 border border-indigo-200 text-center">
+                  <p className="text-xs text-indigo-700 font-semibold">IA <span className="font-bold">({(crmTargets || []).filter(t => t.tahapAudit && t.tahapAudit.toUpperCase() === 'IA').length})</span></p>
+                </div>
+                <div className="bg-rose-50 rounded px-2 py-1 border border-rose-200 text-center">
+                  <p className="text-xs text-rose-700 font-semibold">RC <span className="font-bold">({(crmTargets || []).filter(t => t.tahapAudit && t.tahapAudit.toUpperCase() === 'RC').length})</span></p>
+                </div>
+                <div className="bg-sky-50 rounded px-2 py-1 border border-sky-200 text-center">
+                  <p className="text-xs text-sky-700 font-semibold">SV1 <span className="font-bold">({(crmTargets || []).filter(t => t.tahapAudit && t.tahapAudit.toUpperCase() === 'SV1').length})</span></p>
+                </div>
+                <div className="bg-blue-50 rounded px-2 py-1 border border-blue-200 text-center">
+                  <p className="text-xs text-blue-700 font-semibold">SV2 <span className="font-bold">({(crmTargets || []).filter(t => t.tahapAudit && t.tahapAudit.toUpperCase() === 'SV2').length})</span></p>
+                </div>
+                <div className="bg-sky-50 rounded px-2 py-1 border border-sky-200 text-center hidden sm:block">
+                  <p className="text-xs text-sky-700 font-semibold">SV3 <span className="font-bold">({(crmTargets || []).filter(t => t.tahapAudit && t.tahapAudit.toUpperCase() === 'SV3').length})</span></p>
+                </div>
+                <div className="bg-blue-50 rounded px-2 py-1 border border-blue-200 text-center hidden sm:block">
+                  <p className="text-xs text-blue-700 font-semibold">SV4 <span className="font-bold">({(crmTargets || []).filter(t => t.tahapAudit && t.tahapAudit.toUpperCase() === 'SV4').length})</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Table */}
