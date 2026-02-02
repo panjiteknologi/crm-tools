@@ -2165,12 +2165,12 @@ export default function CrmDataManagementPage() {
         </div>
 
         {/* Statistics Cards - Desktop 2 Column, Mobile Stacked with Certificates at Bottom */}
-        <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4">
+        <div className="lg:grid lg:grid-cols-2 lg:gap-2">
           {/* Top Section - Always shows first on all screens */}
-          <div className="space-y-3 lg:contents">
+          <div className="lg:contents">
             {/* Main Metrics - Spans full width on desktop */}
-            <div className="lg:col-span-2">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center">
+              <div className="flex items-center">
                 <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">📊 Main Metrics:</span>
                 <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                   <div className="bg-blue-50 rounded px-2 py-1 border border-blue-200 text-center">
@@ -2184,7 +2184,7 @@ export default function CrmDataManagementPage() {
             </div>
 
             {/* Status */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">📋 Status:</span>
               <div className="flex-1 grid grid-cols-3 sm:grid-cols-5 gap-1.5">
                 <div
@@ -2245,37 +2245,8 @@ export default function CrmDataManagementPage() {
               </div>
             </div>
 
-            {/* Direct/Associate */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">👥 Direct/Associate:</span>
-              <div className="flex-1 grid grid-cols-2 gap-1.5">
-                <div
-                  className={`bg-cyan-50 rounded px-2 py-1 border border-cyan-200 text-center cursor-pointer hover:ring-2 hover:ring-cyan-400 transition-all ${
-                    quickFilter?.field === 'directOrAssociate' && quickFilter?.value === 'DIRECT' ? 'ring-2 ring-cyan-600' : ''
-                  }`}
-                  onClick={() => quickFilter?.field === 'directOrAssociate' && quickFilter?.value === 'DIRECT'
-                    ? clearQuickFilter()
-                    : handleQuickFilter('directOrAssociate', 'DIRECT')
-                  }
-                >
-                  <p className="text-xs text-cyan-700 font-semibold">Direct <span className="font-bold">({(crmTargets || []).filter(t => t.directOrAssociate && t.directOrAssociate.toUpperCase() === 'DIRECT').length})</span></p>
-                </div>
-                <div
-                  className={`bg-pink-50 rounded px-2 py-1 border border-pink-200 text-center cursor-pointer hover:ring-2 hover:ring-pink-400 transition-all ${
-                    quickFilter?.field === 'directOrAssociate' && quickFilter?.value === 'ASSOCIATE' ? 'ring-2 ring-pink-600' : ''
-                  }`}
-                  onClick={() => quickFilter?.field === 'directOrAssociate' && quickFilter?.value === 'ASSOCIATE'
-                    ? clearQuickFilter()
-                    : handleQuickFilter('directOrAssociate', 'ASSOCIATE')
-                  }
-                >
-                  <p className="text-xs text-pink-700 font-semibold">Associate <span className="font-bold">({(crmTargets || []).filter(t => t.directOrAssociate && t.directOrAssociate.toUpperCase() === 'ASSOCIATE').length})</span></p>
-                </div>
-              </div>
-            </div>
-
             {/* Kuadran */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">🎯 Kuadran:</span>
               <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                 <div
@@ -2326,7 +2297,7 @@ export default function CrmDataManagementPage() {
             </div>
 
             {/* Lokasi */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">📍 Lokasi:</span>
               <div className="flex-1 grid grid-cols-2 gap-1.5">
                 <div
@@ -2357,10 +2328,10 @@ export default function CrmDataManagementPage() {
         </div>
 
         {/* Sertifikat Section - Always shows at the bottom on mobile */}
-        <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:mt-0">
+        <div className="lg:grid lg:grid-cols-2 lg:gap-2">
           <div className="lg:contents">
             {/* Kategori Akreditasi */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">🏅 Kategori Akreditasi:</span>
               <div className="flex-1 grid grid-cols-3 gap-1.5">
                 <div
@@ -2400,7 +2371,7 @@ export default function CrmDataManagementPage() {
             </div>
 
             {/* Status Terbit */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">📜 Status Terbit:</span>
               <div className="flex-1 grid grid-cols-2 gap-1.5">
                 <div
@@ -2429,7 +2400,7 @@ export default function CrmDataManagementPage() {
             </div>
 
             {/* Tahapan Audit */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">🔍 Tahapan Audit:</span>
               <div className="flex-1 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-1.5">
                 <div
@@ -2497,6 +2468,35 @@ export default function CrmDataManagementPage() {
                   }
                 >
                   <p className="text-xs text-blue-700 font-semibold">SV4 <span className="font-bold">({(crmTargets || []).filter(t => t.tahapAudit && t.tahapAudit.toUpperCase() === 'SV4').length})</span></p>
+                </div>
+              </div>
+            </div>
+
+            {/* Direct/Associate */}
+            <div className="flex items-center">
+              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44">👥 Direct/Associate:</span>
+              <div className="flex-1 grid grid-cols-2 gap-1.5">
+                <div
+                  className={`bg-cyan-50 rounded px-2 py-1 border border-cyan-200 text-center cursor-pointer hover:ring-2 hover:ring-cyan-400 transition-all ${
+                    quickFilter?.field === 'directOrAssociate' && quickFilter?.value === 'DIRECT' ? 'ring-2 ring-cyan-600' : ''
+                  }`}
+                  onClick={() => quickFilter?.field === 'directOrAssociate' && quickFilter?.value === 'DIRECT'
+                    ? clearQuickFilter()
+                    : handleQuickFilter('directOrAssociate', 'DIRECT')
+                  }
+                >
+                  <p className="text-xs text-cyan-700 font-semibold">Direct <span className="font-bold">({(crmTargets || []).filter(t => t.directOrAssociate && t.directOrAssociate.toUpperCase() === 'DIRECT').length})</span></p>
+                </div>
+                <div
+                  className={`bg-pink-50 rounded px-2 py-1 border border-pink-200 text-center cursor-pointer hover:ring-2 hover:ring-pink-400 transition-all ${
+                    quickFilter?.field === 'directOrAssociate' && quickFilter?.value === 'ASSOCIATE' ? 'ring-2 ring-pink-600' : ''
+                  }`}
+                  onClick={() => quickFilter?.field === 'directOrAssociate' && quickFilter?.value === 'ASSOCIATE'
+                    ? clearQuickFilter()
+                    : handleQuickFilter('directOrAssociate', 'ASSOCIATE')
+                  }
+                >
+                  <p className="text-xs text-pink-700 font-semibold">Associate <span className="font-bold">({(crmTargets || []).filter(t => t.directOrAssociate && t.directOrAssociate.toUpperCase() === 'ASSOCIATE').length})</span></p>
                 </div>
               </div>
             </div>
