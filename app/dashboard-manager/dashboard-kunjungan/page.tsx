@@ -1153,21 +1153,16 @@ export default function DashboardKunjunganPage() {
                                   {picDayCompanyGroups.slice(0, 2).map((task, taskIndex) => (
                                     <div
                                       key={taskIndex}
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        setSelectedTask(task)
-                                        setIsEditModalOpen(true)
-                                      }}
                                       className={`
-                                        text-[8px] px-1 py-0.5 rounded truncate cursor-pointer
+                                        text-[8px] px-1 py-0.5 rounded truncate
                                         ${task.statusKunjungan === 'VISITED'
-                                          ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                          ? 'bg-green-100 text-green-700 border border-green-300'
                                           : task.statusKunjungan === 'NOT YET'
-                                            ? 'bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-300'
-                                            : 'bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300'
+                                            ? 'bg-orange-100 text-orange-700 border border-orange-300'
+                                            : 'bg-blue-100 text-blue-700 border border-blue-300'
                                         }
                                       `}
-                                      title={`${task.namaPerusahaan} - Click to edit`}
+                                      title={task.namaPerusahaan}
                                     >
                                       {task.namaPerusahaan.length > 10
                                         ? task.namaPerusahaan.substring(0, 10) + '..'
