@@ -239,41 +239,41 @@ export const createCrmTarget = mutation({
 export const updateCrmTarget = mutation({
   args: {
     id: v.id("crmTargets"),
-    tahun: v.optional(v.string()),
-    bulanExpDate: v.optional(v.string()),
-    produk: v.optional(v.string()),
-    picCrm: v.optional(v.string()),
-    sales: v.optional(v.string()),
-    namaAssociate: v.optional(v.string()),
-    directOrAssociate: v.optional(v.string()),
-    namaPerusahaan: v.optional(v.string()),
-    status: v.optional(v.string()),
-    alasan: v.optional(v.string()),
-    category: v.optional(v.string()),
-    kuadran: v.optional(v.string()),
-    luarKota: v.optional(v.string()),
-    provinsi: v.optional(v.string()),
-    kota: v.optional(v.string()),
-    alamat: v.optional(v.string()),
-    akreditasi: v.optional(v.string()),
-    catAkre: v.optional(v.string()),
-    eaCode: v.optional(v.string()),
-    std: v.optional(v.string()),
-    iaDate: v.optional(v.string()),
-    expDate: v.optional(v.string()),
-    tahapAudit: v.optional(v.string()),
-    hargaKontrak: v.optional(v.number()),
-    bulanTtdNotif: v.optional(v.string()),
-    hargaTerupdate: v.optional(v.number()),
-    trimmingValue: v.optional(v.number()),
-    lossValue: v.optional(v.number()),
-    cashback: v.optional(v.number()),
-    terminPembayaran: v.optional(v.string()),
-    statusSertifikat: v.optional(v.string()),
-    tanggalKunjungan: v.optional(v.string()),
-    statusKunjungan: v.optional(v.string()),
-    catatanKunjungan: v.optional(v.string()),
-    fotoBuktiKunjungan: v.optional(v.string()),
+    tahun: v.optional(v.union(v.string(), v.null())),
+    bulanExpDate: v.optional(v.union(v.string(), v.null())),
+    produk: v.optional(v.union(v.string(), v.null())),
+    picCrm: v.optional(v.union(v.string(), v.null())),
+    sales: v.optional(v.union(v.string(), v.null())),
+    namaAssociate: v.optional(v.union(v.string(), v.null())),
+    directOrAssociate: v.optional(v.union(v.string(), v.null())),
+    namaPerusahaan: v.optional(v.union(v.string(), v.null())),
+    status: v.optional(v.union(v.string(), v.null())),
+    alasan: v.optional(v.union(v.string(), v.null())),
+    category: v.optional(v.union(v.string(), v.null())),
+    kuadran: v.optional(v.union(v.string(), v.null())),
+    luarKota: v.optional(v.union(v.string(), v.null())),
+    provinsi: v.optional(v.union(v.string(), v.null())),
+    kota: v.optional(v.union(v.string(), v.null())),
+    alamat: v.optional(v.union(v.string(), v.null())),
+    akreditasi: v.optional(v.union(v.string(), v.null())),
+    catAkre: v.optional(v.union(v.string(), v.null())),
+    eaCode: v.optional(v.union(v.string(), v.null())),
+    std: v.optional(v.union(v.string(), v.null())),
+    iaDate: v.optional(v.union(v.string(), v.null())),
+    expDate: v.optional(v.union(v.string(), v.null())),
+    tahapAudit: v.optional(v.union(v.string(), v.null())),
+    hargaKontrak: v.optional(v.union(v.number(), v.null())),
+    bulanTtdNotif: v.optional(v.union(v.string(), v.null())),
+    hargaTerupdate: v.optional(v.union(v.number(), v.null())),
+    trimmingValue: v.optional(v.union(v.number(), v.null())),
+    lossValue: v.optional(v.union(v.number(), v.null())),
+    cashback: v.optional(v.union(v.number(), v.null())),
+    terminPembayaran: v.optional(v.union(v.string(), v.null())),
+    statusSertifikat: v.optional(v.union(v.string(), v.null())),
+    tanggalKunjungan: v.optional(v.union(v.string(), v.null())),
+    statusKunjungan: v.optional(v.union(v.string(), v.null())),
+    catatanKunjungan: v.optional(v.union(v.string(), v.null())),
+    fotoBuktiKunjungan: v.optional(v.union(v.string(), v.null())),
     updated_by: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
@@ -285,13 +285,40 @@ export const updateCrmTarget = mutation({
       throw new Error("CRM Target not found");
     }
 
-    // Update only provided fields
-    const updates: any = { ...rest, updatedAt: Date.now() };
+    // Build updates object
+    const updates: any = { updatedAt: Date.now() };
+
+    // Process each field
+    for (const [key, value] of Object.entries(rest)) {
+      // Skip undefined fields (don't update)
+      if (value === undefined) {
+        continue;
+      }
+      // Include null fields and all other values
+      updates[key] = value;
+    }
+
     if (updated_by) {
       updates.updated_by = updated_by;
     }
 
-    await ctx.db.patch(id, updates);
+    // Check if we need to unset any fields (fields with null value)
+    const hasNullFields = Object.entries(rest).some(([key, value]) => value === null);
+
+    if (hasNullFields) {
+      // Use replace to fully replace the document (this will remove fields with null)
+      const merged = { ...existing, ...updates };
+      // Remove fields that are null in updates
+      for (const [key, value] of Object.entries(rest)) {
+        if (value === null) {
+          delete merged[key];
+        }
+      }
+      await ctx.db.replace(id, merged);
+    } else {
+      // Use patch for normal updates
+      await ctx.db.patch(id, updates);
+    }
 
     return id;
   },

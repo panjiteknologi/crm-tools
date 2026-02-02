@@ -49,6 +49,7 @@ import { FilterPicCrmSection } from "@/components/filters/FilterPicCrmSection"
 import { FilterKunjunganSection } from "@/components/filters/FilterKunjunganSection"
 import { InfinityLoader } from "@/components/ui/infinity-loader"
 import { EditKunjunganDialog } from "@/components/crm-edit-kunjungan-dialog"
+import { MassUpdateKunjunganDialog } from "@/components/crm-mass-update-kunjungan-dialog"
 
 import { IconCalendar, IconMapPin, IconPhone, IconBuilding, IconSearch, IconFilter, IconCheck, IconX, IconClock, IconCalendarTime, IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
@@ -457,11 +458,6 @@ export default function DashboardKunjunganPage() {
   const [expandedCompanies, setExpandedCompanies] = React.useState<Set<string>>(new Set());
   const [isMassUpdateModalOpen, setIsMassUpdateModalOpen] = React.useState(false);
   const [selectedCompanyForUpdate, setSelectedCompanyForUpdate] = React.useState<string | null>(null);
-  const [massUpdateTanggal, setMassUpdateTanggal] = React.useState<string>("");
-  const [massUpdateStatus, setMassUpdateStatus] = React.useState<string>("");
-  const [massUpdateCatatan, setMassUpdateCatatan] = React.useState<string>("");
-  const [massUpdateFoto, setMassUpdateFoto] = React.useState<string | null>(null);
-  const [isMassUploading, setIsMassUploading] = React.useState(false);
 
   // Mobile filter sheet state
   const [activeFilterSheet, setActiveFilterSheet] = React.useState<string | null>(null);
@@ -556,88 +552,25 @@ export default function DashboardKunjunganPage() {
     }
   }, [filterMonth])
 
-  // Compress image before upload
-  const compressImage = (file: File, maxSizeKB: number = 500): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = (event) => {
-        const img = new Image()
-        img.src = event.target?.result as string
-        img.onload = () => {
-          const canvas = document.createElement('canvas')
-          let width = img.width
-          let height = img.height
-
-          // Calculate new dimensions (max 1024px)
-          const MAX_DIMENSION = 1024
-          if (width > height) {
-            if (width > MAX_DIMENSION) {
-              height *= MAX_DIMENSION / width
-              width = MAX_DIMENSION
-            }
-          } else {
-            if (height > MAX_DIMENSION) {
-              width *= MAX_DIMENSION / height
-              height = MAX_DIMENSION
-            }
-          }
-
-          canvas.width = width
-          canvas.height = height
-
-          const ctx = canvas.getContext('2d')
-          if (!ctx) {
-            reject(new Error('Failed to get canvas context'))
-            return
-          }
-
-          ctx.drawImage(img, 0, 0, width, height)
-
-          // Start with high quality
-          let quality = 0.9
-          let compressedDataUrl = canvas.toDataURL('image/jpeg', quality)
-
-          // Reduce quality until size is under limit
-          while (compressedDataUrl.length > maxSizeKB * 1024 * 1.37 && quality > 0.1) {
-            quality -= 0.1
-            compressedDataUrl = canvas.toDataURL('image/jpeg', quality)
-          }
-
-          resolve(compressedDataUrl)
-        }
-        img.onerror = (error) => reject(error)
-      }
-      reader.onerror = (error) => reject(error)
-    })
-  }
-
-  // Handle mass update file upload
-  const handleMassFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // Check file size (max 2MB before compression)
-    if (file.size > 2 * 1024 * 1024) {
-      alert('File terlalu besar! Maksimum 2MB.')
-      return
-    }
-
-    setIsMassUploading(true)
-    try {
-      // Compress image to max 500KB
-      const compressedImage = await compressImage(file, 500)
-      setMassUpdateFoto(compressedImage)
-      setIsMassUploading(false)
-    } catch (error) {
-      console.error('Error uploading file:', error)
-      alert('Gagal mengupload foto. Silakan coba lagi.')
-      setIsMassUploading(false)
-    }
+  // Open mass update modal
+  const openMassUpdateModal = (companyName: string) => {
+    setSelectedCompanyForUpdate(companyName)
+    setIsMassUpdateModalOpen(true)
   }
 
   // Handle mass update for all tasks under a company
-  const handleMassUpdate = async () => {
+  const handleMassUpdate = async (data: {
+    status: string
+    hargaKontrak: number
+    hargaTerupdate: number
+    trimmingValue: number
+    lossValue: number
+    bulanTtdNotif: string
+    tanggalKunjungan: string
+    statusKunjungan: string
+    catatanKunjungan: string
+    fotoBuktiKunjungan: string | null
+  }) => {
     if (!selectedCompanyForUpdate) return
 
     try {
@@ -648,10 +581,16 @@ export default function DashboardKunjunganPage() {
       const updatePromises = companyTasks.map(task =>
         updateCrmTarget({
           id: task._id,
-          tanggalKunjungan: massUpdateTanggal || undefined,
-          statusKunjungan: massUpdateStatus || undefined,
-          catatanKunjungan: massUpdateCatatan || undefined,
-          fotoBuktiKunjungan: massUpdateFoto || undefined,
+          status: data.status,
+          hargaKontrak: data.hargaKontrak,
+          hargaTerupdate: data.hargaTerupdate,
+          trimmingValue: data.trimmingValue,
+          lossValue: data.lossValue,
+          bulanTtdNotif: data.bulanTtdNotif && data.bulanTtdNotif.trim() !== "" ? data.bulanTtdNotif : null,
+          tanggalKunjungan: data.tanggalKunjungan && data.tanggalKunjungan.trim() !== "" ? data.tanggalKunjungan : null,
+          statusKunjungan: data.statusKunjungan && data.statusKunjungan.trim() !== "" ? data.statusKunjungan : null,
+          catatanKunjungan: data.catatanKunjungan && data.catatanKunjungan.trim() !== "" ? data.catatanKunjungan : null,
+          fotoBuktiKunjungan: data.fotoBuktiKunjungan && data.fotoBuktiKunjungan.trim() !== "" ? data.fotoBuktiKunjungan : null,
         })
       )
 
@@ -660,34 +599,19 @@ export default function DashboardKunjunganPage() {
       // Close modal and reset form
       setIsMassUpdateModalOpen(false)
       setSelectedCompanyForUpdate(null)
-      setMassUpdateTanggal("")
-      setMassUpdateStatus("")
-      setMassUpdateCatatan("")
-      setMassUpdateFoto(null)
-      setIsMassUploading(false)
 
-      // Show success message
-      alert(`Kunjungan berhasil diupdate untuk ${companyTasks.length} standar!`)
+      // Refresh data
+      window.location.reload()
     } catch (error) {
       console.error('Error mass updating kunjungan:', error)
-      alert('Gagal mengupdate kunjungan. Silakan coba lagi.')
+      throw error
     }
   }
 
-  // Open mass update modal
-  const openMassUpdateModal = (companyName: string) => {
-    setSelectedCompanyForUpdate(companyName)
-
-    // Get the first task to pre-fill data
-    const firstTask = displayTasks.find(t => t.namaPerusahaan === companyName)
-    if (firstTask) {
-      setMassUpdateTanggal(firstTask.tanggalKunjungan || "")
-      setMassUpdateStatus(firstTask.statusKunjungan || "")
-      setMassUpdateCatatan(firstTask.catatanKunjungan || "")
-      setMassUpdateFoto(firstTask.fotoBuktiKunjungan || null)
-    }
-
-    setIsMassUpdateModalOpen(true)
+  // Get company targets for mass update
+  const getCompanyTargets = () => {
+    if (!selectedCompanyForUpdate) return []
+    return displayTasks.filter(t => t.namaPerusahaan === selectedCompanyForUpdate)
   }
 
   return (
@@ -699,17 +623,6 @@ export default function DashboardKunjunganPage() {
             <InfinityLoader size="xl" />
             <p className="mt-6 text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Memuat data...</p>
             <p className="text-sm text-muted-foreground mt-2">Mohon tunggu sebentar</p>
-          </div>
-        </div>
-      )}
-
-      {/* Loading Overlay - Mass Update */}
-      {isMassUploading && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="text-center bg-background p-8 rounded-lg shadow-lg border">
-            <InfinityLoader size="xl" />
-            <p className="mt-6 text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Menyimpan Data...</p>
-            <p className="text-sm text-muted-foreground mt-2">Mohon tunggu, sedang mengupdate semua standar</p>
           </div>
         </div>
       )}
@@ -1477,134 +1390,13 @@ export default function DashboardKunjunganPage() {
     />
 
     {/* Mass Update Kunjungan Modal */}
-    <Dialog open={isMassUpdateModalOpen} onOpenChange={setIsMassUpdateModalOpen}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Update Kunjungan Massal</DialogTitle>
-          <DialogDescription>
-            Update informasi kunjungan untuk SEMUA standar under perusahaan <strong>{selectedCompanyForUpdate}</strong>
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 py-4">
-          {/* Warning Info */}
-          <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-            <div className="flex items-start gap-2">
-              <IconCalendar className="h-4 w-4 text-blue-600 mt-0.5" />
-              <div className="text-sm text-blue-800">
-                <p className="font-semibold">Perhatian!</p>
-                <p className="text-xs mt-1">Update ini akan diterapkan ke <strong>SEMUA</strong> standar/produk under perusahaan ini.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Company Info */}
-          <div className="bg-muted/50 p-4 rounded-lg">
-            <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <IconBuilding className="h-4 w-4" />
-              Informasi Perusahaan
-            </h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>
-                <span className="text-muted-foreground">Nama Perusahaan:</span>
-                <p className="font-medium">{selectedCompanyForUpdate || '-'}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Jumlah Standar:</span>
-                <p className="font-medium">{displayTasks.filter(t => t.namaPerusahaan === selectedCompanyForUpdate).length} standar</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Visit Information */}
-          <div className="space-y-3">
-            <h3 className="font-semibold flex items-center gap-2">
-              <IconCalendar className="h-4 w-4" />
-              Detail Kunjungan
-            </h3>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="mass-update-tanggal">Tanggal Kunjungan</Label>
-                <Input
-                  id="mass-update-tanggal"
-                  type="date"
-                  value={massUpdateTanggal}
-                  onChange={(e) => setMassUpdateTanggal(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="mass-update-status">Status Kunjungan</Label>
-                <Select value={massUpdateStatus} onValueChange={setMassUpdateStatus}>
-                  <SelectTrigger id="mass-update-status">
-                    <SelectValue placeholder="Pilih status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="VISITED">Visited</SelectItem>
-                    <SelectItem value="NOT YET">Not Yet</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="mass-update-foto">Foto Bukti Kunjungan</Label>
-              <div className="space-y-2">
-                <Input
-                  id="mass-update-foto"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleMassFileUpload}
-                  disabled={isMassUploading}
-                />
-                {massUpdateFoto && (
-                  <div className="mt-2">
-                    <p className="text-xs text-muted-foreground mb-1">Preview:</p>
-                    <img
-                      src={massUpdateFoto}
-                      alt="Preview bukti kunjungan"
-                      className="max-w-xs max-h-40 object-cover rounded-lg border"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setMassUpdateFoto(null)}
-                      className="mt-1 text-xs text-red-600 hover:text-red-700"
-                    >
-                      Hapus foto
-                    </Button>
-                  </div>
-                )}
-                {isMassUploading && (
-                  <p className="text-xs text-muted-foreground">Mengupload foto...</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="mass-update-notes">Catatan Kunjungan</Label>
-              <Textarea
-                id="mass-update-notes"
-                placeholder="Tambahkan catatan kunjungan..."
-                className="min-h-[100px]"
-                value={massUpdateCatatan}
-                onChange={(e) => setMassUpdateCatatan(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setIsMassUpdateModalOpen(false)}>
-            Batal
-          </Button>
-          <Button onClick={handleMassUpdate} disabled={isMassUploading} className="bg-blue-600 hover:bg-blue-700">
-            {isMassUploading ? 'Menyimpan...' : 'Simpan Perubahan'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <MassUpdateKunjunganDialog
+      open={isMassUpdateModalOpen}
+      onOpenChange={setIsMassUpdateModalOpen}
+      selectedCompany={selectedCompanyForUpdate}
+      companyTargets={getCompanyTargets()}
+      onUpdate={handleMassUpdate}
+    />
 
     {/* Mobile Bottom Navigation */}
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border lg:hidden">
