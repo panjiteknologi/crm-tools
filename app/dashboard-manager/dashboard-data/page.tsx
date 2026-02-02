@@ -2896,7 +2896,7 @@ export default function CrmDataManagementPage() {
                   Associate Category Analytics - Monthly Trend
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  Chart Direct vs Associate per bulan (Januari - Desember)
+                  Chart Direct vs Associate per bulan {filterStatus !== 'all' ? `- Status: ${filterStatus.toUpperCase()}` : '(Semua Status)'}
                 </CardDescription>
               </div>
             </div>
@@ -2905,7 +2905,8 @@ export default function CrmDataManagementPage() {
             {(() => {
               // Filter data by tahun from bulanTtdNotif, status DONE, statusSertifikat, and directOrAssociate field
               const dataWithAssociate = (crmTargets || []).filter(t => {
-                const isDone = t.status === 'DONE';
+                // Filter by status - if 'all' show all data, otherwise filter by selected status
+                const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
                 const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
                 const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
                 const hasAssociate = t.directOrAssociate;
@@ -2935,7 +2936,7 @@ export default function CrmDataManagementPage() {
                 }
 
                 // Debug: log filter results
-                if (filterTipeProduk !== 'all' && isDone && isSertifikatMatch && hasBulanTtdNotif && hasAssociate) {
+                if (filterTipeProduk !== 'all' && matchesStatus && isSertifikatMatch && hasBulanTtdNotif && hasAssociate) {
                   console.log('Associate Filter - Produk:', t.produk, 'Filter:', filterTipeProduk, 'Match:', matchesTipeProduk);
                 }
 
@@ -2951,7 +2952,7 @@ export default function CrmDataManagementPage() {
                   }
                 }
 
-                return isDone && isSertifikatMatch && hasBulanTtdNotif && hasAssociate && matchesTahun && matchesTipeProduk && matchesKategoriProduk;
+                return matchesStatus && isSertifikatMatch && hasBulanTtdNotif && hasAssociate && matchesTahun && matchesTipeProduk && matchesKategoriProduk;
               });
 
               // Debug: log total counts
@@ -3372,7 +3373,7 @@ export default function CrmDataManagementPage() {
                   Sales Performance Analytics - By Sales Person
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  Performa semua sales berdasarkan bulan TTD Notif (status DONE & sertifikat terbit)
+                  Performa semua sales berdasarkan bulan TTD Notif {filterStatus !== 'all' ? `- Status: ${filterStatus.toUpperCase()}` : '(Semua Status)'} & sertifikat terbit
                 </CardDescription>
               </div>
               <Select value={selectedTopAssociateChartType} onValueChange={setSelectedTopAssociateChartType}>
@@ -3403,8 +3404,9 @@ export default function CrmDataManagementPage() {
 
                   // Filter data for Sales Performance Analytics - based on bulanTtdNotif, tahun, sertifikat filter, and status DONE
                   const dataWithSalesTtdNotif = (crmTargets || []).filter(t => {
+                    // Filter by status - if 'all' show all data, otherwise filter by selected status
+                    const matchesContractStatus = filterStatus === 'all' || t.status === filterStatus;
                     const matchesStatus = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
-                    const matchesDoneStatus = t.status === 'DONE';
 
                     // Filter Tipe Produk
                     let matchesTipeProduk = true;
@@ -3461,7 +3463,7 @@ export default function CrmDataManagementPage() {
                       matchesBulanTtdNotif = false;
                     }
 
-                    return matchesStatus && matchesDoneStatus && matchesTahun && matchesBulanTtdNotif && matchesTipeProduk && matchesKategoriProduk;
+                    return matchesContractStatus && matchesStatus && matchesTahun && matchesBulanTtdNotif && matchesTipeProduk && matchesKategoriProduk;
                   });
 
                   // Group by sales and get totals
@@ -3800,10 +3802,10 @@ export default function CrmDataManagementPage() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5" />
-                  Distribusi Tahapan Audit 
+                  Distribusi Tahapan Audit
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  Distribusi tahapan audit berdasarkan total harga kontrak (bulan EXP)
+                  Distribusi tahapan audit berdasarkan total harga kontrak (bulan EXP) {filterStatus !== 'all' ? `- Status: ${filterStatus.toUpperCase()}` : '(Semua Status)'}
                 </CardDescription>
               </div>
               <Select value={selectedTopAssociateChartType} onValueChange={setSelectedTopAssociateChartType}>
@@ -3833,6 +3835,8 @@ export default function CrmDataManagementPage() {
                   const dataForTahapan = (crmTargets || []).filter(t => {
                     // Filter tahun
                     const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+                    // Filter by status - if 'all' show all data, otherwise filter by selected status
+                    const matchesContractStatus = filterStatus === 'all' || t.status === filterStatus;
                     const matchesStatus = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
 
                     // Filter PIC CRM
@@ -3889,7 +3893,7 @@ export default function CrmDataManagementPage() {
                       matchesBulanExp = bulanExpNum > 0 && bulanExpNum >= fromMonth && bulanExpNum <= toMonth;
                     }
 
-                    return matchesTahun && matchesStatus && matchesPicCrm && matchesTipeProduk && matchesKategoriProduk && matchesBulanExp;
+                    return matchesTahun && matchesContractStatus && matchesStatus && matchesPicCrm && matchesTipeProduk && matchesKategoriProduk && matchesBulanExp;
                   });
 
                   // Group by tahapAudit and get totals
@@ -4149,7 +4153,7 @@ export default function CrmDataManagementPage() {
                   Chart Standar
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  Distribusi standar berdasarkan jumlah sertifikat
+                  Distribusi standar berdasarkan jumlah sertifikat {filterStatus !== 'all' ? `- Status: ${filterStatus.toUpperCase()}` : '(Semua Status)'}
                 </CardDescription>
               </div>
               <Select value={selectedStandarChartType} onValueChange={setSelectedStandarChartType}>
@@ -4169,7 +4173,10 @@ export default function CrmDataManagementPage() {
             {(() => {
               // Filter data: filter tahun dan tipe produk dari ALL data (tanpa filter statusSertifikat)
               const dataForStandar = (crmTargets || []).filter(t => {
+                // Filter tahun
                 const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+                // Filter by status - if 'all' show all data, otherwise filter by selected status
+                const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
 
                 // Filter Tipe Produk
                 let matchesTipeProduk = true;
@@ -4194,7 +4201,7 @@ export default function CrmDataManagementPage() {
                   }
                 }
 
-                return matchesTahun && matchesTipeProduk && matchesKategoriProduk;
+                return matchesTahun && matchesStatus && matchesTipeProduk && matchesKategoriProduk;
               });
 
               // Group by std and get counts
@@ -4280,7 +4287,7 @@ export default function CrmDataManagementPage() {
                   EA Code Distribution
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  Distribusi EA code berdasarkan jumlah sertifikat
+                  Distribusi EA code berdasarkan jumlah sertifikat {filterStatus !== 'all' ? `- Status: ${filterStatus.toUpperCase()}` : '(Semua Status)'}
                 </CardDescription>
               </div>
               <Select value={selectedEaCodeChartType} onValueChange={setSelectedEaCodeChartType}>
@@ -4300,7 +4307,10 @@ export default function CrmDataManagementPage() {
             {(() => {
               // Filter data: filter tahun dan tipe produk dari ALL data (tanpa filter statusSertifikat)
               const dataForEaCode = (crmTargets || []).filter(t => {
+                // Filter tahun
                 const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+                // Filter by status - if 'all' show all data, otherwise filter by selected status
+                const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
 
                 // Filter Tipe Produk
                 let matchesTipeProduk = true;
@@ -4325,7 +4335,7 @@ export default function CrmDataManagementPage() {
                   }
                 }
 
-                return matchesTahun && matchesTipeProduk && matchesKategoriProduk;
+                return matchesTahun && matchesStatus && matchesTipeProduk && matchesKategoriProduk;
               });
 
               // Get list of valid EA codes from master ea code - normalized
@@ -4406,7 +4416,7 @@ export default function CrmDataManagementPage() {
                   Pareto Chart - Alasan
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  Analisis 80/20 alasan berdasarkan jumlah
+                  Analisis 80/20 alasan berdasarkan jumlah {filterStatus !== 'all' ? `- Status: ${filterStatus.toUpperCase()}` : '(Semua Status)'}
                 </CardDescription>
               </div>
             </div>
@@ -4415,7 +4425,10 @@ export default function CrmDataManagementPage() {
             {(() => {
               // Filter data: filter tahun dan tipe produk dari ALL data (tanpa filter statusSertifikat)
               const dataForAlasan = (crmTargets || []).filter(t => {
+                // Filter tahun
                 const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
+                // Filter by status - if 'all' show all data, otherwise filter by selected status
+                const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
 
                 // Filter Tipe Produk
                 let matchesTipeProduk = true;
@@ -4440,7 +4453,7 @@ export default function CrmDataManagementPage() {
                   }
                 }
 
-                return matchesTahun && matchesTipeProduk && matchesKategoriProduk;
+                return matchesTahun && matchesStatus && matchesTipeProduk && matchesKategoriProduk;
               });
 
               // Get list of valid alasan from master
