@@ -2341,16 +2341,19 @@ export default function CrmDataManagementPage() {
                             <p className="text-2xl font-bold text-purple-700 leading-tight">
                               Rp {Math.round(totalNilaiKontrak * 0.9).toLocaleString('id-ID')}
                             </p>
+                            <p className="text-xs text-muted-foreground">
+                              Target Kontrak 90% dari <b>Rp {totalNilaiKontrak.toLocaleString('id-ID')}</b>
+                            </p>
                           </div>
                         </div>
 
                         {/* Desktop version - no background, inline text */}
-                        <div className="hidden lg:block text-left">
+                        <div className="hidden lg:block text-right">
                           <p className="text-3xl font-bold text-primary leading-tight">
                             Rp {Math.round(totalNilaiKontrak * 0.9).toLocaleString('id-ID')}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            Total Nilai Kontrak
+                            Target Kontrak 90% dari <b>Rp {totalNilaiKontrak.toLocaleString('id-ID')}</b>
                           </p>
                         </div>
                       </div>
@@ -2378,7 +2381,7 @@ export default function CrmDataManagementPage() {
                     </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>
-                        Rp {progressConfig.value.toLocaleString('id-ID')} dari Rp {Math.round(totalNilaiKontrak * 0.9).toLocaleString('id-ID')} (Total Nilai Kontrak)
+                        Rp {progressConfig.value.toLocaleString('id-ID')} dari Rp {Math.round(totalNilaiKontrak * 0.9).toLocaleString('id-ID')} (Total Nilai Target Kontrak)
                         {filterStatus !== 'all' && filterStatus !== 'DONE' && (
                           <span className="ml-2">• Filter: {filterStatus}</span>
                         )}
