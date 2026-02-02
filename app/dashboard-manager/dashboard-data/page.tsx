@@ -1476,13 +1476,144 @@ export default function CrmDataManagementPage() {
               <Card>
                 <CardContent className="p-3">
                   {(() => {
-                    // Use filteredTargets which already has all filters applied
-                    const mrcData = (filteredTargets || []).filter(t => (t.picCrm || '').toUpperCase() === 'MRC');
-                    const mrcTotal = mrcData.length;
+                    // Create base data with ALL filters EXCEPT status (for TARGET calculation)
+                    // This ensures TARGET remains constant regardless of status filter
+                    const mrcDataBase = (crmTargets || []).filter(target => {
+                      // PIC CRM filter
+                      const matchesPicCrm = (target.picCrm || '').toUpperCase() === 'MRC';
 
-                    // Total Nilai Kontrak: sertifikat match + hargaKontrak + tahun
+                      // Search filter
+                      const matchesSearch = searchTerm === '' ||
+                        target.namaPerusahaan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        target.sales.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        target.picCrm.toLowerCase().includes(searchTerm.toLowerCase());
+
+                      // Date section filters
+                      const matchesTahun = filterTahun === 'all' || target.tahun === filterTahun;
+
+                      let matchesBulanExp = true;
+                      const shouldApplyBulanExpToDone = !filterBulanTTDEnabled;
+                      const isNotDoneStatus = target.status !== 'DONE';
+                      const shouldFilterExp = (isNotDoneStatus || shouldApplyBulanExpToDone) && filterBulanExpEnabled && (filterFromBulanExp !== 'all' || filterToBulanExp !== 'all');
+
+                      if (shouldFilterExp) {
+                        const bulanNameToNum: { [key: string]: number } = {
+                          'januari': 1, 'februari': 2, 'maret': 3, 'april': 4, 'mei': 5, 'juni': 6,
+                          'juli': 7, 'agustus': 8, 'september': 9, 'oktober': 10, 'november': 11, 'desember': 12,
+                          'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+                          'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
+                        };
+
+                        let bulanExpNum = 0;
+                        const bulanExpLower = (target.bulanExpDate || '').toLowerCase().trim();
+
+                        if (bulanExpLower) {
+                          const parsedNum = parseInt(bulanExpLower);
+                          if (!isNaN(parsedNum)) {
+                            bulanExpNum = parsedNum;
+                          } else if (bulanNameToNum[bulanExpLower]) {
+                            bulanExpNum = bulanNameToNum[bulanExpLower];
+                          }
+                        }
+
+                        const fromMonth = filterFromBulanExp !== 'all' ? parseInt(filterFromBulanExp) : 1;
+                        const toMonth = filterToBulanExp !== 'all' ? parseInt(filterToBulanExp) : 12;
+
+                        matchesBulanExp = bulanExpNum > 0 && bulanExpNum >= fromMonth && bulanExpNum <= toMonth;
+                      }
+
+                      // Details section filters (excluding status)
+                      const matchesAlasan = filterAlasan === 'all' || target.alasan === filterAlasan;
+                      const matchesCategory = filterCategory === 'all' || target.category === filterCategory;
+                      const matchesProvinsi = filterProvinsi === 'all' ||
+                        (target.provinsi && normalizeProvinsi(target.provinsi) === normalizeProvinsi(filterProvinsi));
+                      const matchesKota = filterKota === 'all' ||
+                        (target.kota && normalizeKota(target.kota) === normalizeKota(filterKota));
+
+                      // Sertifikat section filters
+                      const matchesStandar = filterStandar === 'all' || target.std === filterStandar;
+                      const matchesAkreditasi = filterAkreditasi === 'all' || target.akreditasi === filterAkreditasi;
+                      const matchesEaCode = filterEaCode === '' || (target.eaCode || '').toLowerCase().includes(filterEaCode.toLowerCase());
+                      const matchesTahapAudit = filterTahapAudit === 'all' || target.tahapAudit === filterTahapAudit;
+                      const matchesStatusSertifikat = filterStatusSertifikatTerbit === 'all' || (target.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
+                      const matchesTermin = filterTermin === 'all' || target.terminPembayaran === filterTermin;
+
+                      // Tipe Produk filter
+                      let matchesTipeProduk = true;
+                      if (filterTipeProduk !== 'all') {
+                        const produkUpper = (target.produk || '').toUpperCase();
+                        if (filterTipeProduk === 'ISO') {
+                          matchesTipeProduk = produkUpper.includes('ISO');
+                        } else if (filterTipeProduk === 'SUSTAIN') {
+                          matchesTipeProduk = produkUpper.includes('ISPO');
+                        }
+                      }
+
+                      // Kategori Produk filter
+                      let matchesKategoriProduk = true;
+                      if (filterKategoriProduk !== 'SEMUA') {
+                        const stdCode = (target.std || '').trim();
+                        const standar = masterStandarData.standar.find((s: any) => s.kode === stdCode);
+                        if (standar) {
+                          matchesKategoriProduk = standar.kategori_produk === filterKategoriProduk;
+                        } else {
+                          matchesKategoriProduk = false;
+                        }
+                      }
+
+                      let matchesBulanTTD = true;
+                      const isDoneStatus = target.status === 'DONE';
+
+                      if (isDoneStatus && filterBulanTTDEnabled) {
+                        const ttdDate = target.bulanTtdNotif;
+                        if (ttdDate) {
+                          const dateObj = new Date(ttdDate);
+                          const ttdYear = dateObj.getFullYear();
+                          const ttdMonth = dateObj.getMonth() + 1;
+
+                          const yearMatches = filterTahun === 'all' || ttdYear.toString() === filterTahun;
+
+                          if (yearMatches) {
+                            if (filterFromBulanTTD !== 'all' || filterToBulanTTD !== 'all') {
+                              const fromMonth = filterFromBulanTTD !== 'all' ? parseInt(filterFromBulanTTD) : 1;
+                              const toMonth = filterToBulanTTD !== 'all' ? parseInt(filterToBulanTTD) : 12;
+                              matchesBulanTTD = ttdMonth >= fromMonth && ttdMonth <= toMonth;
+                            }
+                          } else {
+                            matchesBulanTTD = false;
+                          }
+                        } else {
+                          matchesBulanTTD = false;
+                        }
+                      }
+
+                      let matchesKunjungan = true;
+                      if (filterFromKunjungan !== 'all' || filterToKunjungan !== 'all') {
+                        const visitDate = target.tanggalKunjungan;
+                        if (visitDate) {
+                          const visitMonth = new Date(visitDate).getMonth() + 1;
+                          const fromMonth = filterFromKunjungan !== 'all' ? parseInt(filterFromKunjungan) : 1;
+                          const toMonth = filterToKunjungan !== 'all' ? parseInt(filterToKunjungan) : 12;
+                          matchesKunjungan = visitMonth >= fromMonth && visitMonth <= toMonth;
+                        } else {
+                          matchesKunjungan = false;
+                        }
+                      }
+                      const matchesStatusKunjungan = filterStatusKunjungan === 'all' || target.statusKunjungan === filterStatusKunjungan;
+
+                      return matchesSearch && matchesTahun && matchesBulanExp && matchesPicCrm &&
+                             matchesAlasan && matchesCategory && matchesProvinsi &&
+                             matchesKota && matchesStandar && matchesAkreditasi && matchesEaCode &&
+                             matchesTahapAudit && matchesBulanTTD && matchesStatusSertifikat &&
+                             matchesTermin && matchesTipeProduk && matchesKategoriProduk && matchesKunjungan && matchesStatusKunjungan;
+                    });
+
+                    // For display counts, use the filteredTargets with status filter applied
+                    const mrcDataDisplay = (filteredTargets || []).filter(t => (t.picCrm || '').toUpperCase() === 'MRC');
+
+                    // Total Nilai Kontrak: use base data (NOT affected by status filter)
                     const mrcTotalAmount = Math.round(
-                      mrcData
+                      mrcDataBase
                         .filter(t => {
                           const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
                           const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
@@ -1491,16 +1622,15 @@ export default function CrmDataManagementPage() {
                         .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0)
                     );
 
-                    // DONE: filter with bulanTtdNotif + sertifikat + tahun (same as Total Target logic)
+                    // DONE: filter with bulanTtdNotif + sertifikat + tahun (use display data)
                     const mrcDoneAmount = Math.round(
-                      mrcData
+                      mrcDataBase
                         .filter(t => {
                           const isDone = t.status === 'DONE';
                           const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
                           const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
                           const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
 
-                          // Filter tahun dari bulanTtdNotif
                           let matchesTahunTtdNotif = false;
                           if (hasBulanTtdNotif) {
                             if (filterTahun === 'all') {
@@ -1516,7 +1646,8 @@ export default function CrmDataManagementPage() {
                         })
                         .reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0)
                     );
-                    const mrcDone = mrcData.filter(t => {
+
+                    const mrcDone = mrcDataBase.filter(t => {
                       const isDone = t.status === 'DONE';
                       const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
                       const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
@@ -1536,18 +1667,18 @@ export default function CrmDataManagementPage() {
                       return isDone && isSertifikatMatch && hasBulanTtdNotif && matchesTahun && matchesTahunTtdNotif;
                     }).length;
 
-                    const mrcProses = mrcData.filter(t => t.status === 'PROSES').length;
-                    const mrcProsesAmount = Math.round(mrcData.filter(t => t.status === 'PROSES').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
-                    const mrcLoss = mrcData.filter(t => t.status === 'LOSS').length;
-                    const mrcLossAmount = Math.round(mrcData.filter(t => t.status === 'LOSS').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
-                    const mrcSuspend = mrcData.filter(t => t.status === 'SUSPEND').length;
-                    const mrcSuspendAmount = Math.round(mrcData.filter(t => t.status === 'SUSPEND').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
-                    const mrcWaiting = mrcData.filter(t => t.status === 'WAITING').length;
-                    const mrcWaitingAmount = Math.round(mrcData.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                    const mrcProses = mrcDataBase.filter(t => t.status === 'PROSES').length;
+                    const mrcProsesAmount = Math.round(mrcDataBase.filter(t => t.status === 'PROSES').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const mrcLoss = mrcDataBase.filter(t => t.status === 'LOSS').length;
+                    const mrcLossAmount = Math.round(mrcDataBase.filter(t => t.status === 'LOSS').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const mrcSuspend = mrcDataBase.filter(t => t.status === 'SUSPEND').length;
+                    const mrcSuspendAmount = Math.round(mrcDataBase.filter(t => t.status === 'SUSPEND').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const mrcWaiting = mrcDataBase.filter(t => t.status === 'WAITING').length;
+                    const mrcWaitingAmount = Math.round(mrcDataBase.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
 
-                    // Calculate visits - mrcData already has all filters from filteredTargets
-                    const mrcVisitsTarget = Math.round(mrcData.length / 2);
-                    const mrcVisits = mrcData.filter(t => (t.statusKunjungan || '').trim().toUpperCase() === 'VISITED').length;
+                    // Calculate visits - use base data
+                    const mrcVisitsTarget = Math.round(mrcDataBase.length / 2);
+                    const mrcVisits = mrcDataBase.filter(t => (t.statusKunjungan || '').trim().toUpperCase() === 'VISITED').length;
 
                     return (
                       <div className="space-y-3">
@@ -1655,13 +1786,141 @@ export default function CrmDataManagementPage() {
               <Card>
                 <CardContent className="p-3">
                   {(() => {
-                    // Use filteredTargets which already has all filters applied
-                    const dhaData = (filteredTargets || []).filter(t => (t.picCrm || '').toUpperCase() === 'DHA');
-                    const dhaTotal = dhaData.length /2;
+                    // Create base data with ALL filters EXCEPT status (for TARGET calculation)
+                    // This ensures TARGET remains constant regardless of status filter
+                    const dhaDataBase = (crmTargets || []).filter(target => {
+                      // PIC CRM filter
+                      const matchesPicCrm = (target.picCrm || '').toUpperCase() === 'DHA';
 
-                    // Total Nilai Kontrak: sertifikat match + hargaKontrak + tahun
+                      // Search filter
+                      const matchesSearch = searchTerm === '' ||
+                        target.namaPerusahaan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        target.sales.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        target.picCrm.toLowerCase().includes(searchTerm.toLowerCase());
+
+                      // Date section filters
+                      const matchesTahun = filterTahun === 'all' || target.tahun === filterTahun;
+
+                      let matchesBulanExp = true;
+                      const shouldApplyBulanExpToDone = !filterBulanTTDEnabled;
+                      const isNotDoneStatus = target.status !== 'DONE';
+                      const shouldFilterExp = (isNotDoneStatus || shouldApplyBulanExpToDone) && filterBulanExpEnabled && (filterFromBulanExp !== 'all' || filterToBulanExp !== 'all');
+
+                      if (shouldFilterExp) {
+                        const bulanNameToNum: { [key: string]: number } = {
+                          'januari': 1, 'februari': 2, 'maret': 3, 'april': 4, 'mei': 5, 'juni': 6,
+                          'juli': 7, 'agustus': 8, 'september': 9, 'oktober': 10, 'november': 11, 'desember': 12,
+                          'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+                          'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
+                        };
+
+                        let bulanExpNum = 0;
+                        const bulanExpLower = (target.bulanExpDate || '').toLowerCase().trim();
+
+                        if (bulanExpLower) {
+                          const parsedNum = parseInt(bulanExpLower);
+                          if (!isNaN(parsedNum)) {
+                            bulanExpNum = parsedNum;
+                          } else if (bulanNameToNum[bulanExpLower]) {
+                            bulanExpNum = bulanNameToNum[bulanExpLower];
+                          }
+                        }
+
+                        const fromMonth = filterFromBulanExp !== 'all' ? parseInt(filterFromBulanExp) : 1;
+                        const toMonth = filterToBulanExp !== 'all' ? parseInt(filterToBulanExp) : 12;
+
+                        matchesBulanExp = bulanExpNum > 0 && bulanExpNum >= fromMonth && bulanExpNum <= toMonth;
+                      }
+
+                      // Details section filters (excluding status)
+                      const matchesAlasan = filterAlasan === 'all' || target.alasan === filterAlasan;
+                      const matchesCategory = filterCategory === 'all' || target.category === filterCategory;
+                      const matchesProvinsi = filterProvinsi === 'all' ||
+                        (target.provinsi && normalizeProvinsi(target.provinsi) === normalizeProvinsi(filterProvinsi));
+                      const matchesKota = filterKota === 'all' ||
+                        (target.kota && normalizeKota(target.kota) === normalizeKota(filterKota));
+
+                      // Sertifikat section filters
+                      const matchesStandar = filterStandar === 'all' || target.std === filterStandar;
+                      const matchesAkreditasi = filterAkreditasi === 'all' || target.akreditasi === filterAkreditasi;
+                      const matchesEaCode = filterEaCode === '' || (target.eaCode || '').toLowerCase().includes(filterEaCode.toLowerCase());
+                      const matchesTahapAudit = filterTahapAudit === 'all' || target.tahapAudit === filterTahapAudit;
+                      const matchesStatusSertifikat = filterStatusSertifikatTerbit === 'all' || (target.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
+                      const matchesTermin = filterTermin === 'all' || target.terminPembayaran === filterTermin;
+
+                      // Tipe Produk filter
+                      let matchesTipeProduk = true;
+                      if (filterTipeProduk !== 'all') {
+                        const produkUpper = (target.produk || '').toUpperCase();
+                        if (filterTipeProduk === 'ISO') {
+                          matchesTipeProduk = produkUpper.includes('ISO');
+                        } else if (filterTipeProduk === 'SUSTAIN') {
+                          matchesTipeProduk = produkUpper.includes('ISPO');
+                        }
+                      }
+
+                      // Kategori Produk filter
+                      let matchesKategoriProduk = true;
+                      if (filterKategoriProduk !== 'SEMUA') {
+                        const stdCode = (target.std || '').trim();
+                        const standar = masterStandarData.standar.find((s: any) => s.kode === stdCode);
+                        if (standar) {
+                          matchesKategoriProduk = standar.kategori_produk === filterKategoriProduk;
+                        } else {
+                          matchesKategoriProduk = false;
+                        }
+                      }
+
+                      let matchesBulanTTD = true;
+                      const isDoneStatus = target.status === 'DONE';
+
+                      if (isDoneStatus && filterBulanTTDEnabled) {
+                        const ttdDate = target.bulanTtdNotif;
+                        if (ttdDate) {
+                          const dateObj = new Date(ttdDate);
+                          const ttdYear = dateObj.getFullYear();
+                          const ttdMonth = dateObj.getMonth() + 1;
+
+                          const yearMatches = filterTahun === 'all' || ttdYear.toString() === filterTahun;
+
+                          if (yearMatches) {
+                            if (filterFromBulanTTD !== 'all' || filterToBulanTTD !== 'all') {
+                              const fromMonth = filterFromBulanTTD !== 'all' ? parseInt(filterFromBulanTTD) : 1;
+                              const toMonth = filterToBulanTTD !== 'all' ? parseInt(filterToBulanTTD) : 12;
+                              matchesBulanTTD = ttdMonth >= fromMonth && ttdMonth <= toMonth;
+                            }
+                          } else {
+                            matchesBulanTTD = false;
+                          }
+                        } else {
+                          matchesBulanTTD = false;
+                        }
+                      }
+
+                      let matchesKunjungan = true;
+                      if (filterFromKunjungan !== 'all' || filterToKunjungan !== 'all') {
+                        const visitDate = target.tanggalKunjungan;
+                        if (visitDate) {
+                          const visitMonth = new Date(visitDate).getMonth() + 1;
+                          const fromMonth = filterFromKunjungan !== 'all' ? parseInt(filterFromKunjungan) : 1;
+                          const toMonth = filterToKunjungan !== 'all' ? parseInt(filterToKunjungan) : 12;
+                          matchesKunjungan = visitMonth >= fromMonth && visitMonth <= toMonth;
+                        } else {
+                          matchesKunjungan = false;
+                        }
+                      }
+                      const matchesStatusKunjungan = filterStatusKunjungan === 'all' || target.statusKunjungan === filterStatusKunjungan;
+
+                      return matchesSearch && matchesTahun && matchesBulanExp && matchesPicCrm &&
+                             matchesAlasan && matchesCategory && matchesProvinsi &&
+                             matchesKota && matchesStandar && matchesAkreditasi && matchesEaCode &&
+                             matchesTahapAudit && matchesBulanTTD && matchesStatusSertifikat &&
+                             matchesTermin && matchesTipeProduk && matchesKategoriProduk && matchesKunjungan && matchesStatusKunjungan;
+                    });
+
+                    // Total Nilai Kontrak: use base data (NOT affected by status filter)
                     const dhaTotalAmount = Math.round(
-                      dhaData
+                      dhaDataBase
                         .filter(t => {
                           const matchesSertifikat = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
                           const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
@@ -1670,16 +1929,15 @@ export default function CrmDataManagementPage() {
                         .reduce((sum, t) => sum + (t.hargaKontrak || 0), 0)
                     );
 
-                    // DONE: filter with bulanTtdNotif + sertifikat + tahun (same as Total Target logic)
+                    // DONE: filter with bulanTtdNotif + sertifikat + tahun (use base data)
                     const dhaDoneAmount = Math.round(
-                      dhaData
+                      dhaDataBase
                         .filter(t => {
                           const isDone = t.status === 'DONE';
                           const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
                           const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
                           const matchesTahun = filterTahun === 'all' || t.tahun === filterTahun;
 
-                          // Filter tahun dari bulanTtdNotif
                           let matchesTahunTtdNotif = false;
                           if (hasBulanTtdNotif) {
                             if (filterTahun === 'all') {
@@ -1695,7 +1953,8 @@ export default function CrmDataManagementPage() {
                         })
                         .reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0)
                     );
-                    const dhaDone = dhaData.filter(t => {
+
+                    const dhaDone = dhaDataBase.filter(t => {
                       const isDone = t.status === 'DONE';
                       const isSertifikatMatch = filterStatusSertifikatTerbit === 'all' || (t.statusSertifikat || '').trim().toLowerCase() === filterStatusSertifikatTerbit.toLowerCase();
                       const hasBulanTtdNotif = t.bulanTtdNotif && t.bulanTtdNotif !== '';
@@ -1715,18 +1974,18 @@ export default function CrmDataManagementPage() {
                       return isDone && isSertifikatMatch && hasBulanTtdNotif && matchesTahun && matchesTahunTtdNotif;
                     }).length;
 
-                    const dhaProses = dhaData.filter(t => t.status === 'PROSES').length;
-                    const dhaProsesAmount = Math.round(dhaData.filter(t => t.status === 'PROSES').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
-                    const dhaLoss = dhaData.filter(t => t.status === 'LOSS').length;
-                    const dhaLossAmount = Math.round(dhaData.filter(t => t.status === 'LOSS').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
-                    const dhaSuspend = dhaData.filter(t => t.status === 'SUSPEND').length;
-                    const dhaSuspendAmount = Math.round(dhaData.filter(t => t.status === 'SUSPEND').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
-                    const dhaWaiting = dhaData.filter(t => t.status === 'WAITING').length;
-                    const dhaWaitingAmount = Math.round(dhaData.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
+                    const dhaProses = dhaDataBase.filter(t => t.status === 'PROSES').length;
+                    const dhaProsesAmount = Math.round(dhaDataBase.filter(t => t.status === 'PROSES').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const dhaLoss = dhaDataBase.filter(t => t.status === 'LOSS').length;
+                    const dhaLossAmount = Math.round(dhaDataBase.filter(t => t.status === 'LOSS').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const dhaSuspend = dhaDataBase.filter(t => t.status === 'SUSPEND').length;
+                    const dhaSuspendAmount = Math.round(dhaDataBase.filter(t => t.status === 'SUSPEND').reduce((sum, t) => sum + (t.hargaTerupdate || 0), 0));
+                    const dhaWaiting = dhaDataBase.filter(t => t.status === 'WAITING').length;
+                    const dhaWaitingAmount = Math.round(dhaDataBase.filter(t => t.status === 'WAITING').reduce((sum, t) => sum + (t.hargaKontrak || 0), 0));
 
-                    // Calculate visits - dhaData already has all filters from filteredTargets
-                    const dhaVisitsTarget = Math.round(dhaData.length /2);
-                    const dhaVisits = dhaData.filter(t => (t.statusKunjungan || '').trim().toUpperCase() === 'VISITED').length;
+                    // Calculate visits - use base data
+                    const dhaVisitsTarget = Math.round(dhaDataBase.length / 2);
+                    const dhaVisits = dhaDataBase.filter(t => (t.statusKunjungan || '').trim().toUpperCase() === 'VISITED').length;
 
                     return (
                       <div className="space-y-3">
