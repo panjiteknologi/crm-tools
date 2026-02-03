@@ -890,7 +890,7 @@ export default function CrmDataManagementPage() {
           break;
         case 'statusSertifikat':
           if (value === 'TERBIT') {
-            matchesQuickFilter = Boolean(target.statusSertifikat && target.statusSertifikat.toUpperCase().includes('TERBIT'));
+            matchesQuickFilter = Boolean(target.statusSertifikat && target.statusSertifikat.toUpperCase() === 'TERBIT');
           } else if (value === 'BELUM') {
             matchesQuickFilter = Boolean(!target.statusSertifikat || target.statusSertifikat.toUpperCase().includes('BELUM'));
           }
@@ -2383,7 +2383,7 @@ export default function CrmDataManagementPage() {
                     : handleQuickFilter('statusSertifikat', 'TERBIT')
                   }
                 >
-                  <p className="text-xs text-green-700 font-semibold">Terbit <span className="font-bold">({(crmTargets || []).filter(t => t.statusSertifikat && t.statusSertifikat.toUpperCase().includes('TERBIT')).length})</span></p>
+                  <p className="text-xs text-green-700 font-semibold">Terbit <span className="font-bold">({(crmTargets || []).filter(t => t.statusSertifikat && t.statusSertifikat.toUpperCase() === 'TERBIT').length})</span></p>
                 </div>
                 <div
                   className={`bg-red-50 rounded px-2 py-1 border border-red-200 text-center cursor-pointer hover:ring-2 hover:ring-red-400 transition-all ${

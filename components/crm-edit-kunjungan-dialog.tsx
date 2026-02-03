@@ -26,6 +26,7 @@ import masterStandarData from '@/data/master-standar.json';
 import masterEaCodeData from '@/data/master-ea-code.json';
 import masterAlasanData from '@/data/master-alasan.json';
 import masterKuadranData from '@/data/master-kuadran.json';
+import masterAkreditasiData from '@/data/master-akreditasi.json';
 
 interface CrmTarget {
   _id: Id<"crmTargets">;
@@ -778,8 +779,9 @@ const EditKunjunganDialog = React.memo(({ open, onOpenChange, target, staffUsers
                           <SelectValue placeholder="Pilih" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="KAN">KAN</SelectItem>
-                          <SelectItem value="NON KAN">NON KAN</SelectItem>
+                          {masterAkreditasiData.akreditasi.map((akre) => (
+                            <SelectItem key={akre.id} value={akre.kode}>{akre.nama}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>

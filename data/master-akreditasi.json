@@ -1,0 +1,49 @@
+{
+  "akreditasi": [
+    {
+      "id": 1,
+      "kode": "APMG",
+      "nama": "APMG"
+    },
+    {
+      "id": 2,
+      "kode": "DAAS",
+      "nama": "DAAS"
+    },
+    {
+      "id": 3,
+      "kode": "EGAC",
+      "nama": "EGAC"
+    },
+    {
+      "id": 4,
+      "kode": "ISCC",
+      "nama": "ISCC"
+    },
+    {
+      "id": 5,
+      "kode": "KAB",
+      "nama": "KAB"
+    },
+    {
+      "id": 6,
+      "kode": "KAN",
+      "nama": "KAN"
+    },
+    {
+      "id": 7,
+      "kode": "NON AKRE",
+      "nama": "NON AKRE"
+    },
+    {
+      "id": 8,
+      "kode": "SCC",
+      "nama": "SCC"
+    },
+    {
+      "id": 9,
+      "kode": "UAF",
+      "nama": "UAF"
+    }
+  ]
+}

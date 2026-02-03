@@ -25,6 +25,7 @@ import masterEaCodeData from '@/data/master-ea-code.json';
 import masterAlasanData from '@/data/master-alasan.json';
 import masterTahapanData from '@/data/master-tahapan.json';
 import masterKuadranData from '@/data/master-kuadran.json';
+import masterAkreditasiData from '@/data/master-akreditasi.json';
 import { Save, X, Building2, Users, FileText, DollarSign, Calendar, Loader2 } from 'lucide-react';
 
 interface CrmTarget {
@@ -695,8 +696,9 @@ const EditCrmDialog = React.memo(({ open, onOpenChange, target, staffUsers, onSu
                           <SelectValue placeholder="Pilih" />
                         </SelectTrigger>
                         <SelectContent className="w-full">
-                          <SelectItem value="KAN">KAN</SelectItem>
-                          <SelectItem value="NON KAN">NON KAN</SelectItem>
+                          {masterAkreditasiData.akreditasi.map((akre) => (
+                            <SelectItem key={akre.id} value={akre.kode}>{akre.nama}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
