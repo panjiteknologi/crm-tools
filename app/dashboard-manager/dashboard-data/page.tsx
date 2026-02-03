@@ -3200,9 +3200,9 @@ export default function CrmDataManagementPage() {
                 }
 
                 // Debug: log filter results
-                if (filterTipeProduk !== 'all' && matchesStatus && isSertifikatMatch && hasBulanTtdNotif && hasAssociate) {
-                  console.log('Associate Filter - Produk:', t.produk, 'Filter:', filterTipeProduk, 'Match:', matchesTipeProduk);
-                }
+                // if (filterTipeProduk !== 'all' && matchesStatus && isSertifikatMatch && hasBulanTtdNotif && hasAssociate) {
+                //   console.log('Associate Filter - Produk:', t.produk, 'Filter:', filterTipeProduk, 'Match:', matchesTipeProduk);
+                // }
 
                 // Check tahun dari bulanTtdNotif
                 let matchesTahun = false;
@@ -3220,15 +3220,15 @@ export default function CrmDataManagementPage() {
               });
 
               // Debug: log total counts
-              console.log('=== ASSOCIATE CATEGORY DEBUG ===');
-              console.log('Total Data:', crmTargets?.length);
-              console.log('Filtered Count:', dataWithAssociate.length);
-              console.log('Filter Tipe Produk:', filterTipeProduk);
-              console.log('Filter Kategori Produk:', filterKategoriProduk);
-              console.log('Filter Tahun:', filterTahun);
-              console.log('Filter Status Sertifikat:', filterStatusSertifikatTerbit);
-              console.log('Sample filtered data:', dataWithAssociate.slice(0, 3).map(t => ({ produk: t.produk, status: t.status, sertifikat: t.statusSertifikat, std: t.std })));
-              console.log('=============================');
+              // console.log('=== ASSOCIATE CATEGORY DEBUG ===');
+              // console.log('Total Data:', crmTargets?.length);
+              // console.log('Filtered Count:', dataWithAssociate.length);
+              // console.log('Filter Tipe Produk:', filterTipeProduk);
+              // console.log('Filter Kategori Produk:', filterKategoriProduk);
+              // console.log('Filter Tahun:', filterTahun);
+              // console.log('Filter Status Sertifikat:', filterStatusSertifikatTerbit);
+              // console.log('Sample filtered data:', dataWithAssociate.slice(0, 3).map(t => ({ produk: t.produk, status: t.status, sertifikat: t.statusSertifikat, std: t.std })));
+              // console.log('=============================');
 
               return (
                 <div className="space-y-6">
@@ -3767,7 +3767,7 @@ export default function CrmDataManagementPage() {
                     };
                   }).sort((a, b) => b.total - a.total); // Sort by total descending
 
-                  console.log('allSales data:', allSales.slice(0, 3));
+                  // console.log('allSales data:', allSales.slice(0, 3));
 
                   // Preload all images
                   allSales.forEach((sales) => {
@@ -3851,7 +3851,7 @@ export default function CrmDataManagementPage() {
 
                                             const initial = salesName ? salesName.charAt(0) : '?';
 
-                                            console.log('Rendering label for:', salesName, 'Photo:', salesPhoto, 'Has photo:', !!salesPhoto, 'Index:', index);
+                                            // console.log('Rendering label for:', salesName, 'Photo:', salesPhoto, 'Has photo:', !!salesPhoto, 'Index:', index);
 
                                             return (
                                               <g transform={`translate(${x}, ${y})`}>

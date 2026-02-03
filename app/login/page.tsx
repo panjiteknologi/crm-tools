@@ -73,9 +73,20 @@ export default function LoginPage() {
         } else {
           router.push('/login');
         }
+      } else {
+        setError('❌ Email atau password salah. Silakan periksa kembali.');
       }
     } catch (err: any) {
-      setError(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
+      // Handle specific error messages
+      if (err.message && err.message.includes('Invalid')) {
+        setError('❌ Email atau password salah. Silakan periksa kembali.');
+      } else if (err.message && err.message.includes('not found')) {
+        setError('❌ Email tidak ditemukan. Silakan periksa kembali.');
+      } else if (err.message && err.message.includes('password')) {
+        setError('❌ Password salah. Silakan coba lagi.');
+      } else {
+        setError('❌ Login gagal. Silakan periksa email dan password Anda.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -392,10 +403,8 @@ export default function LoginPage() {
                   </div>
 
                   <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 text-center lg:text-left">
-                    Welcome Back
                   </h2>
                   <p className="text-gray-400 mb-6 sm:mb-8 text-sm sm:text-base text-center lg:text-left">
-                    Access your advanced analytics dashboard
                   </p>
 
                   {error && (
@@ -405,6 +414,15 @@ export default function LoginPage() {
                   )}
 
                   <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                    {/* OFC Logo - Centered */}
+                    <div className="flex justify-center mb-4">
+                      <img
+                        src="/images/sales/OFC.png"
+                        alt="OFC Logo"
+                        className="h-24 sm:h-50 w-auto object-contain"
+                      />
+                    </div>
+
                     {/* Email */}
                     <div>
                       <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
@@ -419,6 +437,7 @@ export default function LoginPage() {
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
                           className="pl-10 w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all text-white placeholder:text-gray-500 backdrop-blur text-sm"
                           placeholder="email@company.com"
+                          suppressHydrationWarning
                         />
                       </div>
                     </div>
@@ -437,11 +456,13 @@ export default function LoginPage() {
                           onChange={(e) => setFormData({...formData, password: e.target.value})}
                           className="pl-10 pr-10 w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all text-white placeholder:text-gray-500 backdrop-blur text-sm"
                           placeholder="••••••••"
+                          suppressHydrationWarning
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition"
+                          suppressHydrationWarning
                         >
                           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
@@ -453,6 +474,7 @@ export default function LoginPage() {
                       type="submit"
                       disabled={isLoading}
                       className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2.5 sm:py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 focus:ring-4 focus:ring-blue-500/20 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base"
+                      suppressHydrationWarning
                     >
                       {isLoading ? (
                         <span className="flex items-center justify-center">
@@ -471,47 +493,9 @@ export default function LoginPage() {
                     </button>
                   </form>
 
-                  {/* Demo Account Info */}
-                  <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-gray-800/50 rounded-xl border border-gray-700 backdrop-blur">
-                    <details className="group">
-                      <summary className="flex items-center justify-between cursor-pointer list-none">
-                        <p className="text-xs sm:text-sm font-medium text-gray-300 flex items-center">
-                          <span className="text-base sm:text-lg mr-2">🚀</span>
-                          Demo Accounts
-                        </p>
-                        <svg className="w-4 h-4 text-gray-400 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </summary>
-                      <div className="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
-                          <span className="text-blue-400">Super Admin:</span>
-                          <span className="font-mono text-gray-400 text-[10px] sm:text-xs break-all">admin@tsicertification.co.id</span>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
-                          <span className="text-purple-400">Manager (Diara):</span>
-                          <span className="font-mono text-gray-400 text-[10px] sm:text-xs break-all">diara@tsicertification.co.id</span>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
-                          <span className="text-green-400">Staff (Mercy):</span>
-                          <span className="font-mono text-gray-400 text-[10px] sm:text-xs break-all">mercy@tsicertification.co.id</span>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
-                          <span className="text-teal-400">Staff (Dhea):</span>
-                          <span className="font-mono text-gray-400 text-[10px] sm:text-xs break-all">dhea@tsicertification.co.id</span>
-                        </div>
-                      </div>
-                      <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-gray-700">
-                        <p className="text-[10px] sm:text-xs text-gray-500">
-                          🔐 Default password: <span className="text-gray-300 font-mono">password</span>
-                        </p>
-                      </div>
-                    </details>
-                  </div>
-
-                  <div className="mt-3 sm:mt-4 text-center">
+                  <div className="mt-6 sm:mt-8 text-center">
                     <p className="text-[10px] sm:text-xs text-gray-500">
-                      System auto-detects your role level upon login
+                      🔒 Secure login with OFC CRM System
                     </p>
                   </div>
                 </div>
