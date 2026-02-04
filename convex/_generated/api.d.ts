@@ -19,7 +19,9 @@ import type * as seed from "../seed.js";
 import type * as staffTargets from "../staffTargets.js";
 import type * as targets from "../targets.js";
 import type * as uploads from "../uploads.js";
+import type * as utils_authHelpers from "../utils/authHelpers.js";
 import type * as utils_password from "../utils/password.js";
+import type * as utils_rateLimiter from "../utils/rateLimiter.js";
 import type * as utils_simpleHash from "../utils/simpleHash.js";
 import type * as visitHistory from "../visitHistory.js";
 
@@ -41,7 +43,9 @@ declare const fullApi: ApiFromModules<{
   staffTargets: typeof staffTargets;
   targets: typeof targets;
   uploads: typeof uploads;
+  "utils/authHelpers": typeof utils_authHelpers;
   "utils/password": typeof utils_password;
+  "utils/rateLimiter": typeof utils_rateLimiter;
   "utils/simpleHash": typeof utils_simpleHash;
   visitHistory: typeof visitHistory;
 }>;

@@ -1263,7 +1263,7 @@ export default function CrmDataManagementPage() {
             statusSertifikat: row.statusSertifikat || undefined,
             tanggalKunjungan: row.tanggalKunjungan || undefined,
             statusKunjungan: row.statusKunjungan || undefined,
-            created_by: currentUser?._id,
+            created_by: currentUser?._id as any, // Type assertion for Convex Id
           });
           successCount++;
         } catch (error) {

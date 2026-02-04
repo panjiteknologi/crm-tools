@@ -25,7 +25,8 @@
       "Bash(mkdir:*)",
       "Bash(timeout:*)",
       "Bash(git checkout:*)",
-      "Bash(vercel:*)"
+      "Bash(vercel:*)",
+      "Bash(npx tsx:*)"
     ],
     "deny": [],
     "ask": []

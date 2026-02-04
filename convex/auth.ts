@@ -1,8 +1,9 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { simpleHash, simpleVerify } from "./utils/simpleHash";
+import { comparePassword, hashPassword } from "./utils/password";
+import { checkRateLimit, clearRateLimit, getBlockTimeRemaining } from "./utils/rateLimiter";
 
-// Fungsi login dengan password hashing
+// Fungsi login dengan password hashing yang aman dan rate limiting
 export const login = mutation({
   args: {
     email: v.string(),
@@ -10,6 +11,15 @@ export const login = mutation({
   },
   handler: async (ctx, args) => {
     const { email, password } = args;
+
+    // Check rate limiting by email
+    const rateLimitResult = await checkRateLimit(ctx, email);
+    if (!rateLimitResult.allowed) {
+      const blockTimeRemaining = getBlockTimeRemaining(rateLimitResult.blockUntil!);
+      throw new Error(
+        `Terlalu banyak percobaan login gagal. Akun diblokir sementara selama ${blockTimeRemaining} menit. Silakan coba lagi nanti.`
+      );
+    }
 
     // Cari user berdasarkan email
     const user = await ctx.db
@@ -22,8 +32,9 @@ export const login = mutation({
       throw new Error("Email atau password salah");
     }
 
-    // Compare password dengan hashed password
-    const isPasswordValid = simpleVerify(password, user.password);
+    // Compare password dengan hashed password menggunakan bcrypt (synchronous)
+    const isPasswordValid = comparePassword(password, user.password);
+
     if (!isPasswordValid) {
       throw new Error("Email atau password salah");
     }
@@ -33,13 +44,26 @@ export const login = mutation({
       throw new Error("Akun tidak aktif");
     }
 
+    // Login successful - clear rate limit
+    clearRateLimit(email);
+
+    // Log activity
+    await ctx.db.insert("activityLogs", {
+      action: "login",
+      entity: "users",
+      entityId: user._id.toString(),
+      entityTableName: "users",
+      userId: user._id,
+      createdAt: Date.now(),
+    });
+
     // Return user data tanpa password
     const { password: _, ...userWithoutPassword } = user;
     return userWithoutPassword;
   },
 });
 
-// Fungsi untuk membuat user dengan password hashing
+// Fungsi untuk membuat user dengan password hashing yang aman
 export const createUser = mutation({
   args: {
     name: v.string(),
@@ -61,8 +85,8 @@ export const createUser = mutation({
       throw new Error("User dengan email ini sudah ada");
     }
 
-    // Hash password sebelum menyimpan
-    const hashedPassword = simpleHash(password);
+    // Hash password sebelum menyimpan menggunakan bcrypt (synchronous)
+    const hashedPassword = hashPassword(password);
 
     const now = Date.now();
     const userId = await ctx.db.insert("users", {
@@ -154,9 +178,9 @@ export const updateUser = mutation({
       }
     }
 
-    // Hash password jika password diubah
+    // Hash password jika password diubah menggunakan bcrypt (synchronous)
     if (updateData.password) {
-      updateData.password = simpleHash(updateData.password);
+      updateData.password = hashPassword(updateData.password);
     }
 
     // Update user
@@ -231,5 +255,41 @@ export const toggleUserStatus = mutation({
     // Return user data tanpa password
     const { password: _, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
+  },
+});
+
+// Fungsi untuk reset password admin (TEMPORARY - remove after use)
+export const resetAdminPassword = mutation({
+  args: {
+    email: v.string(),
+    newPassword: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { email, newPassword } = args;
+
+    // Cari user berdasarkan email
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .first();
+
+    if (!user) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    // Hash password baru menggunakan bcrypt
+    const hashedPassword = hashPassword(newPassword);
+
+    // Update password
+    await ctx.db.patch(user._id, {
+      password: hashedPassword,
+      updatedAt: Date.now(),
+    });
+
+    console.log("[PASSWORD RESET] Password reset for user:", email);
+    console.log("[PASSWORD RESET] New password hash length:", hashedPassword.length);
+    console.log("[PASSWORD RESET] New password hash starts with:", hashedPassword.substring(0, 10));
+
+    return { success: true, message: "Password berhasil direset" };
   },
 });
