@@ -26,7 +26,10 @@
       "Bash(timeout:*)",
       "Bash(git checkout:*)",
       "Bash(vercel:*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(npm audit:*)",
+      "Bash(find:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

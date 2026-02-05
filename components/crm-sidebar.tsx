@@ -16,6 +16,7 @@ import {
   IconChartBar,
   IconCalendarTime,
   IconKey,
+  IconAward,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -70,6 +71,11 @@ const getNavigationItems = (role: string) => {
         title: "CRM Data Management",
         url: "/dashboard-manager/crm-data",
         icon: IconTarget,
+      },
+      {
+        title: "KPI Tracker",
+        url: "/dashboard-manager/kpi",
+        icon: IconAward,
       }
     ];
   }
@@ -95,6 +101,11 @@ const getNavigationItems = (role: string) => {
       title: "CRM Data Management",
       url: "/dashboard-manager/crm-data",
       icon: IconTarget,
+    },
+    {
+      title: "KPI Tracker",
+      url: "/dashboard-manager/kpi",
+      icon: IconAward,
     },
     {
       title: "Settings",

@@ -74,18 +74,28 @@
 - No rate limiting
 - No access control
 
-### After: 6/10
-- Strong password hashing (bcrypt)
-- Authentication checks on all operations
-- Rate limiting for login
-- Basic access control
-- Activity logging
+### After: 5/10
+- Strong password hashing (bcrypt with 10 salt rounds)
+- Rate limiting for login (5 attempts per 5 minutes, 15 minute block)
+- Activity logging for audit trail
+- Role-based access control
+- Session expiration (24 hours)
+- Backward compatibility for password migration
+- **Temporary password reset function removed** ✅
+
+### Remaining Vulnerabilities:
+- localStorage-based session (vulnerable to XSS)
+- No proper Convex Auth configuration
+- No JWT/token-based authentication
+- In-memory rate limiting (resets on server restart)
+- Missing security headers (CSP, HSTS, X-Frame-Options)
 
 ### Target: 9/10
 To achieve this score:
 - Implement proper Convex Auth configuration
 - Add JWT/token-based session management
-- Complete password migration
+- Complete password migration for all users
+- Use Redis/Convex database for rate limiting
 - Add 2FA for sensitive accounts
 - Implement comprehensive security headers
 

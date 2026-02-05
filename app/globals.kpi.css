@@ -1,0 +1,141 @@
+/* Custom styles for KPI Data Grid */
+
+.handsontable {
+  font-family: inherit !important;
+  font-size: 14px !important;
+}
+
+.handsontable th {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  border-color: #cbd5e1 !important;
+}
+
+.handsontable td {
+  border-color: #e2e8f0 !important;
+  padding: 8px !important;
+}
+
+.handsontable td.kra-cell {
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.handsontable td.month-cell {
+  text-align: center;
+}
+
+.handshotable td.target-cell {
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.handsontable td.bobot-cell {
+  text-align: center;
+  font-weight: 500;
+  color: #059669;
+}
+
+.handsontable td.current-highlight {
+  background-color: #fef3c7 !important;
+}
+
+.handsontable td.month-cell:hover {
+  cursor: pointer;
+}
+
+.handsontable thead th {
+  text-align: center;
+}
+
+/* Dark mode support */
+.dark .handsontable th {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+.dark .handsontable td {
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .handsontable td.kra-cell {
+  color: #60a5fa;
+}
+
+.dark .handsontable td.target-cell {
+  color: #f1f5f9;
+}
+
+.dark .handsontable td.bobot-cell {
+  color: #34d399;
+}
+
+/* Custom cell styles */
+.handsontable td[style*="background-color"] {
+  transition: background-color 0.2s;
+}
+
+/* Merge cells indicator */
+.handsontable td.merge-cell-indicator {
+  position: relative;
+}
+
+.handsontable td.merge-cell-indicator::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+}
+
+/* Color coding for timeline */
+.handsontable .timeline-completed {
+  background-color: #22c55e !important;
+  color: white !important;
+}
+
+.handsontable .timeline-in-progress {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+.handsontable .timeline-planning {
+  background-color: #f59e0b !important;
+  color: white !important;
+}
+
+.handsontable .timeline-delayed {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.handsontable .timeline-on-hold {
+  background-color: #8b5cf6 !important;
+  color: white !important;
+}
+
+/* Selection highlight */
+.handsontable td.area {
+  background-color: #e0f2fe !important;
+}
+
+.dark .handsontable td.area {
+  background-color: #0c4a6e !important;
+}
+
+/* Read-only cells */
+.handsontable td.readonly {
+  background-color: #f8fafc !important;
+  color: #64748b !important;
+}
+
+.dark .handsontable td.readonly {
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+}

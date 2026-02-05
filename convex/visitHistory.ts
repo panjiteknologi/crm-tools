@@ -180,10 +180,16 @@ export const getVisitStats = query({
     const enrichedUserActivity = await Promise.all(
       Object.entries(userActivity).map(async ([userId, count]) => {
         const user = await ctx.db.get(userId as any);
+        // Type guard to check if it's a user document
+        const isUser = user &&
+          'email' in user &&
+          'password' in user &&
+          'role' in user;
+
         return {
           userId,
           count,
-          userDetails: user && 'name' in user ? {
+          userDetails: isUser ? {
             name: user.name,
             email: user.email,
             role: user.role,

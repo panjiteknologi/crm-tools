@@ -177,4 +177,35 @@ export default defineSchema({
     .index("by_tanggalKunjungan", ["tanggalKunjungan"])
     .index("by_created_by", ["created_by"])
     .index("by_createdAt", ["createdAt"]),
+
+  // Table KPI Annual (1 KPI per tahun untuk divisi)
+  kpiAnnual: defineTable({
+    // Field utama
+    year: v.string(), // Tahun KPI (2025, 2026, dll) - 1 record per tahun
+    name: v.string(), // Nama KPI (contoh: "KPI Annual 2025")
+
+    // Data Handsontable
+    data: v.array(v.array(v.any())), // Data 2D array dari Handsontable
+    mergeCells: v.optional(v.array(v.object({
+      row: v.number(),
+      col: v.number(),
+      rowspan: v.number(),
+      colspan: v.number(),
+    }))), // Merge cells configuration
+
+    // Styling data
+    cellColors: v.optional(v.record(v.string(), v.string())), // key: "row-col", value: hexColor
+    cellStyles: v.optional(v.string()), // JSON string of style object (Record<"row-col", styleObject>)
+
+    // Metadata
+    description: v.optional(v.string()), // Deskripsi KPI
+    division: v.optional(v.string()), // Nama divisi (opsional, untuk dokumentasi)
+
+    // Audit fields
+    created_by: v.id("users"), // User yang membuat
+    updated_by: v.optional(v.id("users")), // User yang terakhir update
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_year", ["year"]),
 });

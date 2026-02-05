@@ -258,38 +258,3 @@ export const toggleUserStatus = mutation({
   },
 });
 
-// Fungsi untuk reset password admin (TEMPORARY - remove after use)
-export const resetAdminPassword = mutation({
-  args: {
-    email: v.string(),
-    newPassword: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const { email, newPassword } = args;
-
-    // Cari user berdasarkan email
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email))
-      .first();
-
-    if (!user) {
-      throw new Error("User tidak ditemukan");
-    }
-
-    // Hash password baru menggunakan bcrypt
-    const hashedPassword = hashPassword(newPassword);
-
-    // Update password
-    await ctx.db.patch(user._id, {
-      password: hashedPassword,
-      updatedAt: Date.now(),
-    });
-
-    console.log("[PASSWORD RESET] Password reset for user:", email);
-    console.log("[PASSWORD RESET] New password hash length:", hashedPassword.length);
-    console.log("[PASSWORD RESET] New password hash starts with:", hashedPassword.substring(0, 10));
-
-    return { success: true, message: "Password berhasil direset" };
-  },
-});
