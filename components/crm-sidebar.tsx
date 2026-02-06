@@ -73,7 +73,7 @@ const getNavigationItems = (role: string) => {
         icon: IconTarget,
       },
       {
-        title: "KPI Tracker",
+        title: "KPI",
         url: "/dashboard-manager/kpi",
         icon: IconAward,
       }
@@ -103,7 +103,7 @@ const getNavigationItems = (role: string) => {
       icon: IconTarget,
     },
     {
-      title: "KPI Tracker",
+      title: "KPI",
       url: "/dashboard-manager/kpi",
       icon: IconAward,
     },

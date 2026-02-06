@@ -184,18 +184,19 @@ export default defineSchema({
     year: v.string(), // Tahun KPI (2025, 2026, dll) - 1 record per tahun
     name: v.string(), // Nama KPI (contoh: "KPI Annual 2025")
 
-    // Data Handsontable
-    data: v.array(v.array(v.any())), // Data 2D array dari Handsontable
+    // NEW: COMPLETE table state dalam 1 JSON field (preferred format)
+    tableState: v.optional(v.string()), // JSON string berisi: { data, mergeCells, cellColors, cellStyles }
+
+    // OLD: Legacy fields (untuk backward compatibility, akan di-migrate)
+    data: v.optional(v.array(v.array(v.any()))), // Data 2D array dari Handsontable (DEPRECATED)
     mergeCells: v.optional(v.array(v.object({
       row: v.number(),
       col: v.number(),
       rowspan: v.number(),
       colspan: v.number(),
-    }))), // Merge cells configuration
-
-    // Styling data
-    cellColors: v.optional(v.record(v.string(), v.string())), // key: "row-col", value: hexColor
-    cellStyles: v.optional(v.string()), // JSON string of style object (Record<"row-col", styleObject>)
+    }))), // Merge cells configuration (DEPRECATED)
+    cellColors: v.optional(v.record(v.string(), v.string())), // key: "row-col", value: hexColor (DEPRECATED)
+    cellStyles: v.optional(v.string()), // JSON string of style object (DEPRECATED)
 
     // Metadata
     description: v.optional(v.string()), // Deskripsi KPI

@@ -76,19 +76,17 @@ export const create = mutation({
   args: {
     year: v.string(),
     name: v.string(),
-    data: v.array(v.array(v.any())),
-    mergeCells: v.optional(
-      v.array(
-        v.object({
-          row: v.number(),
-          col: v.number(),
-          rowspan: v.number(),
-          colspan: v.number(),
-        })
-      )
-    ),
-    cellColors: v.optional(v.record(v.string(), v.string())), // key: "row-col", value: hexColor
-    cellStyles: v.optional(v.string()), // JSON string of style object
+    tableState: v.optional(v.string()), // NEW: Complete JSON string
+    // Legacy fields (for backward compatibility)
+    data: v.optional(v.array(v.array(v.any()))),
+    mergeCells: v.optional(v.array(v.object({
+      row: v.number(),
+      col: v.number(),
+      rowspan: v.number(),
+      colspan: v.number(),
+    }))),
+    cellColors: v.optional(v.record(v.string(), v.string())),
+    cellStyles: v.optional(v.string()),
     description: v.optional(v.string()),
     division: v.optional(v.string()),
     userId: v.id("users"), // Add userId from client
@@ -114,10 +112,11 @@ export const create = mutation({
     const kpiId = await ctx.db.insert("kpiAnnual", {
       year: args.year,
       name: args.name,
-      data: args.data,
-      mergeCells: args.mergeCells,
-      cellColors: args.cellColors,
-      cellStyles: args.cellStyles,
+      tableState: args.tableState, // Single JSON field (preferred)
+      data: args.data, // Legacy (optional)
+      mergeCells: args.mergeCells, // Legacy (optional)
+      cellColors: args.cellColors, // Legacy (optional)
+      cellStyles: args.cellStyles, // Legacy (optional)
       description: args.description,
       division: args.division,
       created_by: user._id,
@@ -135,19 +134,17 @@ export const create = mutation({
 export const update = mutation({
   args: {
     year: v.string(), // Use year as identifier
-    data: v.array(v.array(v.any())),
-    mergeCells: v.optional(
-      v.array(
-        v.object({
-          row: v.number(),
-          col: v.number(),
-          rowspan: v.number(),
-          colspan: v.number(),
-        })
-      )
-    ),
-    cellColors: v.optional(v.record(v.string(), v.string())), // key: "row-col", value: hexColor
-    cellStyles: v.optional(v.string()), // JSON string of style object
+    tableState: v.optional(v.string()), // NEW: Complete JSON string
+    // Legacy fields (for backward compatibility)
+    data: v.optional(v.array(v.array(v.any()))),
+    mergeCells: v.optional(v.array(v.object({
+      row: v.number(),
+      col: v.number(),
+      rowspan: v.number(),
+      colspan: v.number(),
+    }))),
+    cellColors: v.optional(v.record(v.string(), v.string())),
+    cellStyles: v.optional(v.string()),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
     division: v.optional(v.string()),
@@ -173,10 +170,11 @@ export const update = mutation({
 
     // Prepare update data
     const updateData: any = {
-      data: args.data,
-      mergeCells: args.mergeCells,
-      cellColors: args.cellColors,
-      cellStyles: args.cellStyles,
+      tableState: args.tableState, // Single JSON field (preferred)
+      data: args.data, // Legacy (optional)
+      mergeCells: args.mergeCells, // Legacy (optional)
+      cellColors: args.cellColors, // Legacy (optional)
+      cellStyles: args.cellStyles, // Legacy (optional)
       updated_by: user._id,
       updatedAt: Date.now(),
     };

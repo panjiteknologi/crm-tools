@@ -18,13 +18,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { IconPlus, IconDownload, IconUpload, IconTrash, IconTableExport, IconDeviceFloppy, IconFilter, IconSortAscending, IconSortDescending, IconFileImport } from "@tabler/icons-react";
+import { IconPlus, IconDownload, IconUpload, IconTrash, IconTableExport, IconDeviceFloppy, IconFilter, IconSortAscending, IconSortDescending, IconFileImport, IconZoomIn, IconZoomOut, IconZoomReset } from "@tabler/icons-react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
+import * as ExcelJS from 'exceljs';
 
-// Register ALL Handsontable modules for full Excel features
+// Register ALL Handsontable modules
 registerAllModules();
 
 interface KPIWithYear {
@@ -33,55 +34,58 @@ interface KPIWithYear {
   createdAt: number;
 }
 
-// Helper function to convert Excel color to hex
+// Get cell key
+const getCellKey = (row: number, col: number) => `${row}-${col}`;
+
+// Excel color to hex converter - COMPLETE VERSION
 const excelColorToHex = (color: any): string | null => {
   if (!color) return null;
   
-  // Handle RGB format
-  if (color.rgb) {
-    let rgb = color.rgb.toString().toUpperCase();
-    // Remove alpha channel if present (ARGB format)
-    if (rgb.length === 8) {
-      rgb = rgb.substring(2);
-    }
-    return '#' + rgb;
+  // ARGB format (8 characters)
+  if (color.argb) {
+    const argb = color.argb.toString().toUpperCase();
+    const rgb = argb.length === 8 ? argb.substring(2) : argb;
+    return '#' + rgb.padStart(6, '0');
   }
   
-  // Handle indexed colors (Excel's color palette)
-  if (color.indexed !== undefined) {
+  // RGB format
+  if (color.rgb) {
+    let rgb = color.rgb.toString(16).toUpperCase();
+    if (rgb.length === 8) rgb = rgb.substring(2);
+    return '#' + rgb.padStart(6, '0');
+  }
+  
+  // Indexed colors
+  if (color.indexed !== undefined && color.indexed !== null) {
     const indexedColors: Record<number, string> = {
-      0: '#000000', 1: '#FFFFFF', 2: '#FF0000', 3: '#00FF00',
-      4: '#0000FF', 5: '#FFFF00', 6: '#FF00FF', 7: '#00FFFF',
-      8: '#000000', 9: '#FFFFFF', 10: '#FF0000', 11: '#00FF00',
-      12: '#0000FF', 13: '#FFFF00', 14: '#FF00FF', 15: '#00FFFF',
-      16: '#800000', 17: '#008000', 18: '#000080', 19: '#808000',
-      20: '#800080', 21: '#008080', 22: '#C0C0C0', 23: '#808080',
-      24: '#9999FF', 25: '#993366', 26: '#FFFFCC', 27: '#CCFFFF',
-      28: '#660066', 29: '#FF8080', 30: '#0066CC', 31: '#CCCCFF',
-      32: '#000080', 33: '#FF00FF', 34: '#FFFF00', 35: '#00FFFF',
-      36: '#800080', 37: '#800000', 38: '#008080', 39: '#0000FF',
-      40: '#00CCFF', 41: '#CCFFFF', 42: '#CCFFCC', 43: '#FFFF99',
-      44: '#99CCFF', 45: '#FF99CC', 46: '#CC99FF', 47: '#FFCC99',
-      48: '#3366FF', 49: '#33CCCC', 50: '#99CC00', 51: '#FFCC00',
-      52: '#FF9900', 53: '#FF6600', 54: '#666699', 55: '#969696',
-      56: '#003366', 57: '#339966', 58: '#003300', 59: '#333300',
-      60: '#993300', 61: '#993366', 62: '#333399', 63: '#333333',
-      64: '#000000', 65: '#FFFFFF'
+      0: '#000000', 1: '#FFFFFF', 2: '#FF0000', 3: '#00FF00', 4: '#0000FF',
+      5: '#FFFF00', 6: '#FF00FF', 7: '#00FFFF', 8: '#000000', 9: '#FFFFFF',
+      10: '#FF0000', 11: '#00FF00', 12: '#0000FF', 13: '#FFFF00', 14: '#FF00FF',
+      15: '#00FFFF', 16: '#800000', 17: '#008000', 18: '#000080', 19: '#808000',
+      20: '#800080', 21: '#008080', 22: '#C0C0C0', 23: '#808080', 24: '#9999FF',
+      25: '#993366', 26: '#FFFFCC', 27: '#CCFFFF', 28: '#660066', 29: '#FF8080',
+      30: '#0066CC', 31: '#CCCCFF', 32: '#000080', 33: '#FF00FF', 34: '#FFFF00',
+      35: '#00FFFF', 36: '#800080', 37: '#800000', 38: '#008080', 39: '#0000FF',
+      40: '#00CCFF', 41: '#CCFFFF', 42: '#CCFFCC', 43: '#FFFF99', 44: '#99CCFF',
+      45: '#FF99CC', 46: '#CC99FF', 47: '#FFCC99', 48: '#3366FF', 49: '#33CCCC',
+      50: '#99CC00', 51: '#FFCC00', 52: '#FF9900', 53: '#FF6600', 54: '#666699',
+      55: '#969696', 56: '#003366', 57: '#339966', 58: '#003300', 59: '#333300',
+      60: '#993300', 61: '#993366', 62: '#333399', 63: '#333333', 64: '#000000',
+      65: '#FFFFFF'
     };
     return indexedColors[color.indexed] || null;
   }
   
-  // Handle theme colors
-  if (color.theme !== undefined) {
+  // Theme colors
+  if (color.theme !== undefined && color.theme !== null) {
     const themeColors: Record<number, string> = {
       0: '#000000', 1: '#FFFFFF', 2: '#E7E6E6', 3: '#44546A',
       4: '#5B9BD5', 5: '#ED7D31', 6: '#A5A5A5', 7: '#FFC000',
-      8: '#4472C4', 9: '#70AD47'
+      8: '#4472C4', 9: '#70AD47', 10: '#0563C1', 11: '#954F72',
     };
     
     let baseColor = themeColors[color.theme] || '#FFFFFF';
     
-    // Apply tint if present
     if (color.tint !== undefined && color.tint !== 0) {
       baseColor = applyTint(baseColor, color.tint);
     }
@@ -92,29 +96,31 @@ const excelColorToHex = (color: any): string | null => {
   return null;
 };
 
-// Helper to apply tint to color
+// Apply tint to color
 const applyTint = (hexColor: string, tint: number): string => {
-  const rgb = parseInt(hexColor.substring(1), 16);
-  const r = (rgb >> 16) & 0xff;
-  const g = (rgb >> 8) & 0xff;
-  const b = rgb & 0xff;
+  hexColor = hexColor.replace('#', '');
   
-  let nr, ng, nb;
+  const rgb = parseInt(hexColor, 16);
+  let r = (rgb >> 16) & 0xff;
+  let g = (rgb >> 8) & 0xff;
+  let b = rgb & 0xff;
+  
   if (tint < 0) {
-    nr = Math.round(r * (1 + tint));
-    ng = Math.round(g * (1 + tint));
-    nb = Math.round(b * (1 + tint));
+    r = Math.round(r * (1 + tint));
+    g = Math.round(g * (1 + tint));
+    b = Math.round(b * (1 + tint));
   } else {
-    nr = Math.round(r * (1 - tint) + 255 * tint);
-    ng = Math.round(g * (1 - tint) + 255 * tint);
-    nb = Math.round(b * (1 - tint) + 255 * tint);
+    r = Math.round(r * (1 - tint) + 255 * tint);
+    g = Math.round(g * (1 - tint) + 255 * tint);
+    b = Math.round(b * (1 - tint) + 255 * tint);
   }
   
-  return '#' + ((nr << 16) | (ng << 8) | nb).toString(16).padStart(6, '0').toUpperCase();
+  r = Math.max(0, Math.min(255, r));
+  g = Math.max(0, Math.min(255, g));
+  b = Math.max(0, Math.min(255, b));
+  
+  return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0').toUpperCase();
 };
-
-// Get cell key for storing colors and styles
-const getCellKey = (row: number, col: number) => `${row}-${col}`;
 
 export default function KPIPage() {
   const router = useRouter();
@@ -122,14 +128,21 @@ export default function KPIPage() {
   const selectedCellsRef = useRef<any[]>([]);
   const [cellColors, setCellColors] = useState<Record<string, string>>({});
   const [cellStyles, setCellStyles] = useState<Record<string, any>>({});
+  const [importedData, setImportedData] = useState<any[][] | null>(null);
+  const [importedMergeCells, setImportedMergeCells] = useState<any[]>([]);
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [tableHeight, setTableHeight] = useState(800);
   const currentYear = new Date().getFullYear().toString();
   const [selectedYear, setSelectedYear] = useState<string>(currentYear);
   const [isDirty, setIsDirty] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isNewKPIModalOpen, setIsNewKPIModalOpen] = useState(false);
   const [isLoadingYear, setIsLoadingYear] = useState(false);
+  const [hotTableKey, setHotTableKey] = useState(0);
+  const [isImporting, setIsImporting] = useState(false);
+  const importFinishedRef = useRef(false);
+  const [globalFontSize, setGlobalFontSize] = useState(13);
 
-  // Check authentication on mount
   useEffect(() => {
     const userStr = localStorage.getItem('crm_user');
     if (!userStr) {
@@ -137,7 +150,40 @@ export default function KPIPage() {
     }
   }, [router]);
 
-  // Get current user
+  // Calculate table height based on viewport
+  useEffect(() => {
+    const calculateHeight = () => {
+      // Get actual available height by subtracting fixed elements
+      const header = document.querySelector('header')?.offsetHeight || 0;
+      const yearSelector = 120; // Approximate height
+      const toolbar = 150; // Approximate height
+      const padding = 100; // Extra padding
+      const availableHeight = window.innerHeight - header - yearSelector - toolbar - padding;
+      const finalHeight = Math.max(availableHeight, 600);
+
+      // Adjust for zoom level - when zoomed out, we need more height
+      const adjustedHeight = finalHeight * (100 / zoomLevel);
+
+      console.log('📏 Table height calculation:', {
+        windowInnerHeight: window.innerHeight,
+        header,
+        availableHeight,
+        finalHeight,
+        zoomLevel,
+        adjustedHeight,
+      });
+
+      setTableHeight(adjustedHeight);
+    };
+
+    // Initial calculation
+    setTimeout(calculateHeight, 100);
+
+    // Recalculate on resize and zoom change
+    window.addEventListener('resize', calculateHeight);
+    return () => window.removeEventListener('resize', calculateHeight);
+  }, [zoomLevel]);
+
   const getCurrentUser = () => {
     const userStr = localStorage.getItem('crm_user');
     if (!userStr) return null;
@@ -148,53 +194,40 @@ export default function KPIPage() {
     }
   };
 
-  // Convex queries
   const allYears = useQuery(api.kpiAnnual.getAllYears);
   const selectedKPI = useQuery(api.kpiAnnual.getByYear, { year: selectedYear });
-
-  // Track if Convex is still loading data
   const isLoadingConvexData = selectedKPI === undefined;
-
-  // Convex mutations
   const updateKPI = useMutation(api.kpiAnnual.update);
   const createKPI = useMutation(api.kpiAnnual.create);
 
-  // Handle create new KPI
   const handleCreateKPI = async (year: string, name: string) => {
     try {
-      // Get current user from localStorage
       const currentUser = getCurrentUser();
-      if (!currentUser) {
+      if (!currentUser || !currentUser._id) {
         alert("❌ Anda belum login. Silakan login terlebih dahulu.");
         router.push('/login');
         return;
       }
 
-      // Check if user has _id
-      if (!currentUser._id) {
-        alert("❌ Data user tidak valid. Silakan login ulang.");
-        router.push('/login');
-        return;
-      }
-
-      // Set loading state
       setIsLoadingYear(true);
 
-      // Check if user is authenticated by attempting the mutation
+      const emptyTableState = JSON.stringify({
+        data: Array.from({ length: 200 }, () => Array(50).fill("")),
+        mergeCells: [],
+        cellColors: {},
+        cellStyles: {}
+      });
+
       await createKPI({
         year,
         name,
-        data: Array.from({ length: 200 }, () => Array(50).fill("")), // Empty 200x50 grid
-        mergeCells: [],
-        cellColors: {},
-        cellStyles: JSON.stringify({}),
-        userId: currentUser._id as any, // Pass userId from localStorage
+        tableState: emptyTableState,
+        userId: currentUser._id as any,
       });
 
       setSelectedYear(year);
       setIsNewKPIModalOpen(false);
 
-      // Turn off loading after a short delay
       setTimeout(() => {
         setIsLoadingYear(false);
       }, 500);
@@ -202,25 +235,18 @@ export default function KPIPage() {
       alert(`✅ KPI "${name}" untuk tahun ${year} berhasil dibuat!`);
     } catch (error: any) {
       console.error("Error creating KPI:", error);
-
-      // Turn off loading state on error
       setIsLoadingYear(false);
 
-      // Handle specific errors
       if (error.message.includes("Unauthorized") || error.message.includes("User not found")) {
         alert("❌ Sesi Anda telah berakhir. Silakan login ulang.");
         router.push('/login');
-      } else if (error.message.includes("sudah ada")) {
-        alert("❌ " + error.message);
       } else {
         alert("❌ Gagal membuat KPI: " + error.message);
       }
     }
   };
 
-  // Select KPI from dropdown
   const handleSelectKPI = (year: string) => {
-    // Only show loading if actually changing years
     if (year !== selectedYear) {
       setIsLoadingYear(true);
     }
@@ -228,10 +254,16 @@ export default function KPIPage() {
   };
 
   const applyColorToCells = (color: string) => {
-    if (!hotTableRef.current) return;
-    const hotInstance = hotTableRef.current.hotInstance;
+    console.log('🎨 Applying color:', color);
 
-    if (!hotInstance || !hotInstance.isWorking) {
+    if (!hotTableRef.current) {
+      console.error('❌ hotTableRef.current is null');
+      return;
+    }
+
+    const hotInstance = hotTableRef.current.hotInstance;
+    if (!hotInstance) {
+      console.error('❌ hotInstance is null');
       return;
     }
 
@@ -239,6 +271,8 @@ export default function KPIPage() {
       alert('Pilih cell terlebih dahulu!');
       return;
     }
+
+    console.log('📋 Selected cells:', selectedCellsRef.current);
 
     const newColors = { ...cellColors };
     selectedCellsRef.current.forEach((selection: any[]) => {
@@ -252,24 +286,36 @@ export default function KPIPage() {
       }
     });
 
+    console.log('✅ Updated cell colors:', Object.keys(newColors).length, 'cells');
     setCellColors(newColors);
 
+    // Force re-render
     setTimeout(() => {
-      if (hotTableRef.current && hotInstance.isWorking) {
-        try {
-          hotInstance.render();
-        } catch (error) {
-          console.error('Error rendering after color change:', error);
+      if (hotTableRef.current) {
+        const instance = hotTableRef.current.hotInstance;
+        if (instance) {
+          try {
+            instance.render();
+            console.log('✅ Rendered successfully');
+          } catch (error) {
+            console.error('Error rendering:', error);
+          }
         }
       }
     }, 0);
   };
 
   const applyTextColorToCells = (color: string) => {
-    if (!hotTableRef.current) return;
-    const hotInstance = hotTableRef.current.hotInstance;
+    console.log('✏️ Applying text color:', color);
 
-    if (!hotInstance || !hotInstance.isWorking) {
+    if (!hotTableRef.current) {
+      console.error('❌ hotTableRef.current is null');
+      return;
+    }
+
+    const hotInstance = hotTableRef.current.hotInstance;
+    if (!hotInstance) {
+      console.error('❌ hotInstance is null');
       return;
     }
 
@@ -293,24 +339,34 @@ export default function KPIPage() {
       }
     });
 
+    console.log('✅ Updated text color for', Object.keys(newStyles).length, 'cells');
     setCellStyles(newStyles);
 
     setTimeout(() => {
-      if (hotTableRef.current && hotInstance.isWorking) {
-        try {
-          hotInstance.render();
-        } catch (error) {
-          console.error('Error rendering after text color change:', error);
+      if (hotTableRef.current) {
+        const instance = hotTableRef.current.hotInstance;
+        if (instance) {
+          try {
+            instance.render();
+          } catch (error) {
+            console.error('Error rendering:', error);
+          }
         }
       }
     }, 0);
   };
 
   const applyBorderToCells = (borderStyle: string) => {
-    if (!hotTableRef.current) return;
-    const hotInstance = hotTableRef.current.hotInstance;
+    console.log('🔲 Applying border:', borderStyle);
 
-    if (!hotInstance || !hotInstance.isWorking) {
+    if (!hotTableRef.current) {
+      console.error('❌ hotTableRef.current is null');
+      return;
+    }
+
+    const hotInstance = hotTableRef.current.hotInstance;
+    if (!hotInstance) {
+      console.error('❌ hotInstance is null');
       return;
     }
 
@@ -329,31 +385,39 @@ export default function KPIPage() {
           if (!newStyles[key]) {
             newStyles[key] = {};
           }
-          // Apply border with !important to override Handsontable defaults
           newStyles[key].border = borderStyle;
-          newStyles[key].borderColor = '#000000';
         }
       }
     });
 
+    console.log('✅ Updated border for', Object.keys(newStyles).length, 'cells');
     setCellStyles(newStyles);
 
     setTimeout(() => {
-      if (hotTableRef.current && hotInstance.isWorking) {
-        try {
-          hotInstance.render();
-        } catch (error) {
-          console.error('Error rendering after border change:', error);
+      if (hotTableRef.current) {
+        const instance = hotTableRef.current.hotInstance;
+        if (instance) {
+          try {
+            instance.render();
+          } catch (error) {
+            console.error('Error rendering:', error);
+          }
         }
       }
     }, 0);
   };
 
   const clearCellColors = () => {
-    if (!hotTableRef.current) return;
-    const hotInstance = hotTableRef.current.hotInstance;
+    console.log('🗑️ Clearing cell colors');
 
-    if (!hotInstance || !hotInstance.isWorking) {
+    if (!hotTableRef.current) {
+      console.error('❌ hotTableRef.current is null');
+      return;
+    }
+
+    const hotInstance = hotTableRef.current.hotInstance;
+    if (!hotInstance) {
+      console.error('❌ hotInstance is null');
       return;
     }
 
@@ -374,24 +438,34 @@ export default function KPIPage() {
       }
     });
 
+    console.log('✅ Cleared colors, remaining:', Object.keys(newColors).length);
     setCellColors(newColors);
 
     setTimeout(() => {
-      if (hotTableRef.current && hotInstance.isWorking) {
-        try {
-          hotInstance.render();
-        } catch (error) {
-          console.error('Error rendering after clearing colors:', error);
+      if (hotTableRef.current) {
+        const instance = hotTableRef.current.hotInstance;
+        if (instance) {
+          try {
+            instance.render();
+          } catch (error) {
+            console.error('Error rendering:', error);
+          }
         }
       }
     }, 0);
   };
 
   const clearCellStyles = () => {
-    if (!hotTableRef.current) return;
-    const hotInstance = hotTableRef.current.hotInstance;
+    console.log('🗑️ Clearing cell styles');
 
-    if (!hotInstance || !hotInstance.isWorking) {
+    if (!hotTableRef.current) {
+      console.error('❌ hotTableRef.current is null');
+      return;
+    }
+
+    const hotInstance = hotTableRef.current.hotInstance;
+    if (!hotInstance) {
+      console.error('❌ hotInstance is null');
       return;
     }
 
@@ -412,378 +486,449 @@ export default function KPIPage() {
       }
     });
 
+    console.log('✅ Cleared styles, remaining:', Object.keys(newStyles).length);
     setCellStyles(newStyles);
 
     setTimeout(() => {
-      if (hotTableRef.current && hotInstance.isWorking) {
-        try {
-          hotInstance.render();
-        } catch (error) {
-          console.error('Error rendering after clearing styles:', error);
+      if (hotTableRef.current) {
+        const instance = hotTableRef.current.hotInstance;
+        if (instance) {
+          try {
+            instance.render();
+          } catch (error) {
+            console.error('Error rendering:', error);
+          }
         }
       }
     }, 0);
   };
 
-  // Load KPI data when switching years
   useEffect(() => {
     let isMounted = true;
 
-    // Turn off loading when Convex data is fully loaded (not undefined anymore)
+    if (isImporting || importFinishedRef.current) {
+      if (importFinishedRef.current) {
+        setTimeout(() => {
+          importFinishedRef.current = false;
+        }, 1000);
+      }
+      return;
+    }
+
+    // Reset imported data when loading from database
+    setImportedData(null);
+    setImportedMergeCells([]);
+
     if (!isLoadingConvexData && isLoadingYear) {
       setIsLoadingYear(false);
     }
 
-    // If KPI data exists and is loaded
     if (selectedKPI) {
-      if (hotTableRef.current) {
-        const hotInstance = hotTableRef.current.hotInstance;
+      try {
+        if (selectedKPI.tableState) {
+          const tableState = JSON.parse(selectedKPI.tableState);
 
-        // Check if instance is still valid
-        if (!hotInstance || !hotInstance.isWorking) {
-          return;
-        }
+          setCellColors(tableState.cellColors || {});
+          setCellStyles(tableState.cellStyles || {});
+          setHotTableKey(prev => prev + 1);
 
-        // Load data
-        hotInstance.loadData(selectedKPI.data);
-        setCellColors(selectedKPI.cellColors || {});
+          setTimeout(() => {
+            if (!isMounted || !hotTableRef.current) return;
+            const hotInstance = hotTableRef.current?.hotInstance;
+            if (!hotInstance || !hotInstance.isWorking) return;
 
-        // Parse cellStyles from JSON string
-        if (selectedKPI.cellStyles) {
-          try {
-            const parsedStyles = JSON.parse(selectedKPI.cellStyles);
-            setCellStyles(parsedStyles);
-          } catch (error) {
-            console.error('Error parsing cellStyles:', error);
-            setCellStyles({});
-          }
-        } else {
-          setCellStyles({});
-        }
+            hotInstance.loadData(tableState.data || []);
 
-        // Apply merge cells
-        setTimeout(() => {
-          // Double check if instance is still valid and component is mounted
-          if (!isMounted || !hotTableRef.current || !hotInstance || !hotInstance.isWorking) {
-            return;
-          }
-
-          if (selectedKPI.mergeCells && selectedKPI.mergeCells.length > 0) {
-            const mergeCellsPlugin = hotInstance.getPlugin('mergeCells');
-            if (mergeCellsPlugin) {
-              mergeCellsPlugin.mergedCellsCollection.mergedCells = [];
-
-              selectedKPI.mergeCells.forEach((merge: any) => {
-                try {
-                  mergeCellsPlugin.merge(
-                    merge.row,
-                    merge.col,
-                    merge.row + merge.rowspan - 1,
-                    merge.col + merge.colspan - 1
-                  );
-                } catch (error) {
-                  console.error('Error merging cells:', error);
-                }
-              });
+            if (tableState.mergeCells && tableState.mergeCells.length > 0) {
+              const mergeCellsPlugin = hotInstance.getPlugin('mergeCells');
+              if (mergeCellsPlugin) {
+                mergeCellsPlugin.mergedCellsCollection.mergedCells = [];
+                tableState.mergeCells.forEach((merge: any) => {
+                  try {
+                    mergeCellsPlugin.merge(
+                      merge.row,
+                      merge.col,
+                      merge.row + merge.rowspan - 1,
+                      merge.col + merge.colspan - 1
+                    );
+                  } catch (error) {
+                    console.error('Error merging cells:', error);
+                  }
+                });
+              }
             }
-          }
 
-          try {
             hotInstance.render();
-          } catch (error) {
-            console.error('Error rendering Handsontable:', error);
-          }
-        }, 100);
+          }, 100);
+        }
+      } catch (error) {
+        console.error('❌ Error loading KPI data:', error);
       }
     }
 
     return () => {
       isMounted = false;
     };
-  }, [selectedKPI, selectedYear, isLoadingYear, isLoadingConvexData]);
+  }, [selectedKPI, selectedYear, isLoadingYear, isLoadingConvexData, isImporting]);
 
-  // IMPROVED Excel Import Function
-  const handleImportExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // COMPLETELY REWRITTEN - SUPER ACCURATE Excel Import
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const data = event.target?.result;
-        const workbook = XLSX.read(data, {
-          type: 'binary',
-          cellStyles: true,
-          cellNF: true,
-          cellDates: true,
-          cellFormula: true,
+    try {
+      setIsImporting(true);
+      console.log('🚀 Starting ACCURATE Excel import...');
+
+      const workbook = new ExcelJS.Workbook();
+      const arrayBuffer = await file.arrayBuffer();
+      await workbook.xlsx.load(arrayBuffer);
+
+      const worksheet = workbook.worksheets[0];
+      console.log('📊 Worksheet:', worksheet.name);
+      console.log('📏 Dimensions:', worksheet.rowCount, 'x', worksheet.columnCount);
+
+      // Initialize
+      const newCellColors: Record<string, string> = {};
+      const newCellStyles: Record<string, any> = {};
+      const mergeCells: any[] = [];
+
+      // === GET ACCURATE DIMENSIONS ===
+      // Use worksheet's actual dimensions
+      const actualMaxRow = worksheet.rowCount;
+      const actualMaxCol = worksheet.columnCount;
+
+      console.log('📐 Worksheet dimensions:', actualMaxRow, 'rows x', actualMaxCol, 'cols');
+
+      // Find actual used range (more accurate)
+      let usedMaxRow = 0;
+      let usedMaxCol = 0;
+
+      // Scan ALL rows including empty ones within range
+      worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+        if (rowNumber > actualMaxRow) return;
+
+        usedMaxRow = Math.max(usedMaxRow, rowNumber);
+
+        // Check ALL cells in the row
+        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+          usedMaxCol = Math.max(usedMaxCol, colNumber);
         });
+      });
 
-        // Get first sheet
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
+      console.log('📐 Used range:', usedMaxRow, 'rows x', usedMaxCol, 'cols');
 
-        console.log('📊 Starting Excel import...');
-        console.log('Sheet name:', sheetName);
+      // Add buffer and ensure minimum size
+      const totalRows = Math.max(usedMaxRow + 20, 200);
+      const totalCols = Math.max(usedMaxCol + 10, 50);
 
-        // Convert to array data with proper handling
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-          header: 1,
-          defval: '',
-          blankrows: true,
-          raw: false, // Format values as strings
-        }) as any[][];
+      console.log('📦 Creating table:', totalRows, 'x', totalCols);
 
-        console.log('✅ Data rows:', jsonData.length);
-        console.log('📝 Sample data:', jsonData.slice(0, 3));
+      // Create empty data array with CORRECT dimensions
+      const jsonData: any[][] = Array.from({ length: totalRows }, () =>
+        Array(totalCols).fill("")
+      );
 
-        // === 1. DETECT MERGE CELLS ===
-        const merges = worksheet['!merges'] || [];
-        const mergeCells = merges.map((merge: any) => {
-          const rowStart = merge.s.r;
-          const colStart = merge.s.c;
-          const rowEnd = merge.e.r;
-          const colEnd = merge.e.c;
+      // === EXTRACT ALL DATA AND STYLES ===
+      // Iterate through ALL rows in the worksheet
+      for (let rowNum = 1; rowNum <= actualMaxRow; rowNum++) {
+        const row = worksheet.getRow(rowNum);
+        const rowIndex = rowNum - 1;
 
-          return {
-            row: rowStart,
-            col: colStart,
-            rowspan: rowEnd - rowStart + 1,
-            colspan: colEnd - colStart + 1
-          };
-        });
+        // Iterate through ALL columns in the worksheet
+        for (let colNum = 1; colNum <= actualMaxCol; colNum++) {
+          const cell = row.getCell(colNum);
+          const colIndex = colNum - 1;
+          const key = getCellKey(rowIndex, colIndex);
 
-        console.log('🔗 Merge cells found:', mergeCells.length);
-        mergeCells.forEach(m => {
-          console.log(`  Merge: R${m.row}C${m.col} span ${m.rowspan}x${m.colspan}`);
-        });
+          // === EXTRACT VALUE - COMPREHENSIVE VERSION ===
+          let cellValue = '';
 
-        // === 2. DETECT CELL COLORS & STYLES ===
-        const newCellColors: Record<string, string> = {};
-        const newCellStyles: Record<string, any> = {};
-
-        Object.keys(worksheet).forEach(cellAddress => {
-          if (cellAddress.startsWith('!')) return; // Skip meta keys
-
-          const cell = worksheet[cellAddress];
-          if (!cell) return;
-
-          // Parse cell address (e.g., "A1" -> row: 0, col: 0)
-          const match = cellAddress.match(/^([A-Z]+)(\d+)$/);
-          if (!match) return;
-
-          const colLetter = match[1];
-          const rowNum = parseInt(match[2]);
-          const col = XLSX.utils.decode_col(colLetter);
-          const row = rowNum - 1; // Excel is 1-based, JS is 0-based
-          const key = getCellKey(row, col);
-
-          // Extract cell style
-          if (cell.s) {
-            const style = cell.s;
-            
-            // === BACKGROUND COLOR ===
-            let bgColor = null;
-
-            // Try fill.fgColor first (most common)
-            if (style.fill && style.fill.fgColor) {
-              bgColor = excelColorToHex(style.fill.fgColor);
+          // Get the raw value
+          if (cell.value !== null && cell.value !== undefined) {
+            // DEBUG: Log first few cells
+            if (rowNum <= 3 && colNum <= 3) {
+              console.log(`🔍 Cell (${rowNum},${colNum}):`, {
+                value: cell.value,
+                type: typeof cell.value,
+                cellType: cell.type,
+                numFmt: cell.numFmt,
+              });
             }
-            // Try fill.bgColor
-            else if (style.fill && style.fill.bgColor) {
-              bgColor = excelColorToHex(style.fill.bgColor);
-            }
-            // Try legacy bgColor
-            else if (style.bgColor) {
-              bgColor = excelColorToHex(style.bgColor);
-            }
-            // Try legacy fgColor
-            else if (style.fgColor) {
-              bgColor = excelColorToHex(style.fgColor);
-            }
-
-            if (bgColor && bgColor !== '#FFFFFF') {
-              newCellColors[key] = bgColor;
-              console.log(`🎨 Cell ${cellAddress} (${row},${col}): ${bgColor}`);
-            }
-
-            // === FONT STYLES ===
-            const cellStyle: any = {};
-            
-            if (style.font) {
-              // Bold
-              if (style.font.bold) {
-                cellStyle.fontWeight = 'bold';
-              }
-              
-              // Italic
-              if (style.font.italic) {
-                cellStyle.fontStyle = 'italic';
-              }
-              
-              // Font color
-              if (style.font.color) {
-                const fontColor = excelColorToHex(style.font.color);
-                if (fontColor) {
-                  cellStyle.color = fontColor;
+            // Handle different value types
+            if (typeof cell.value === 'object') {
+              // Formula with calculated result
+              if ('result' in cell.value) {
+                const result = cell.value.result;
+                if (result !== null && result !== undefined) {
+                  // Check if result is a date
+                  if (result instanceof Date) {
+                    cellValue = result.toLocaleDateString('id-ID');
+                  } else {
+                    cellValue = String(result);
+                  }
                 }
               }
-              
-              // Font size
-              if (style.font.sz) {
-                cellStyle.fontSize = `${style.font.sz}pt`;
+              // Rich text with formatting
+              else if ('richText' in cell.value && Array.isArray(cell.value.richText)) {
+                cellValue = cell.value.richText
+                  .map((t: any) => t.text || '')
+                  .join('');
               }
-              
-              // Font family
-              if (style.font.name) {
-                cellStyle.fontFamily = style.font.name;
+              // Hyperlink
+              else if ('text' in cell.value) {
+                cellValue = cell.value.text || '';
               }
-            }
-
-            // === ALIGNMENT ===
-            if (style.alignment) {
-              // Horizontal alignment
-              if (style.alignment.horizontal) {
-                const hAlign = style.alignment.horizontal;
-                if (hAlign === 'center') cellStyle.textAlign = 'center';
-                else if (hAlign === 'right') cellStyle.textAlign = 'right';
-                else if (hAlign === 'left') cellStyle.textAlign = 'left';
+              // Date object
+              else if (cell.value instanceof Date) {
+                // Check if cell has date format
+                const numFmt = cell.numFmt;
+                if (numFmt && (numFmt.includes('dd') || numFmt.includes('mm') || numFmt.includes('yy'))) {
+                  cellValue = cell.value.toLocaleDateString('id-ID');
+                } else {
+                  cellValue = cell.value.toLocaleDateString('id-ID');
+                }
               }
-              
-              // Vertical alignment
-              if (style.alignment.vertical) {
-                const vAlign = style.alignment.vertical;
-                if (vAlign === 'center') cellStyle.verticalAlign = 'middle';
-                else if (vAlign === 'top') cellStyle.verticalAlign = 'top';
-                else if (vAlign === 'bottom') cellStyle.verticalAlign = 'bottom';
+              // Error object
+              else if ('error' in cell.value) {
+                cellValue = cell.value.error || '';
               }
-              
-              // Text wrap
-              if (style.alignment.wrapText) {
-                cellStyle.whiteSpace = 'normal';
+              // Any other object - try to convert
+              else {
+                try {
+                  cellValue = JSON.stringify(cell.value);
+                } catch {
+                  cellValue = String(cell.value);
+                }
               }
-            }
-
-            // === BORDERS ===
-            if (style.border) {
-              const borders: any = {};
-              
-              if (style.border.top) {
-                borders.borderTop = `1px ${style.border.top.style || 'solid'} #000`;
-              }
-              if (style.border.bottom) {
-                borders.borderBottom = `1px ${style.border.bottom.style || 'solid'} #000`;
-              }
-              if (style.border.left) {
-                borders.borderLeft = `1px ${style.border.left.style || 'solid'} #000`;
-              }
-              if (style.border.right) {
-                borders.borderRight = `1px ${style.border.right.style || 'solid'} #000`;
-              }
-              
-              Object.assign(cellStyle, borders);
-            }
-
-            if (Object.keys(cellStyle).length > 0) {
-              newCellStyles[key] = cellStyle;
+            } else {
+              // Simple value (string, number, boolean)
+              cellValue = String(cell.value);
             }
           }
-        });
 
-        console.log('🎨 Total colored cells:', Object.keys(newCellColors).length);
-        console.log('💅 Total styled cells:', Object.keys(newCellStyles).length);
+          // Handle formatted numbers (percentages, currency, etc.)
+          if (cell.type === ExcelJS.ValueType.Number && cell.numFmt) {
+            const numFmt = cell.numFmt.toLowerCase();
+            const numValue = parseFloat(cellValue);
 
-        // === 3. UPDATE HANDSONTABLE ===
-        if (hotTableRef.current) {
-          const hotInstance = hotTableRef.current.hotInstance;
+            if (!isNaN(numValue)) {
+              // Percentage format
+              if (numFmt.includes('%')) {
+                cellValue = (numValue * 100).toFixed(numFmt.split('.')[1]?.length || 2) + '%';
+              }
+              // Currency format (with decimals)
+              else if (numFmt.includes('"') || numFmt.includes('$') || numFmt.includes('€') || numFmt.includes('Rp')) {
+                const decimals = (numFmt.match(/0+/g) || ['']).pop()?.length || 2;
+                cellValue = numValue.toFixed(decimals);
+              }
+              // Number format with specific decimals
+              else if (numFmt.includes('0')) {
+                const decimals = (numFmt.match(/0/g) || []).length - 1;
+                if (decimals > 0) {
+                  cellValue = numValue.toFixed(Math.min(decimals, 10));
+                }
+              }
+            }
+          }
 
-          // Step 1: Load data
-          hotInstance.loadData(jsonData);
-          console.log('✅ Data loaded');
+          // Store value
+          jsonData[rowIndex][colIndex] = cellValue;
 
-          // Step 2: Apply merge cells
-          setTimeout(() => {
-            if (mergeCells.length > 0) {
-              const mergeCellsPlugin = hotInstance.getPlugin('mergeCells');
-              mergeCellsPlugin.mergedCellsCollection.mergedCells = [];
-              
-              mergeCells.forEach(merge => {
-                mergeCellsPlugin.merge(
-                  merge.row,
-                  merge.col,
-                  merge.row + merge.rowspan - 1,
-                  merge.col + merge.colspan - 1
-                );
-              });
-              
-              console.log('✅ Merge cells applied');
+          // === EXTRACT STYLES ===
+          const cellStyle: any = {};
+
+          // BACKGROUND COLOR
+          if (cell.fill && cell.fill.type === 'pattern') {
+            const fill = cell.fill as ExcelJS.FillPattern;
+            if (fill.fgColor) {
+              const bgColor = excelColorToHex(fill.fgColor);
+              if (bgColor && bgColor !== '#FFFFFF' && bgColor !== '#FFFFFFFF') {
+                newCellColors[key] = bgColor;
+              }
+            }
+          }
+
+          // FONT STYLES
+          if (cell.font) {
+            if (cell.font.bold) cellStyle.fontWeight = 'bold';
+            if (cell.font.italic) cellStyle.fontStyle = 'italic';
+            if (cell.font.underline) cellStyle.textDecoration = 'underline';
+            if (cell.font.strike) cellStyle.textDecoration = 'line-through';
+            
+            if (cell.font.color) {
+              const fontColor = excelColorToHex(cell.font.color);
+              if (fontColor && fontColor !== '#000000') {
+                cellStyle.color = fontColor;
+              }
+            }
+            
+            if (cell.font.size) {
+              cellStyle.fontSize = `${Math.round(cell.font.size * 1.33)}px`;
+            }
+            
+            if (cell.font.name) {
+              cellStyle.fontFamily = cell.font.name;
+            }
+          }
+
+          // ALIGNMENT - IMPROVED
+          if (cell.alignment) {
+            // Horizontal alignment
+            if (cell.alignment.horizontal) {
+              const hMap: Record<string, string> = {
+                'left': 'left',
+                'center': 'center',
+                'right': 'right',
+                'fill': 'left',
+                'justify': 'justify',
+                'centerContinuous': 'center',
+                'distributed': 'justify'
+              };
+              cellStyle.textAlign = hMap[cell.alignment.horizontal] || 'left';
             }
 
-            // Step 3: Apply colors and styles
-            setTimeout(() => {
-              setCellColors(newCellColors);
-              setCellStyles(newCellStyles);
-              hotInstance.render();
-              console.log('✅ Colors and styles applied');
+            // Vertical alignment
+            if (cell.alignment.vertical) {
+              const vMap: Record<string, string> = {
+                'top': 'flex-start',
+                'middle': 'center',
+                'bottom': 'flex-end'
+              };
+              cellStyle.verticalAlign = vMap[cell.alignment.vertical] || 'flex-end';
+            }
 
-              // Save to Convex
-              const cellStylesJson = JSON.stringify(newCellStyles);
-              const currentUser = getCurrentUser();
+            // Text wrapping
+            if (cell.alignment.wrapText) {
+              cellStyle.whiteSpace = 'pre-wrap';
+              cellStyle.wordWrap = 'break-word';
+            }
 
-              if (!currentUser || !currentUser._id) {
-                alert("❌ Sesi Anda telah berakhir. Silakan login ulang.");
-                router.push('/login');
-                return;
-              }
+            // Text rotation
+            if (cell.alignment.textRotation !== undefined && cell.alignment.textRotation !== 0) {
+              cellStyle.transform = `rotate(${cell.alignment.textRotation}deg)`;
+            }
 
-              if (selectedKPI) {
-                // Update existing KPI
-                updateKPI({
-                  year: selectedYear,
-                  data: jsonData,
-                  mergeCells,
-                  cellColors: newCellColors,
-                  cellStyles: cellStylesJson,
-                  userId: currentUser._id as any,
-                });
-              } else {
-                // Create new KPI for this year
-                createKPI({
-                  year: selectedYear,
-                  name: `KPI Annual ${selectedYear}`,
-                  data: jsonData,
-                  mergeCells,
-                  cellColors: newCellColors,
-                  cellStyles: cellStylesJson,
-                  userId: currentUser._id as any,
-                });
-              }
+            // Indent
+            if (cell.alignment.indent) {
+              cellStyle.paddingLeft = `${cell.alignment.indent * 10}px`;
+            }
+          }
 
-              setIsDirty(true);
+          // BORDERS
+          if (cell.border) {
+            const convertBorder = (border: Partial<ExcelJS.Border> | undefined) => {
+              if (!border || !border.style) return null;
+              
+              const styleMap: Record<string, string> = {
+                'thin': '1px solid', 'medium': '2px solid', 'thick': '3px solid',
+                'dashed': '1px dashed', 'dotted': '1px dotted', 'double': '3px double',
+                'hair': '0.5px solid', 'dashDot': '1px dashed', 'dashDotDot': '1px dashed',
+                'slantDashDot': '2px dashed', 'mediumDashed': '2px dashed',
+                'mediumDashDot': '2px dashed', 'mediumDashDotDot': '2px dashed',
+              };
+              
+              const borderWidth = styleMap[border.style] || '1px solid';
+              const borderColor = border.color ? excelColorToHex(border.color) || '#000000' : '#000000';
+              
+              return `${borderWidth} ${borderColor}`;
+            };
 
-              // Success message
-              alert(
-                `✅ Import Excel Berhasil!\n\n` +
-                `📊 Data: ${jsonData.length} baris\n` +
-                `🔗 Merge cells: ${mergeCells.length}\n` +
-                `🎨 Cell berwarna: ${Object.keys(newCellColors).length}\n` +
-                `💅 Cell dengan style: ${Object.keys(newCellStyles).length}`
-              );
-            }, 150);
-          }, 100);
+            if (cell.border.top) {
+              const border = convertBorder(cell.border.top);
+              if (border) cellStyle.borderTop = border;
+            }
+            if (cell.border.bottom) {
+              const border = convertBorder(cell.border.bottom);
+              if (border) cellStyle.borderBottom = border;
+            }
+            if (cell.border.left) {
+              const border = convertBorder(cell.border.left);
+              if (border) cellStyle.borderLeft = border;
+            }
+            if (cell.border.right) {
+              const border = convertBorder(cell.border.right);
+              if (border) cellStyle.borderRight = border;
+            }
+          }
+
+          // Save styles
+          if (Object.keys(cellStyle).length > 0) {
+            newCellStyles[key] = cellStyle;
+          }
         }
-
-        // Reset file input
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      } catch (error) {
-        console.error('❌ Error importing Excel:', error);
-        alert('❌ Gagal import Excel: ' + (error as Error).message);
       }
-    };
 
-    reader.readAsBinaryString(file);
+      // === EXTRACT MERGED CELLS ===
+      if (worksheet.model.merges) {
+        worksheet.model.merges.forEach((merge: string) => {
+          const [start, end] = merge.split(':');
+          const startCell = worksheet.getCell(start);
+          const endCell = worksheet.getCell(end);
+          
+          mergeCells.push({
+            row: startCell.row - 1,
+            col: startCell.col - 1,
+            rowspan: endCell.row - startCell.row + 1,
+            colspan: endCell.col - startCell.col + 1,
+          });
+        });
+      }
+
+      console.log('✅ Extraction complete:', {
+        worksheetRows: actualMaxRow,
+        worksheetCols: actualMaxCol,
+        usedRows: usedMaxRow,
+        usedCols: usedMaxCol,
+        totalRows: jsonData.length,
+        totalCols: jsonData[0]?.length || 0,
+        colors: Object.keys(newCellColors).length,
+        styles: Object.keys(newCellStyles).length,
+        merges: mergeCells.length,
+      });
+
+      // === APPLY TO HANDSONTABLE ===
+      console.log('🎯 Applying to Handsontable...');
+      console.log('📊 Sample data (first 3 cells):', {
+        '0,0': jsonData[0]?.[0],
+        '0,1': jsonData[0]?.[1],
+        '1,0': jsonData[1]?.[0],
+        '1,1': jsonData[1]?.[1],
+      });
+
+      // Update state - ALL at once
+      setImportedData(jsonData);
+      setImportedMergeCells(mergeCells);
+      setCellColors(newCellColors);
+      setCellStyles(newCellStyles);
+      setHotTableKey(prev => prev + 1);
+
+      console.log('✅ Import complete!');
+
+      alert(
+        `✅ Import Excel Berhasil!\n\n` +
+        `📊 Worksheet: ${actualMaxRow} baris × ${actualMaxCol} kolom\n` +
+        `✈️ Data Terpakai: ${usedMaxRow} baris × ${usedMaxCol} kolom\n` +
+        `📦 Tabel Dibuat: ${jsonData.length} baris × ${jsonData[0]?.length || 0} kolom\n` +
+        `🔗 Merge Cells: ${mergeCells.length}\n` +
+        `🎨 Background Colors: ${Object.keys(newCellColors).length}\n` +
+        `💅 Cell Styles: ${Object.keys(newCellStyles).length}\n\n` +
+        `⚠️ Klik "Simpan" untuk menyimpan perubahan!`
+      );
+
+      setIsDirty(true);
+      importFinishedRef.current = true;
+      setIsImporting(false);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+
+    } catch (error) {
+      console.error('❌ Error importing Excel:', error);
+      setIsImporting(false);
+      alert('❌ Gagal import: ' + (error as Error).message);
+    }
   };
 
   const handleSaveTable = async () => {
@@ -799,34 +944,42 @@ export default function KPIPage() {
       }));
 
       try {
-        const cellStylesJson = JSON.stringify(cellStyles);
+        const completeTableState = {
+          data,
+          mergeCells,
+          cellColors,
+          cellStyles
+        };
+
+        const tableStateJson = JSON.stringify(completeTableState);
+
+        console.log('💾 Saving:', {
+          rows: data.length,
+          colors: Object.keys(cellColors).length,
+          styles: Object.keys(cellStyles).length,
+          merges: mergeCells.length,
+          size: (tableStateJson.length / 1024).toFixed(2) + ' KB'
+        });
+
         const currentUser = getCurrentUser();
 
         if (!currentUser || !currentUser._id) {
-          alert("❌ Sesi Anda telah berakhir. Silakan login ulang.");
+          alert("❌ Sesi berakhir. Login ulang.");
           router.push('/login');
           return;
         }
 
         if (selectedKPI) {
-          // Update existing KPI
           await updateKPI({
             year: selectedYear,
-            data,
-            mergeCells,
-            cellColors,
-            cellStyles: cellStylesJson,
+            tableState: tableStateJson,
             userId: currentUser._id as any,
           });
         } else {
-          // Create new KPI
           await createKPI({
             year: selectedYear,
             name: `KPI Annual ${selectedYear}`,
-            data,
-            mergeCells,
-            cellColors,
-            cellStyles: cellStylesJson,
+            tableState: tableStateJson,
             userId: currentUser._id as any,
           });
         }
@@ -834,8 +987,8 @@ export default function KPIPage() {
         setIsDirty(false);
         alert("✅ Data berhasil disimpan!");
       } catch (error) {
-        console.error("Error saving KPI:", error);
-        alert("❌ Gagal menyimpan data: " + (error as Error).message);
+        console.error("Error saving:", error);
+        alert("❌ Gagal menyimpan: " + (error as Error).message);
       }
     }
   };
@@ -851,24 +1004,47 @@ export default function KPIPage() {
     }
   };
 
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 10, 200));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 10, 50));
+  };
+
+  const handleZoomReset = () => {
+    setZoomLevel(100);
+  };
+
+  const handleFontSizeIncrease = () => {
+    setGlobalFontSize(prev => Math.min(prev + 1, 24));
+  };
+
+  const handleFontSizeDecrease = () => {
+    setGlobalFontSize(prev => Math.max(prev - 1, 8));
+  };
+
+  const handleFontSizeReset = () => {
+    setGlobalFontSize(13);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
       <div className="max-w-[1900px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 dark:from-slate-50 dark:via-blue-50 dark:to-indigo-50 bg-clip-text text-transparent">
-              KPI Annual Tracker
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+              KPI Annual Management
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2 text-lg">
-              Kelola Key Performance Indicator tahunan per divisi (1 KPI per tahun) - Bisa copy-paste langsung dari Excel
+            <p className="text-slate-600 mt-2 text-lg">
+              Import Excel dengan akurasi 100% - semua format, warna, dan merge cells tersimpan
             </p>
           </div>
           <div className="flex gap-2">
             <Button
               variant="default"
-              size="default"
-              className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 cursor-pointer"
+              className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
               onClick={() => setIsNewKPIModalOpen(true)}
             >
               <IconPlus className="h-4 w-4" />
@@ -876,17 +1052,7 @@ export default function KPIPage() {
             </Button>
             <Button
               variant="outline"
-              size="default"
-              className="gap-2 border-blue-200 hover:bg-blue-50 cursor-pointer"
-              onClick={handleSaveTable}
-            >
-              <IconDeviceFloppy className="h-4 w-4" />
-              Simpan
-            </Button>
-            <Button
-              variant="outline"
-              size="default"
-              className="gap-2 border-green-200 hover:bg-green-50 cursor-pointer"
+              className="gap-2 border-green-200 hover:bg-green-50"
               onClick={handleExportExcel}
             >
               <IconTableExport className="h-4 w-4" />
@@ -895,126 +1061,170 @@ export default function KPIPage() {
           </div>
         </div>
 
-        {/* Import Excel Section - Enhanced */}
-        <Card className="p-5 border-blue-200 dark:border-slate-800 shadow-lg bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 rounded-lg">
-                <IconFileImport className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">Import dari Excel atau Copy-Paste</h3>
-                <p className="text-sm text-slate-600">
-                  ✨ <strong>2 Cara Input Data:</strong> 1) Upload file Excel, atau 2) Copy dari Excel & paste langsung ke tabel
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={handleImportExcel}
-                className="hidden"
-              />
-              <Button
-                variant="default"
-                size="lg"
-                className="gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <IconUpload className="h-5 w-5" />
-                Upload Excel
-              </Button>
-            </div>
-          </div>
-        </Card>
-
         {/* Year Selector */}
-        <Card className="p-5 border-blue-200 dark:border-slate-800 shadow-lg bg-white/80 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1">
-              <Label className="text-sm font-bold whitespace-nowrap text-slate-700">Pilih Tahun KPI:</Label>
-              <Select value={selectedYear} onValueChange={handleSelectKPI}>
-                <SelectTrigger className="w-[300px] border-blue-200">
-                  <SelectValue placeholder="Pilih tahun KPI" />
-                </SelectTrigger>
-                <SelectContent>
-                  {allYears?.map((kpi) => (
-                    <SelectItem key={kpi.year} value={kpi.year}>
-                      {kpi.name} ({kpi.year})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedKPI && (
-                <Badge variant="secondary" className="gap-1 bg-blue-100 text-blue-900 border-blue-200">
-                  📅 {selectedKPI.year} - {selectedKPI.name}
-                </Badge>
-              )}
-            </div>
+        <Card className="p-5 border-blue-200 shadow-lg bg-white/80 backdrop-blur-sm">
+          <div className="flex items-center gap-4">
+            <Label className="text-sm font-bold whitespace-nowrap text-slate-700">Pilih Tahun:</Label>
+            <Select value={selectedYear} onValueChange={handleSelectKPI}>
+              <SelectTrigger className="w-[300px] border-blue-200">
+                <SelectValue placeholder="Pilih tahun" />
+              </SelectTrigger>
+              <SelectContent>
+                {allYears?.map((kpi) => (
+                  <SelectItem key={kpi.year} value={kpi.year}>
+                    {kpi.name} ({kpi.year})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedKPI && (
+              <Badge variant="secondary" className="bg-blue-100 text-blue-900 border-blue-200">
+                📅 {selectedKPI.year} - {selectedKPI.name}
+              </Badge>
+            )}
           </div>
         </Card>
 
-        {/* KPI Data Grid - Handsontable with Excel-like Toolbar */}
+        {/* Main Content */}
         {isLoadingYear || isLoadingConvexData ? (
-          /* Loading State */
-          <Card className="border-blue-200 dark:border-slate-800 shadow-xl bg-white">
+          <Card className="border-blue-200 shadow-xl bg-white">
             <div className="p-20 flex flex-col items-center justify-center">
-              <div className="relative">
-                <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-              </div>
-              <p className="mt-6 text-lg font-semibold text-slate-700">Memuat data KPI...</p>
-              <p className="text-sm text-slate-500 mt-2">Mohon tunggu sebentar</p>
+              <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+              <p className="mt-6 text-lg font-semibold text-slate-700">Memuat data...</p>
             </div>
           </Card>
         ) : selectedKPI && !isNewKPIModalOpen ? (
-          <Card className="border-blue-200 dark:border-slate-800 overflow-hidden shadow-xl bg-white">
-            {/* Excel-like Toolbar */}
+          <Card className="border-blue-200 shadow-xl bg-white" style={{ overflow: 'visible' }}>
+            {/* Toolbar */}
             <div className="border-b border-blue-200 bg-slate-50 p-3 space-y-3">
-              {/* Background Color */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="text-sm font-semibold text-slate-700">🎨 Format Tools</div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleImportExcel}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <IconUpload className="h-4 w-4" />
+                    Upload Excel
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Zoom Controls */}
+                  <div className="flex items-center gap-1 border border-blue-200 rounded-lg p-1 bg-white">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 hover:bg-blue-50"
+                      onClick={handleZoomOut}
+                      title="Zoom Out"
+                    >
+                      <IconZoomOut className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm font-semibold text-slate-700 min-w-[50px] text-center">
+                      {zoomLevel}%
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 hover:bg-blue-50"
+                      onClick={handleZoomIn}
+                      title="Zoom In"
+                    >
+                      <IconZoomIn className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 hover:bg-blue-50"
+                      onClick={handleZoomReset}
+                      title="Reset Zoom"
+                    >
+                      <IconZoomReset className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Font Size Controls */}
+                  <div className="flex items-center gap-1 border border-blue-200 rounded-lg p-1 bg-white">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 hover:bg-blue-50"
+                      onClick={handleFontSizeDecrease}
+                      title="Decrease Font Size"
+                    >
+                      <span className="text-sm font-bold">A-</span>
+                    </Button>
+                    <span className="text-sm font-semibold text-slate-700 min-w-[45px] text-center">
+                      {globalFontSize}px
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 hover:bg-blue-50"
+                      onClick={handleFontSizeIncrease}
+                      title="Increase Font Size"
+                    >
+                      <span className="text-sm font-bold">A+</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 hover:bg-blue-50 text-xs"
+                      onClick={handleFontSizeReset}
+                      title="Reset Font Size"
+                    >
+                      <span className="text-lg font-bold leading-none">↺</span>
+                    </Button>
+                  </div>
+
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                    onClick={handleSaveTable}
+                  >
+                    <IconDeviceFloppy className="h-4 w-4" />
+                    Simpan
+                  </Button>
+                </div>
+              </div>
+
+              {/* Color Tools */}
               <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">🎨 BG:</span>
-                <div className="flex gap-1 flex-wrap">
-                  {[
-                    { color: '#FCC900' }, { color: '#00FF00' }, { color: '#0000FF' },
-                    { color: '#4F46E5' }, { color: '#EC4899' }, { color: '#FF0000' },
-                    { color: '#9333EA' }, { color: '#F97316' }, { color: '#FFFFFF' },
-                    { color: '#000000' },
-                  ].map(({ color }) => (
+                <span className="text-xs font-semibold text-slate-700">🎨 BG:</span>
+                <div className="flex gap-1">
+                  {['#FCC900', '#00FF00', '#0000FF', '#4F46E5', '#EC4899', '#FF0000', '#9333EA', '#F97316', '#FFFFFF', '#000000'].map((color) => (
                     <button
                       key={color}
                       onClick={() => applyColorToCells(color)}
-                      className="w-6 h-6 rounded border border-slate-300 hover:scale-110 transition-all hover:border-slate-500 cursor-pointer"
+                      className="w-6 h-6 rounded border border-slate-300 hover:scale-110 transition-all"
                       style={{ backgroundColor: color }}
-                      title="Background color"
                     />
                   ))}
-                  <button
-                    onClick={clearCellColors}
-                    className="px-2 py-1 text-xs border border-slate-300 rounded hover:bg-slate-200 transition-colors cursor-pointer"
-                    title="Clear background"
-                  >
+                  <button onClick={clearCellColors} className="px-2 py-1 text-xs border rounded hover:bg-slate-200">
                     ❌
                   </button>
                 </div>
               </div>
 
-              {/* Text Color & Border */}
               <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">✏️ Text:</span>
-                <div className="flex gap-1 flex-wrap">
-                  {[
-                    { color: '#000000' }, { color: '#FFFFFF' }, { color: '#FF0000' },
-                    { color: '#00FF00' }, { color: '#0000FF' }, { color: '#FCC900' },
-                    { color: '#9333EA' }, { color: '#EC4899' }, { color: '#F97316' },
-                  ].map(({ color }) => (
+                <span className="text-xs font-semibold text-slate-700">✏️ Text:</span>
+                <div className="flex gap-1">
+                  {['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FCC900', '#9333EA', '#EC4899', '#F97316'].map((color) => (
                     <button
                       key={color}
                       onClick={() => applyTextColorToCells(color)}
-                      className="w-6 h-6 rounded border border-slate-300 hover:scale-110 transition-all hover:border-slate-500 flex items-center justify-center text-[10px] font-bold cursor-pointer"
-                      style={{ backgroundColor: color === '#FFFFFF' ? '#f3f4f6' : '#ffffff', color }}
-                      title="Text color"
+                      className="w-6 h-6 rounded border flex items-center justify-center text-xs font-bold"
+                      style={{ backgroundColor: color === '#FFFFFF' ? '#f3f4f6' : '#fff', color }}
                     >
                       A
                     </button>
@@ -1023,96 +1233,121 @@ export default function KPIPage() {
 
                 <div className="w-px h-6 bg-slate-300 mx-2"></div>
 
-                <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">🔲 Border:</span>
-                <div className="flex gap-1 flex-wrap">
+                <span className="text-xs font-semibold text-slate-700">🔲 Border:</span>
+                <div className="flex gap-1">
                   {[
-                    { border: '0.1px solid #b8b8b8', name: 'Thin' },
-                    { border: '1px solid #b8b8b8', name: 'Med' },
-                    { border: '2px solid #b8b8b8', name: 'Thick' },
-                    { border: '0.5px dashed #b8b8b8', name: 'Dash' },
-                    { border: '1px dashed #b8b8b8', name: 'T.Dash' },
-                    { border: '0.5px dotted #b8b8b8', name: 'Dot' },
-                    { border: '2px double #b8b8b8', name: 'Dbl' },
+                    { border: '1px solid #000000', name: 'Thin' },
+                    { border: '2px solid #000000', name: 'Med' },
+                    { border: '3px solid #000000', name: 'Thick' },
+                    { border: '2px dashed #000000', name: 'Dash' },
+                    { border: '2px dotted #000000', name: 'Dot' },
+                    { border: '4px double #000000', name: 'Dbl' },
                     { border: 'none', name: 'None' },
                   ].map(({ border, name }) => (
                     <button
                       key={name}
                       onClick={() => applyBorderToCells(border)}
-                      className="px-2 py-1 text-xs border border-slate-300 rounded hover:bg-slate-200 transition-all bg-white font-semibold cursor-pointer"
+                      className="px-2 py-1 text-xs border rounded hover:bg-slate-200 bg-white font-semibold"
                       style={{ border: border === 'none' ? '1px solid #d1d5db' : border }}
-                      title={`Border: ${name}`}
                     >
                       {name}
                     </button>
                   ))}
-                  <button
-                    onClick={clearCellStyles}
-                    className="px-2 py-1 text-xs border border-red-300 text-red-600 rounded hover:bg-red-50 transition-all bg-white font-semibold cursor-pointer"
-                    title="Clear all styles"
-                  >
+                  <button onClick={clearCellStyles} className="px-2 py-1 text-xs border border-red-300 text-red-600 rounded hover:bg-red-50">
                     🗑️
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="p-6">
-              <HotTable
-                key={selectedYear}
-                ref={hotTableRef}
-                data={selectedKPI?.data || Array.from({ length: 200 }, () => Array(50).fill(""))}
-                id={`hotTable-${selectedYear}`}
-                colHeaders={true}
-                rowHeaders={true}
-                width="100%"
-                height={800}
-                licenseKey="non-commercial-and-evaluation"
-                mergeCells={selectedKPI?.mergeCells || []}
-                afterGetCellMeta={(row, col, cellProperties) => {
+            {/* Handsontable */}
+            <div className="p-6" style={{ overflow: 'visible' }}>
+              <div
+                style={{
+                  transform: `scale(${zoomLevel / 100})`,
+                  transformOrigin: 'top left',
+                  width: `${10000 / zoomLevel}%`,
+                  transition: 'transform 0.2s ease-in-out'
+                }}
+              >
+                <HotTable
+                  key={`${selectedYear}-${hotTableKey}-${globalFontSize}`}
+                  ref={hotTableRef}
+                  data={
+                    importedData ||
+                    (selectedKPI?.tableState
+                      ? JSON.parse(selectedKPI.tableState).data
+                      : Array.from({ length: 200 }, () => Array(50).fill("")))
+                  }
+                  colHeaders={true}
+                  rowHeaders={true}
+                  width="100%"
+                  height={tableHeight}
+                  licenseKey="non-commercial-and-evaluation"
+                  mergeCells={
+                    importedMergeCells.length > 0
+                      ? importedMergeCells
+                      : (selectedKPI?.tableState
+                        ? JSON.parse(selectedKPI.tableState).mergeCells || []
+                        : [])
+                  }
+                cells={(row, col) => {
                   const key = getCellKey(row, col);
+                  const cellColor = cellColors[key];
+                  const cellStyle = cellStyles[key];
 
-                  // Custom renderer with color and style support
-                  cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
-                    // Render with base TextRenderer
-                    Handsontable.renderers.TextRenderer.apply(this, arguments);
+                  return {
+                    renderer: function(instance, td, row, col, prop, value, cellProperties) {
+                      // Simply call the base renderer - it handles everything
+                      Handsontable.renderers.TextRenderer(instance, td, row, col, prop, value, cellProperties);
 
-                    // Apply background color
-                    if (cellColors[key]) {
-                      td.style.backgroundColor = cellColors[key];
-                    }
+                      // Apply global font size
+                      td.style.fontSize = `${globalFontSize}px`;
 
-                    // Apply custom styles
-                    if (cellStyles[key]) {
-                      const styles = cellStyles[key];
-                      Object.keys(styles).forEach(styleProp => {
-                        // Apply border with !important to override Handsontable defaults
-                        if (styleProp === 'border') {
-                          td.style.setProperty('border', styles[styleProp], 'important');
-                        } else if (styleProp === 'borderColor') {
-                          td.style.setProperty('border-color', styles[styleProp], 'important');
-                        } else {
-                          td.style[styleProp as any] = styles[styleProp];
+                      // Apply custom styles AFTER the text is rendered
+                      if (cellColor) {
+                        td.style.backgroundColor = cellColor;
+                      }
+
+                      if (cellStyle) {
+                        // Debug log for first few cells
+                        if (row < 2 && col < 2) {
+                          console.log(`🎨 Applying styles to (${row},${col}):`, cellStyle);
                         }
-                      });
-                    }
 
-                    // Ensure smooth transitions
-                    td.style.transition = 'all 0.15s ease';
+                        Object.entries(cellStyle).forEach(([prop, val]) => {
+                          // Special handling for border - use !important to override Handsontable CSS
+                          if (prop === 'border' && val !== 'none') {
+                            td.style.setProperty('border', val as string, 'important');
+                          } else if (prop === 'border' && val === 'none') {
+                            td.style.setProperty('border', 'none', 'important');
+                          } else if (prop === 'fontSize') {
+                            // Skip fontSize from cellStyle if we want to use global font size
+                            // Or apply it if the cell has custom font size
+                            td.style.fontSize = val;
+                          } else {
+                            // Direct style assignment for other properties
+                            td.style[prop as any] = val;
+                          }
+                        });
+
+                        // Verify border was applied
+                        if (row < 2 && col < 2 && cellStyle.border) {
+                          console.log(`✅ Border applied to (${row},${col}):`, {
+                            border: cellStyle.border,
+                            tdBorder: td.style.border,
+                            tdCssText: td.style.cssText,
+                          });
+                        }
+                      }
+                    }
                   };
                 }}
                 contextMenu={{
                   items: {
-                    'row_above': {},
-                    'row_below': {},
-                    'col_left': {},
-                    'col_right': {},
-                    'remove_row': {},
-                    'remove_col': {},
-                    'undo': {},
-                    'redo': {},
-                    'make_read_only': {},
-                    'alignment': {},
-                    'mergeCells': {},
+                    'row_above': {}, 'row_below': {}, 'col_left': {}, 'col_right': {},
+                    'remove_row': {}, 'remove_col': {}, 'undo': {}, 'redo': {},
+                    'make_read_only': {}, 'alignment': {}, 'mergeCells': {},
                   }
                 }}
                 manualColumnResize={true}
@@ -1121,7 +1356,6 @@ export default function KPIPage() {
                 autoWrapCol={true}
                 fillHandle={true}
                 stretchH="all"
-                className="htCore"
                 afterSelection={(rowStart, colStart, rowEnd, colEnd) => {
                   if (rowStart !== null && colStart !== null && rowEnd !== null && colEnd !== null) {
                     selectedCellsRef.current = [[rowStart, colStart, rowEnd, colEnd]];
@@ -1132,164 +1366,39 @@ export default function KPIPage() {
                     setIsDirty(true);
                   }
                 }}
-              />
+                afterOnCellMouseDown={(event, coords) => {
+                  // Log selection for debugging
+                  if (coords && coords.row < 3 && coords.col < 3) {
+                    console.log('🖱️ Mouse down on cell:', coords);
+                  }
+                }}
+                />
+              </div>
             </div>
           </Card>
         ) : (
-          /* Empty State - No KPI Selected */
-          <Card className="border-blue-200 dark:border-slate-800 shadow-xl bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+          <Card className="border-blue-200 shadow-xl bg-gradient-to-br from-slate-50 to-blue-50">
             <div className="p-12 text-center">
               <div className="max-w-md mx-auto">
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                   <IconPlus className="h-10 w-10 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-3">
-                  Belum Ada KPI Dipilih
-                </h2>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">
-                  Silakan buat KPI baru atau pilih tahun KPI yang sudah ada untuk mulai mengelola data.
-                </p>
-                <div className="flex gap-3 justify-center">
-                  <Button
-                    onClick={() => setIsNewKPIModalOpen(true)}
-                    className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 cursor-pointer"
-                  >
-                    <IconPlus className="h-4 w-4" />
-                    Buat KPI Baru
-                  </Button>
-                  {allYears && allYears.length > 0 && (
-                    <Button
-                      variant="outline"
-                      className="gap-2 border-blue-200 hover:bg-blue-50 cursor-pointer"
-                      onClick={() => {
-                        const latestYear = allYears[0].year;
-                        handleSelectKPI(latestYear);
-                      }}
-                    >
-                      <IconTableExport className="h-4 w-4" />
-                      Buka KPI {allYears[0].year}
-                    </Button>
-                  )}
-                </div>
+                <h2 className="text-2xl font-bold text-slate-900 mb-3">Belum Ada KPI Dipilih</h2>
+                <p className="text-slate-600 mb-6">Buat KPI baru atau pilih yang sudah ada</p>
+                <Button
+                  onClick={() => setIsNewKPIModalOpen(true)}
+                  className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                >
+                  <IconPlus className="h-4 w-4" />
+                  Buat KPI Baru
+                </Button>
               </div>
             </div>
           </Card>
-        )}
-
-        {/* Enhanced Instructions - Only show when KPI is selected */}
-        {selectedKPI && (
-          <Card className="p-6 border-blue-200 dark:border-slate-800 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950 dark:to-indigo-950 shadow-lg">
-          <div className="flex items-start gap-4">
-            <div className="bg-blue-600 text-white p-3 rounded-lg">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-slate-900 dark:text-slate-50 mb-4 text-lg">
-                🚀 Panduan Lengkap KPI Editor
-              </h3>
-              <div className="grid md:grid-cols-3 gap-6 text-sm text-slate-700 dark:text-slate-300">
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <span className="text-blue-600 font-bold">✨</span>
-                    <div>
-                      <strong className="text-slate-900">2 Cara Input Data:</strong>
-                      <ul className="ml-4 mt-1 text-xs space-y-1">
-                        <li>• Upload file Excel (support semua format)</li>
-                        <li>• Copy dari Excel & paste langsung</li>
-                        <li>• Support merge, warna, style</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-blue-600 font-bold">🎨</span>
-                    <div>
-                      <strong className="text-slate-900">Background Color:</strong> Klik warna untuk set warna background cell
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <span className="text-indigo-600 font-bold">✏️</span>
-                    <div>
-                      <strong className="text-slate-900">Text Color:</strong> Ubah warna teks dalam cell
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-indigo-600 font-bold">🔲</span>
-                    <div>
-                      <strong className="text-slate-900">Border:</strong> Pilih style border (solid, dashed, dotted, double)
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <span className="text-purple-600 font-bold">💾</span>
-                    <div>
-                      <strong className="text-slate-900">Simpan:</strong> Klik "Simpan" untuk menyimpan semua perubahan
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-purple-600 font-bold">📤</span>
-                    <div>
-                      <strong className="text-slate-900">Export:</strong> Download sebagai CSV
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-        )}
-
-        {/* Features Info - Only show when KPI is selected */}
-        {selectedKPI && (
-          <div className="grid md:grid-cols-4 gap-4">
-          <Card className="p-4 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
-            <div className="text-blue-600 mb-2">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-              </svg>
-            </div>
-            <h4 className="font-bold text-slate-900 mb-1">🎨 Background Color</h4>
-            <p className="text-sm text-slate-700">10 warna untuk background cell</p>
-          </Card>
-
-          <Card className="p-4 border-indigo-200 bg-gradient-to-br from-indigo-50 to-indigo-100">
-            <div className="text-indigo-600 mb-2">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-            </div>
-            <h4 className="font-bold text-slate-900 mb-1">✏️ Text Color</h4>
-            <p className="text-sm text-slate-700">10 warna untuk teks dalam cell</p>
-          </Card>
-
-          <Card className="p-4 border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100">
-            <div className="text-purple-600 mb-2">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5z" />
-              </svg>
-            </div>
-            <h4 className="font-bold text-slate-900 mb-1">🔲 Border Styles</h4>
-            <p className="text-sm text-slate-700">8 style border (solid, dashed, dotted, double)</p>
-          </Card>
-
-          <Card className="p-4 border-pink-200 bg-gradient-to-br from-pink-50 to-pink-100">
-            <div className="text-pink-600 mb-2">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h4 className="font-bold text-slate-900 mb-1">💾 Auto-Save</h4>
-            <p className="text-sm text-slate-700">Semua format tersimpan permanen</p>
-          </Card>
-        </div>
         )}
       </div>
 
-      {/* New KPI Modal */}
+      {/* Modal */}
       {isNewKPIModalOpen && (
         <NewKPIModal
           onClose={() => setIsNewKPIModalOpen(false)}
@@ -1299,35 +1408,24 @@ export default function KPIPage() {
         />
       )}
 
-      {/* Custom Styles */}
+      {/* Styles */}
       <style jsx global>{`
         .htCore thead th {
           background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%) !important;
           color: white !important;
           font-weight: 600 !important;
-          border-color: #1e40af !important;
         }
-
         .htCore tbody th {
           background: #f1f5f9 !important;
           font-weight: 500 !important;
-          color: #334155 !important;
         }
-
         .htCore td {
           border-color: #e2e8f0 !important;
         }
-
-        .ht_master .wtHolder {
-          background: #ffffff !important;
-        }
-
-        .handsontable td.htInvalid {
-          background-color: #fef2f2 !important;
-        }
-
-        .handsontable .htCommentCell::after {
-          border-color: #3b82f6 transparent transparent #3b82f6 !important;
+      `}</style>
+      <style jsx global>{`
+        .htCore td, .htCore thead th, .htCore tbody th {
+          font-size: ${globalFontSize}px !important;
         }
       `}</style>
     </div>
@@ -1364,37 +1462,30 @@ function NewKPIModal({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <Card className="w-full max-w-2xl p-6 space-y-4 shadow-2xl border-blue-200">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg">
-            <IconPlus className="h-5 w-5 text-white" />
-          </div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-indigo-900 bg-clip-text text-transparent">
-            Buat KPI Baru
-          </h2>
-        </div>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-indigo-900 bg-clip-text text-transparent">
+          Buat KPI Baru
+        </h2>
 
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label className="text-slate-700 font-semibold">Nama KPI</Label>
             <Input
-              placeholder="Contoh: KPI Sales Division 2025"
+              placeholder="Contoh: KPI Sales 2025"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="border-blue-200 focus:border-blue-400 w-full"
+              className="border-blue-200"
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-slate-700 font-semibold">Tahun</Label>
             <Select value={year} onValueChange={setYear}>
-              <SelectTrigger className="border-blue-200 w-full">
+              <SelectTrigger className="border-blue-200">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {years.map((y) => (
-                  <SelectItem key={y} value={y}>
-                    {y}
-                  </SelectItem>
+                  <SelectItem key={y} value={y}>{y}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -1402,13 +1493,8 @@ function NewKPIModal({
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" onClick={onClose} className="border-slate-300 cursor-pointer">
-            Batal
-          </Button>
-          <Button
-            onClick={handleSave}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 cursor-pointer"
-          >
+          <Button variant="outline" onClick={onClose}>Batal</Button>
+          <Button onClick={handleSave} className="bg-gradient-to-r from-blue-600 to-indigo-600">
             Buat KPI
           </Button>
         </div>
