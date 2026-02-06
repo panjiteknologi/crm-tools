@@ -584,7 +584,7 @@ export default function CrmDataManagementPage() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Sorting state
-  const [sortField, setSortField] = useState<string>('updatedAt');
+  const [sortField, setSortField] = useState<string>('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // Ref for select all checkbox
