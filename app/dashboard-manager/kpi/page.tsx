@@ -1031,6 +1031,32 @@ export default function KPIPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
       <div className="max-w-[1900px] mx-auto space-y-6">
+        {/* Development Warning Banner */}
+        <Card className="border-2 border-red-500 bg-gradient-to-r from-red-50 to-rose-50 shadow-lg">
+          <div className="flex items-start gap-3 p-4">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg className="h-6 w-6 text-red-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-red-900 mb-1">⚠️ Modul dalam Pengembangan</h3>
+              <p className="text-red-800 text-sm leading-relaxed">
+                Modul KPI Annual Management saat ini masih dalam tahap <strong>Pengembangan</strong>. Fitur yang tersedia mungkin belum sepenuhnya stabil dan masih terus diperbaiki. Segala bentuk <strong>feedback</strong> dan <strong>laporan bug</strong> sangat kami hargai untuk perbaikan lebih lanjut.
+              </p>
+              <div className="mt-2 flex items-center gap-2 text-xs text-red-700">
+                <Badge variant="outline" className="border-red-500 bg-red-100 text-red-900 font-semibold">
+                  🚧 Beta Version
+                </Badge>
+                <Badge variant="outline" className="border-red-500 bg-red-100 text-red-900 font-semibold">
+                  🔧 Under Development
+                </Badge>
+                <span className="text-red-600">Terakhir diupdate: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+              </div>
+            </div>
+          </div>
+        </Card>
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
