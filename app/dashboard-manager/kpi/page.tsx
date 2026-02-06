@@ -124,7 +124,7 @@ const applyTint = (hexColor: string, tint: number): string => {
 
 export default function KPIPage() {
   const router = useRouter();
-  const hotTableRef = useRef(null);
+  const hotTableRef = useRef<any>(null);
   const selectedCellsRef = useRef<any[]>([]);
   const [cellColors, setCellColors] = useState<Record<string, string>>({});
   const [cellStyles, setCellStyles] = useState<Record<string, any>>({});
@@ -865,12 +865,12 @@ export default function KPIPage() {
           const [start, end] = merge.split(':');
           const startCell = worksheet.getCell(start);
           const endCell = worksheet.getCell(end);
-          
+
           mergeCells.push({
-            row: startCell.row - 1,
-            col: startCell.col - 1,
-            rowspan: endCell.row - startCell.row + 1,
-            colspan: endCell.col - startCell.col + 1,
+            row: ((startCell.row as unknown) as number) - 1,
+            col: ((startCell.col as unknown) as number) - 1,
+            rowspan: ((endCell.row as unknown) as number) - ((startCell.row as unknown) as number) + 1,
+            colspan: ((endCell.col as unknown) as number) - ((startCell.col as unknown) as number) + 1,
           });
         });
       }
@@ -1350,10 +1350,10 @@ export default function KPIPage() {
                           } else if (prop === 'fontSize') {
                             // Skip fontSize from cellStyle if we want to use global font size
                             // Or apply it if the cell has custom font size
-                            td.style.fontSize = val;
+                            td.style.fontSize = val as string;
                           } else {
                             // Direct style assignment for other properties
-                            td.style[prop as any] = val;
+                            td.style[prop as any] = val as any;
                           }
                         });
 
