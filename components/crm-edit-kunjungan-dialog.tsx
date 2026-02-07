@@ -303,6 +303,15 @@ const EditKunjunganDialog = React.memo(({ open, onOpenChange, target, staffUsers
   const handleUpdate = async () => {
     if (!target) return;
 
+    // Validation: Check if bulanTtdNotif is required when status is DONE
+    if (formData.status === 'DONE' && !formData.bulanTtdNotif) {
+      toast.error('❌ Bulan TTD Notif wajib diisi!', {
+        description: 'Status DONE memerlukan Bulan TTD Notif untuk diisi',
+        duration: 4000,
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       await updateTargetMutation({
@@ -907,13 +916,19 @@ const EditKunjunganDialog = React.memo(({ open, onOpenChange, target, staffUsers
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Bulan TTD Notif</Label>
+                        <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                          Bulan TTD Notif {formData.status === 'DONE' && <span className="text-red-500">*</span>}
+                        </Label>
                         <Input
                           type="date"
                           value={formData.bulanTtdNotif}
                           onChange={(e) => updateFormField('bulanTtdNotif', e.target.value)}
-                          className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 h-9 text-sm"
+                          className={`border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 h-9 text-sm ${formData.status === 'DONE' && !formData.bulanTtdNotif ? 'border-red-500' : ''}`}
+                          required={formData.status === 'DONE'}
                         />
+                        {formData.status === 'DONE' && !formData.bulanTtdNotif && (
+                          <p className="text-[9px] text-red-500 dark:text-red-400">Wajib diisi untuk status DONE</p>
+                        )}
                       </div>
                     </div>
                   </div>
