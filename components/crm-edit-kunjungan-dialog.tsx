@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Save, X, Calendar, MapPin, Building2, FileText, DollarSign, Users, Phone, Loader2 } from 'lucide-react';
@@ -552,42 +553,32 @@ const EditKunjunganDialog = React.memo(({ open, onOpenChange, target, staffUsers
                       <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                         Provinsi <span className="text-red-500">*</span>
                       </Label>
-                      <Select
-                        value={formData.provinsi || undefined}
-                        onValueChange={(value) => {
+                      <SearchableSelect
+                        options={provinsiOptions}
+                        value={formData.provinsi || ''}
+                        onChange={(value) => {
                           updateFormField('provinsi', value);
                           updateFormField('kota', '');
                         }}
-                      >
-                        <SelectTrigger className="w-full border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 h-9 text-sm">
-                          <SelectValue placeholder="Pilih" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {provinsiOptions.map(prov => (
-                            <SelectItem key={prov} value={prov}>{prov}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        placeholder="Pilih provinsi"
+                        emptyText="Tidak ada provinsi"
+                        className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 h-9 text-sm"
+                      />
                     </div>
 
                     <div className="space-y-1">
                       <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                         Kota <span className="text-red-500">*</span>
                       </Label>
-                      <Select
-                        value={formData.kota || undefined}
-                        onValueChange={(value) => updateFormField('kota', value)}
+                      <SearchableSelect
+                        options={kotaOptions}
+                        value={formData.kota || ''}
+                        onChange={(value) => updateFormField('kota', value)}
+                        placeholder="Pilih kota"
+                        emptyText="Pilih provinsi dulu"
                         disabled={!formData.provinsi}
-                      >
-                        <SelectTrigger className="w-full border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 h-9 text-sm">
-                          <SelectValue placeholder="Pilih" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {kotaOptions.map((kota: string) => (
-                            <SelectItem key={kota} value={kota}>{kota}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 h-9 text-sm"
+                      />
                     </div>
                   </div>
 
@@ -644,19 +635,14 @@ const EditKunjunganDialog = React.memo(({ open, onOpenChange, target, staffUsers
 
                   <div className="space-y-1">
                     <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Alasan</Label>
-                    <Select value={formData.alasan || undefined} onValueChange={(value) => updateFormField('alasan', value === 'empty' ? '' : value)}>
-                      <SelectTrigger className="w-full border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 h-9 text-sm">
-                        <SelectValue placeholder="Pilih" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="empty">
-                          <span className="text-slate-400 italic">Kosong</span>
-                        </SelectItem>
-                        {alasanOptions.map((alasan) => (
-                          <SelectItem key={alasan} value={alasan}>{alasan}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                      options={[{ value: '', label: 'Kosong' }, ...alasanOptions.map(a => ({ value: a, label: a }))]}
+                      value={formData.alasan || ''}
+                      onChange={(value) => updateFormField('alasan', value)}
+                      placeholder="Cari alasan..."
+                      emptyText="Tidak ada alasan"
+                      className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 h-9 text-sm"
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
@@ -676,34 +662,27 @@ const EditKunjunganDialog = React.memo(({ open, onOpenChange, target, staffUsers
 
                     <div className="space-y-1">
                       <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Sales</Label>
-                      <Select value={formData.sales || undefined} onValueChange={(value) => updateFormField('sales', value)}>
-                        <SelectTrigger className="w-full border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 h-9 text-sm">
-                          <SelectValue placeholder="Pilih" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {salesOptions.map((sales) => (
-                            <SelectItem key={sales} value={sales}>{sales}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <SearchableSelect
+                        options={salesOptions}
+                        value={formData.sales || ''}
+                        onChange={(value) => updateFormField('sales', value)}
+                        placeholder="Cari sales..."
+                        emptyText="Tidak ada sales"
+                        className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 h-9 text-sm"
+                      />
                     </div>
                   </div>
 
                   <div className="space-y-1">
                     <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Associate</Label>
-                    <Select value={formData.namaAssociate || undefined} onValueChange={(value) => updateFormField('namaAssociate', value === 'empty' ? '' : value)}>
-                      <SelectTrigger className="w-full border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 h-9 text-sm">
-                        <SelectValue placeholder="Pilih" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="empty">
-                          <span className="text-slate-400 italic">Kosong</span>
-                        </SelectItem>
-                        {associateOptions.map((assoc) => (
-                          <SelectItem key={assoc} value={assoc}>{assoc}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                      options={associateOptions}
+                      value={formData.namaAssociate || ''}
+                      onChange={(value) => updateFormField('namaAssociate', value)}
+                      placeholder="Cari associate..."
+                      emptyText="Tidak ada associate"
+                      className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 h-9 text-sm"
+                    />
                   </div>
 
                   <div className="space-y-1">
@@ -821,16 +800,14 @@ const EditKunjunganDialog = React.memo(({ open, onOpenChange, target, staffUsers
 
                   <div className="space-y-1">
                     <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Standar</Label>
-                    <Select value={formData.std || undefined} onValueChange={(value) => updateFormField('std', value)}>
-                      <SelectTrigger className="w-full border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 h-9 text-sm">
-                        <SelectValue placeholder="Pilih" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {standarOptions.map((std) => (
-                          <SelectItem key={std} value={std}>{std}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                      options={standarOptions}
+                      value={formData.std || ''}
+                      onChange={(value) => updateFormField('std', value)}
+                      placeholder="Cari standar..."
+                      emptyText="Tidak ada standar"
+                      className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 h-9 text-sm"
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">

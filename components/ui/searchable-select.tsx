@@ -140,17 +140,20 @@ const SearchableSelect = React.memo(({
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md shadow-lg animate-in fade-in-0 zoom-in-95">
+        <div
+          className="absolute z-50 min-w-full mt-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md shadow-lg animate-in fade-in-0 zoom-in-95"
+          style={{ minWidth: '300px', width: 'auto' }}
+        >
           {/* Search Input */}
           <div className="flex items-center border-b border-slate-200 dark:border-slate-800 px-3 py-2">
-            <Search className="h-4 w-4 text-slate-500 mr-2" />
+            <Search className="h-4 w-4 text-slate-500 mr-2 flex-shrink-0" />
             <input
               ref={inputRef}
               type="text"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder="Cari..."
-              className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-slate-400"
+              className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-slate-400 min-w-0"
             />
           </div>
 
@@ -168,17 +171,17 @@ const SearchableSelect = React.memo(({
                     key={option.value}
                     onClick={() => handleSelect(option.value)}
                     className={cn(
-                      "flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors",
+                      "flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors gap-2",
                       isSelected && "bg-slate-100 dark:bg-slate-800"
                     )}
                   >
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4 flex-shrink-0",
+                        "h-4 w-4 flex-shrink-0",
                         isSelected ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    <span className="truncate">{option.label}</span>
+                    <span className="flex-1 min-w-0 whitespace-normal break-words">{option.label}</span>
                   </div>
                 );
               })
