@@ -822,16 +822,14 @@ const EditKunjunganDialog = React.memo(({ open, onOpenChange, target, staffUsers
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
                       <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">EA Code</Label>
-                      <Select value={formData.eaCode || undefined} onValueChange={(value) => updateFormField('eaCode', value)}>
-                        <SelectTrigger className="w-full border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 h-9 text-sm">
-                          <SelectValue placeholder="Pilih" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {eaCodeOptions.map((ea) => (
-                            <SelectItem key={ea.id} value={ea.code}>{ea.code}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <SearchableSelect
+                        options={eaCodeOptions.map(ea => ({ value: ea.code, label: ea.code }))}
+                        value={formData.eaCode || ''}
+                        onChange={(value) => updateFormField('eaCode', value)}
+                        placeholder="Cari EA Code..."
+                        emptyText="Tidak ada EA Code"
+                        className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 h-9 text-sm"
+                      />
                     </div>
 
                     <div className="space-y-1">
