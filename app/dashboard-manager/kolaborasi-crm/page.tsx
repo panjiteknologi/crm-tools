@@ -30,7 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Plus, HelpCircle, Trash2, Pencil, Trash, StickyNote, ArrowRightLeft, ArrowRight, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { Plus, HelpCircle, Trash2, Pencil, Trash, StickyNote, ArrowRightLeft, ArrowRight, ArrowLeft, AlertTriangle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
@@ -89,7 +89,7 @@ const NoteNode = ({ data, selected }: { data: any; selected?: boolean }) => {
       {/* Note Content - hanya isi note */}
       <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
         <div
-          className="text-sm text-slate-700 dark:text-slate-300 jobdesk-content"
+          className="text-sm text-slate-900 dark:text-white jobdesk-content leading-relaxed"
           dangerouslySetInnerHTML={{ __html: data.content || '' }}
         />
       </div>
@@ -186,11 +186,11 @@ const StaffNode = ({ data, selected }: { data: any; selected?: boolean }) => {
           {/* Job Desk Section */}
           {data.jobDesk && data.jobDesk.trim() !== '' && (
             <div className="mb-3">
-              <h4 className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+              <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2 uppercase tracking-wide">
                 Job Desk
               </h4>
               <div
-                className="text-sm text-slate-600 dark:text-slate-400 jobdesk-content"
+                className="text-sm text-slate-800 dark:text-slate-200 jobdesk-content leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: data.jobDesk }}
               />
             </div>
@@ -199,7 +199,7 @@ const StaffNode = ({ data, selected }: { data: any; selected?: boolean }) => {
           {/* Keterangan */}
           {data.keterangan && data.keterangan.trim() !== '' && (
             <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-              <div className="text-xs text-slate-600 dark:text-slate-400 italic text-center">
+              <div className="text-xs text-slate-900 dark:text-white italic text-center font-medium leading-relaxed">
                 "{data.keterangan}"
               </div>
             </div>
@@ -307,6 +307,7 @@ export default function KolaborasiCrmPage() {
   const [selectedStaff, setSelectedStaff] = useState<any>(null);
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); // Add refresh key
+  const [arrowTypeDialogOpen, setArrowTypeDialogOpen] = useState(false); // Arrow type dialog state
 
   // Confirm dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -579,9 +580,20 @@ export default function KolaborasiCrmPage() {
   };
 
   const showHelp = () => {
-    toast.info('📌 Cara Menggunakan:', {
-      description: '✨ DRAG CARD: Geser card untuk atur posisi\n✨ CONNECT: Drag dari titik biru di KANAN/BAWAH card ke KIRI/ATAS card lain\n❌ DELETE EDGE: Double-click pada garis koneksi',
-      duration: 8000,
+    toast.success('📌 Panduan Penggunaan', {
+      description: (
+        <div className="text-slate-900 dark:text-white">
+          <p className="font-semibold mb-1">✨ DRAG CARD:</p>
+          <p className="text-sm ml-4 mb-2">Geser card untuk atur posisi</p>
+          <p className="font-semibold mb-1">✨ MULTI-SELECT:</p>
+          <p className="text-sm ml-4 mb-2">Ctrl/Cmd + Klik untuk select multiple card</p>
+          <p className="font-semibold mb-1">✨ CONNECT:</p>
+          <p className="text-sm ml-4 mb-2">Drag dari titik ungu di KANAN/BAWAH card ke KIRI/ATAS card lain</p>
+          <p className="font-semibold mb-1">❌ DELETE EDGE:</p>
+          <p className="text-sm ml-4">Klik pada garis koneksi untuk menghapus</p>
+        </div>
+      ),
+      duration: 10000,
     });
   };
 
@@ -665,46 +677,48 @@ export default function KolaborasiCrmPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Header - Sticky */}
       <div className="sticky top-0 z-50 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 shadow-md">
-        <div className="max-w-full mx-auto p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+        <div className="max-w-full mx-auto p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
                 Kolaborasi CRM
               </h1>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={showHelp}
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 cursor-pointer"
-                title="Cara menggunakan"
-              >
-                ❓
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClearAllConnections}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
-                title="Hapus semua koneksi"
-              >
-                🗑️
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleMigrateJobDesk}
-                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 cursor-pointer"
-                title="Migrasi jobDesk ke format HTML"
-              >
-                🔄
-              </Button>
+              <div className="hidden sm:flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={showHelp}
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 cursor-pointer"
+                  title="Cara menggunakan"
+                >
+                  ❓
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearAllConnections}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                  title="Hapus semua koneksi"
+                >
+                  🗑️
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleMigrateJobDesk}
+                  className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 cursor-pointer"
+                  title="Migrasi jobDesk ke format HTML"
+                >
+                  🔄
+                </Button>
+              </div>
             </div>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
               ✨ Klik card untuk select • Ctrl/Cmd + Klik untuk multi-select • Drag card untuk geser semua • Drag dari titik ke titik untuk connect • Klik garis untuk hapus
             </p>
           </div>
-          <div className="flex gap-3 items-center">
+          <div className="hidden sm:flex gap-3 items-center">
             <Button
               onClick={handleAdd}
               className="bg-gradient-to-r from-purple-400 to-purple-700 hover:from-purple-500 hover:to-purple-800 text-white shadow-lg cursor-pointer"
@@ -768,7 +782,7 @@ export default function KolaborasiCrmPage() {
       </div>
 
       {/* React Flow Canvas */}
-      <div className="max-w-full mx-5 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700" style={{ height: 'calc(100vh - 160px)', cursor: 'crosshair' }}>
+      <div className="max-w-full mx-2 sm:mx-5 mb-20 sm:mb-5 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700" style={{ height: 'calc(100vh - 180px)', cursor: 'crosshair' }}>
         <style>{`
           /* Black pointer for canvas area */
           .react-flow__pane {
@@ -790,6 +804,20 @@ export default function KolaborasiCrmPage() {
           .react-flow__node:active {
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='black' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 11V6a2 2 0 0 0-4 0v5'/%3E%3Cpath d='M14 11V4a2 2 0 0 0-4 0v7'/%3E%3Cpath d='M10 11V9a2 2 0 0 0-4 0v2'/%3E%3Cpath d='M6 11V4a2 2 0 0 1 4 0v7'/%3E%3Cpath d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'/%3E%3C/svg%3E") 12 12, grabbing !important;
           }
+
+          /* Smaller controls on mobile */
+          @media (max-width: 1024px) {
+            .react-flow__controls {
+              transform: scale(0.75);
+              transform-origin: bottom right;
+            }
+          }
+
+          @media (max-width: 640px) {
+            .react-flow__controls {
+              transform: scale(0.65);
+            }
+          }
         `}</style>
         <ReactFlow
           nodes={nodes}
@@ -810,10 +838,12 @@ export default function KolaborasiCrmPage() {
         >
           <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
           <Controls />
-          <MiniMap
-            nodeColor={() => '#a855f7'}
-            maskColor="rgba(0, 0, 0, 0.1)"
-          />
+          <div className="hidden lg:block">
+            <MiniMap
+              nodeColor={() => '#a855f7'}
+              maskColor="rgba(0, 0, 0, 0.1)"
+            />
+          </div>
         </ReactFlow>
       </div>
 
@@ -859,6 +889,109 @@ export default function KolaborasiCrmPage() {
               Ya, Hapus
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border lg:hidden">
+        <div className="grid grid-cols-4 gap-1 p-2">
+          {/* Info Button */}
+          <button
+            onClick={showHelp}
+            className="flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+          >
+            <Info className="h-5 w-5 mb-1" />
+            <span className="text-[10px] font-medium">Info</span>
+          </button>
+
+          {/* Add Staff Button */}
+          <button
+            onClick={handleAdd}
+            className="flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors bg-gradient-to-r from-purple-400 to-purple-700 hover:from-purple-500 hover:to-purple-800 text-white shadow-md"
+          >
+            <Plus className="h-5 w-5 mb-1" />
+            <span className="text-[10px] font-medium">Staff</span>
+          </button>
+
+          {/* Add Note Button */}
+          <button
+            onClick={handleAddNote}
+            className="flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors bg-gradient-to-r from-fuchsia-400 to-purple-600 hover:from-fuchsia-500 hover:to-purple-700 text-white shadow-md"
+          >
+            <StickyNote className="h-5 w-5 mb-1" />
+            <span className="text-[10px] font-medium">Note</span>
+          </button>
+
+          {/* Arrow Type Button */}
+          <button
+            onClick={() => setArrowTypeDialogOpen(true)}
+            className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors ${
+              arrowType === 'two-way'
+                ? 'bg-purple-600 text-white shadow-md'
+                : 'bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+            }`}
+          >
+            {arrowType === 'one-way-right' && <ArrowRight className="h-5 w-5 mb-1" />}
+            {arrowType === 'one-way-left' && <ArrowLeft className="h-5 w-5 mb-1" />}
+            {arrowType === 'two-way' && <ArrowRightLeft className="h-5 w-5 mb-1" />}
+            <span className="text-[10px] font-medium">Panah</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Arrow Type Dialog for Mobile */}
+      <Dialog open={arrowTypeDialogOpen} onOpenChange={setArrowTypeDialogOpen}>
+        <DialogContent className="sm:max-w-[350px]">
+          <DialogHeader>
+            <DialogTitle>Pilih Tipe Panah</DialogTitle>
+            <DialogDescription>
+              Pilih arah panah untuk koneksi yang akan dibuat
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-3 py-4">
+            <button
+              onClick={() => {
+                setArrowType('one-way-right');
+                setArrowTypeDialogOpen(false);
+              }}
+              className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                arrowType === 'one-way-right'
+                  ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20'
+                  : 'border-slate-200 dark:border-slate-700 hover:border-purple-400'
+              }`}
+            >
+              <ArrowRight className="w-8 h-8 text-purple-600" />
+              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Kanan (→)</span>
+            </button>
+            <button
+              onClick={() => {
+                setArrowType('one-way-left');
+                setArrowTypeDialogOpen(false);
+              }}
+              className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                arrowType === 'one-way-left'
+                  ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20'
+                  : 'border-slate-200 dark:border-slate-700 hover:border-purple-400'
+              }`}
+            >
+              <ArrowLeft className="w-8 h-8 text-purple-600" />
+              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Kiri (←)</span>
+            </button>
+            <button
+              onClick={() => {
+                setArrowType('two-way');
+                setArrowTypeDialogOpen(false);
+              }}
+              className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                arrowType === 'two-way'
+                  ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20'
+                  : 'border-slate-200 dark:border-slate-700 hover:border-purple-400'
+              }`}
+            >
+              <ArrowRightLeft className="w-8 h-8 text-purple-600" />
+              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">2 Arah (↔)</span>
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

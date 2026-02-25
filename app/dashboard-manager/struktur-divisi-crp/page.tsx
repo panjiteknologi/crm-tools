@@ -22,7 +22,7 @@ import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { StrukturDivisiCrpDialog } from '@/components/struktur-divisi-crp-dialog';
-import { Plus, HelpCircle, Trash2, Pencil, Trash } from 'lucide-react';
+import { Plus, HelpCircle, Trash2, Pencil, Trash, TrashIcon, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
@@ -108,7 +108,7 @@ const StaffNode = ({ data }: { data: any }) => {
       {/* Card Body - Keterangan */}
       {data.keterangan && (
         <div className="p-4 pt-2 rounded-b-xl">
-          <div className="text-xs text-slate-600 dark:text-slate-400 italic text-center">
+          <div className="text-xs text-slate-900 dark:text-white italic text-center leading-relaxed font-medium">
             "{data.keterangan}"
           </div>
         </div>
@@ -276,9 +276,18 @@ export default function StrukturDivisiCrpReactFlowPage() {
   };
 
   const showHelp = () => {
-    toast.info('📌 Cara Menggunakan:', {
-      description: '✨ DRAG CARD: Geser card untuk atur posisi\n✨ CONNECT: Drag dari titik biru di KANAN/BAWAH card ke KIRI/ATAS card lain\n❌ DELETE EDGE: Double-click pada garis koneksi',
-      duration: 8000,
+    toast.success('📌 Panduan Penggunaan', {
+      description: (
+        <div className="text-slate-900 dark:text-white">
+          <p className="font-semibold mb-1">✨ DRAG CARD:</p>
+          <p className="text-sm ml-4 mb-2">Geser card untuk atur posisi</p>
+          <p className="font-semibold mb-1">✨ CONNECT:</p>
+          <p className="text-sm ml-4 mb-2">Drag dari titik biru di KANAN/BAWAH card ke KIRI/ATAS card lain</p>
+          <p className="font-semibold mb-1">❌ DELETE EDGE:</p>
+          <p className="text-sm ml-4">Double-click pada garis koneksi</p>
+        </div>
+      ),
+      duration: 10000,
     });
   };
 
@@ -329,48 +338,67 @@ export default function StrukturDivisiCrpReactFlowPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
-      <div className="max-w-10xl mx-auto p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+      <div className="max-w-10xl mx-auto p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
                 Struktur Divisi CRP
               </h1>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={showHelp}
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 cursor-pointer"
-                title="Cara menggunakan"
-              >
-                ❓
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClearAllConnections}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
-                title="Hapus semua koneksi"
-              >
-                🗑️
-              </Button>
+              <div className="hidden sm:flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={showHelp}
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 cursor-pointer"
+                  title="Cara menggunakan"
+                >
+                  ❓
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearAllConnections}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                  title="Hapus semua koneksi"
+                >
+                  🗑️
+                </Button>
+              </div>
             </div>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
               ✨ Drag card untuk geser • Drag dari titik ke titik untuk connect • Double-click garis untuk hapus
             </p>
           </div>
-          <Button
-            onClick={handleAdd}
-            className="bg-gradient-to-r from-purple-800 to-purple-900 hover:from-purple-900 hover:to-purple-950 text-white shadow-lg cursor-pointer"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Tambah Staff
-          </Button>
+          <div className="hidden sm:block">
+            <Button
+              onClick={handleAdd}
+              className="bg-gradient-to-r from-purple-800 to-purple-900 hover:from-purple-900 hover:to-purple-950 text-white shadow-lg cursor-pointer"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Tambah Staff
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* React Flow Canvas */}
-      <div className="max-w-full mx-5 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700" style={{ height: 'calc(100vh - 160px)' }}>
+      <div className="max-w-full mx-2 sm:mx-5 mb-20 sm:mb-5 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700" style={{ height: 'calc(100vh - 180px)' }}>
+        <style>{`
+          /* Smaller controls on mobile */
+          @media (max-width: 1024px) {
+            .react-flow__controls {
+              transform: scale(0.75);
+              transform-origin: bottom right;
+            }
+          }
+
+          @media (max-width: 640px) {
+            .react-flow__controls {
+              transform: scale(0.65);
+            }
+          }
+        `}</style>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -386,10 +414,12 @@ export default function StrukturDivisiCrpReactFlowPage() {
         >
           <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
           <Controls />
-          <MiniMap
-            nodeColor={() => '#1e3a8a'}
-            maskColor="rgba(0, 0, 0, 0.1)"
-          />
+          <div className="hidden lg:block">
+            <MiniMap
+              nodeColor={() => '#1e3a8a'}
+              maskColor="rgba(0, 0, 0, 0.1)"
+            />
+          </div>
         </ReactFlow>
       </div>
 
@@ -401,6 +431,29 @@ export default function StrukturDivisiCrpReactFlowPage() {
         mode={dialogMode}
         onSuccess={handleDialogSuccess}
       />
+
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border lg:hidden">
+        <div className="grid grid-cols-2 gap-1 p-2">
+          {/* Help Button */}
+          <button
+            onClick={showHelp}
+            className="flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+          >
+            <Info className="h-5 w-5 mb-1" />
+            <span className="text-[10px] font-medium">Info</span>
+          </button>
+
+          {/* Add Button */}
+          <button
+            onClick={handleAdd}
+            className="flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors bg-gradient-to-r from-purple-800 to-purple-900 hover:from-purple-900 hover:to-purple-950 text-white shadow-md"
+          >
+            <Plus className="h-5 w-5 mb-1" />
+            <span className="text-[10px] font-medium">Tambah</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
