@@ -45,6 +45,9 @@ import {
   TrendingUp,
   Users,
   Star,
+  Calendar,
+  Filter,
+  X,
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
@@ -114,6 +117,7 @@ export default function NPSPage() {
   const [deletingItem, setDeletingItem] = useState<NPS | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   // Form state - store as string to allow comma input
   const [formData, setFormData] = useState<NPSFormData>({
@@ -561,27 +565,29 @@ export default function NPSPage() {
 
   return (
     <>
-      <div className="flex-1 space-y-6 p-2 md:p-8 pt-6">
+      <div className="flex-1 space-y-4 sm:space-y-6 p-4 sm:p-8 pt-6 pb-20 sm:pb-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">NPS</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">NPS</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Net Promoter Score & Rating - Kelola data survei ISO & ISPO
             </p>
           </div>
-          <Button
-            onClick={handleOpenDialog}
-            className="cursor-pointer bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Tambah NPS
-          </Button>
+          <div className="hidden sm:block">
+            <Button
+              onClick={handleOpenDialog}
+              className="cursor-pointer bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Tambah NPS
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
-        <Card className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 border-slate-200 dark:border-slate-800">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="hidden sm:block p-4 sm:p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 border-slate-200 dark:border-slate-800">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Bulan
@@ -939,6 +945,126 @@ export default function NPSPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border lg:hidden">
+        <div className="grid grid-cols-2 gap-1 p-2">
+          {/* Filter Button */}
+          <button
+            onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
+            className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors ${
+              mobileFilterOpen ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+            }`}
+          >
+            <Calendar className="h-5 w-5 mb-1" />
+            <span className="text-[10px] font-medium">Filter</span>
+          </button>
+
+          {/* Add Button */}
+          <button
+            onClick={handleOpenDialog}
+            className="flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md"
+          >
+            <Plus className="h-5 w-5 mb-1" />
+            <span className="text-[10px] font-medium">Tambah</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Filter Sheet Overlay */}
+      {mobileFilterOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setMobileFilterOpen(false)}
+          />
+
+          {/* Filter Sheet */}
+          <div className="fixed bottom-16 left-0 right-0 z-40 lg:hidden max-h-[70vh] overflow-y-auto bg-background rounded-t-2xl border-t border-border shadow-2xl animate-in slide-in-from-bottom-10">
+            {/* Handle bar */}
+            <div className="flex justify-center border-b p-3">
+              <div className="w-12 h-1.5 bg-muted rounded-full" />
+            </div>
+
+            {/* Filter Content */}
+            <div className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-sm">Filter Tanggal</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setMobileFilterOpen(false)}
+                  className="h-8 text-xs"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {/* Bulan */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Bulan</Label>
+                  <Select
+                    value={selectedMonth.toString()}
+                    onValueChange={(v) => setSelectedMonth(parseInt(v))}
+                  >
+                    <SelectTrigger className="w-full bg-muted/50 border-muted focus:ring-2 focus:ring-blue-500">
+                      <SelectValue placeholder="Pilih bulan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MONTHS.map((month, idx) => (
+                        <SelectItem key={idx} value={(idx + 1).toString()}>
+                          {month}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Tahun */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Tahun</Label>
+                  <Select
+                    value={selectedYear.toString()}
+                    onValueChange={(v) => setSelectedYear(parseInt(v))}
+                  >
+                    <SelectTrigger className="w-full bg-muted/50 border-muted focus:ring-2 focus:ring-blue-500">
+                      <SelectValue placeholder="Pilih tahun" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {yearOptions.map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Filter Info */}
+                <div className="text-xs bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                  <p className="text-blue-700 dark:text-blue-300 font-medium">📊 Menampilkan data untuk:</p>
+                  <p className="mt-1 font-bold text-slate-900 dark:text-white">
+                    {MONTHS[selectedMonth - 1]} {selectedYear}
+                  </p>
+                  <p className="mt-1 text-slate-700 dark:text-slate-300">
+                    ISO: <span className="font-bold text-blue-600 dark:text-blue-400">{isoItems.length}</span> data |
+                    ISPO: <span className="font-bold text-purple-600 dark:text-purple-400">{ispoItems.length}</span> data
+                  </p>
+                </div>
+
+                <Button
+                  onClick={() => setMobileFilterOpen(false)}
+                  className="w-full"
+                >
+                  OK
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

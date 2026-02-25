@@ -96,7 +96,7 @@ export default function KunjunganEngagementPartnershipPage() {
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState<'search' | 'date' | null>(null);
 
   // Generate year options (current year - 2 to current year + 5)
   const currentYear = new Date().getFullYear();
