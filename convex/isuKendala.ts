@@ -97,7 +97,10 @@ export const createIsuKendala = mutation({
     title: v.string(),
     month: v.number(),
     year: v.number(),
-    points: v.array(v.string()),
+    points: v.array(v.object({
+      text: v.string(),
+      images: v.optional(v.array(v.string()))
+    })),
     status: v.union(v.literal("active"), v.literal("inactive")),
     category: v.union(v.literal("Internal"), v.literal("Eksternal"), v.literal("Operasional"), v.literal("Teknis")),
     priority: v.union(v.literal("Low"), v.literal("Medium"), v.literal("High"), v.literal("Critical")),
@@ -136,7 +139,10 @@ export const updateIsuKendala = mutation({
     title: v.optional(v.string()),
     month: v.optional(v.number()),
     year: v.optional(v.number()),
-    points: v.optional(v.array(v.string())),
+    points: v.optional(v.array(v.object({
+      text: v.string(),
+      images: v.optional(v.array(v.string()))
+    }))),
     status: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
     category: v.optional(v.union(v.literal("Internal"), v.literal("Eksternal"), v.literal("Operasional"), v.literal("Teknis"))),
     priority: v.optional(v.union(v.literal("Low"), v.literal("Medium"), v.literal("High"), v.literal("Critical"))),

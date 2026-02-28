@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { IsuKendalaDialog } from '@/components/isu-kendala-dialog';
+import { ImagePreviewDialog } from '@/components/image-preview-dialog';
 import { toast } from 'sonner';
 import {
   AlertTriangle,
@@ -53,7 +54,7 @@ interface IsuKendala {
   title: string;
   month: number;
   year: number;
-  points: string[];
+  points: Array<{ text: string; images?: string[] }>;
   status: "active" | "inactive";
   category: "Internal" | "Eksternal" | "Operasional" | "Teknis";
   priority: "Low" | "Medium" | "High" | "Critical";
@@ -93,6 +94,8 @@ export default function IsuKendalaPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [mobileFilterOpen, setMobileFilterOpen] = useState<'search' | 'date' | null>(null);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
 
   // Generate year options (current year - 2 to current year + 5)
   const currentYear = new Date().getFullYear();
@@ -104,7 +107,7 @@ export default function IsuKendalaPage() {
     const matchesYear = isu.year === selectedYear;
     const matchesSearch = searchQuery === "" ||
       isu.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      isu.points.some(point => point.toLowerCase().includes(searchQuery.toLowerCase()));
+      isu.points.some(point => point.text.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesMonth && matchesYear && matchesSearch;
   }) || [];
 
@@ -184,6 +187,11 @@ export default function IsuKendalaPage() {
   const handleViewDetail = (isu: IsuKendala) => {
     setViewingIsu(isu);
     setViewDetailOpen(true);
+  };
+
+  const handleImageClick = (imgSrc: string) => {
+    setCurrentImageUrl(imgSrc);
+    setImageModalOpen(true);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -410,9 +418,29 @@ export default function IsuKendalaPage() {
                             <span className="flex-shrink-0 w-6 h-6 bg-blue-600 dark:bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">
                               {idx + 1}
                             </span>
-                            <p className="text-sm text-slate-700 dark:text-slate-300 flex-1 leading-snug">
-                              {point}
-                            </p>
+                            <div className="flex-1">
+                              <p className="text-sm text-slate-700 dark:text-slate-300 leading-snug">
+                                {point.text}
+                              </p>
+                              {point.images && point.images.length > 0 && (
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  {point.images.slice(0, 3).map((img, imgIdx) => (
+                                    <img
+                                      key={imgIdx}
+                                      src={img}
+                                      alt={`Point ${idx + 1} - Gambar ${imgIdx + 1}`}
+                                      className="w-16 h-16 object-cover rounded-lg border border-slate-300 cursor-pointer hover:scale-105 transition-transform"
+                                      onClick={() => handleImageClick(img)}
+                                    />
+                                  ))}
+                                  {point.images.length > 3 && (
+                                    <div className="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-lg flex items-center justify-center text-xs text-slate-600 dark:text-slate-400">
+                                      +{point.images.length - 3}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -581,7 +609,7 @@ export default function IsuKendalaPage() {
                         </TableCell>
                         <TableCell className="max-w-xs">
                           <p className="text-sm line-clamp-2">
-                            {isu.points.slice(0, 2).join("; ")}
+                            {isu.points.slice(0, 2).map(p => p.text).join("; ")}
                             {isu.points.length > 2 && "..."}
                           </p>
                         </TableCell>
@@ -811,9 +839,29 @@ export default function IsuKendalaPage() {
                       <span className="flex-shrink-0 w-7 h-7 bg-blue-600 dark:bg-blue-500 text-white rounded-full flex items-center justify-center text-base font-bold mt-0.5">
                         {idx + 1}
                       </span>
-                      <p className="text-base text-slate-700 dark:text-slate-300 flex-1 leading-snug">
-                        {point}
-                      </p>
+                      <div className="flex-1">
+                        <p className="text-base text-slate-700 dark:text-slate-300 leading-snug">
+                          {point.text}
+                        </p>
+                        {point.images && point.images.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                              📷 Gambar ({point.images.length}):
+                            </p>
+                            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                              {point.images.map((img, imgIdx) => (
+                                <img
+                                  key={imgIdx}
+                                  src={img}
+                                  alt={`Point ${idx + 1} - Gambar ${imgIdx + 1}`}
+                                  className="w-full h-24 object-cover rounded-lg border border-slate-300 cursor-pointer hover:scale-105 transition-transform"
+                                  onClick={() => handleImageClick(img)}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -862,6 +910,14 @@ export default function IsuKendalaPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Image Preview Dialog */}
+      <ImagePreviewDialog
+        open={imageModalOpen}
+        onOpenChange={setImageModalOpen}
+        imageUrl={currentImageUrl}
+        alt="Preview Gambar Isu Kendala"
+      />
 
       {/* Mobile Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border lg:hidden">

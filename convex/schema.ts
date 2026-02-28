@@ -261,7 +261,10 @@ export default defineSchema({
     title: v.string(), // Judul isu/kendala
     month: v.number(), // Bulan (1-12)
     year: v.number(), // Tahun
-    points: v.array(v.string()), // Array point-point isu/kendala
+    points: v.array(v.object({
+      text: v.string(), // Text point isu/kendala
+      images: v.optional(v.array(v.string())) // Array base64 images untuk point ini
+    })), // Array object point-point isu/kendala dengan gambar
     status: v.union(v.literal("active"), v.literal("inactive")), // Status isu
     category: v.union(v.literal("Internal"), v.literal("Eksternal"), v.literal("Operasional"), v.literal("Teknis")), // Kategori isu
     priority: v.union(v.literal("Low"), v.literal("Medium"), v.literal("High"), v.literal("Critical")), // Prioritas isu

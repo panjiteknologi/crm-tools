@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Save, X, Loader2, Plus, Trash2 } from 'lucide-react';
+import { Save, X, Loader2, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 
 const MONTHS = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -34,7 +34,7 @@ interface IsuKendala {
   title: string;
   month: number;
   year: number;
-  points: string[];
+  points: Array<{ text: string; images?: string[] }>;
   status: "active" | "inactive";
   category: "Internal" | "Eksternal" | "Operasional" | "Teknis";
   priority: "Low" | "Medium" | "High" | "Critical";
@@ -56,6 +56,71 @@ interface IsuKendalaDialogProps {
   onSuccess?: () => void;
 }
 
+// Helper function to convert file to base64
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
+// Helper function to compress image before converting to base64
+const compressImage = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate new dimensions (max 1024px)
+        const MAX_DIMENSION = 1024;
+        if (width > height) {
+          if (width > MAX_DIMENSION) {
+            height *= MAX_DIMENSION / width;
+            width = MAX_DIMENSION;
+          }
+        } else {
+          if (height > MAX_DIMENSION) {
+            width *= MAX_DIMENSION / height;
+            height = MAX_DIMENSION;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Start with high quality
+          let quality = 0.9;
+          let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+
+          // Reduce quality until size is under limit (100KB per gambar untuk isu kendala)
+          while (compressedDataUrl.length > 100 * 1024 * 1.37 && quality > 0.1) {
+            quality -= 0.1;
+            compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          }
+
+          resolve(compressedDataUrl);
+        } else {
+          reject(new Error('Failed to get canvas context'));
+        }
+      };
+      img.onerror = reject;
+    };
+    reader.onerror = reject;
+  });
+};
+
 export function IsuKendalaDialog({ open, onOpenChange, isuKendala, onSuccess }: IsuKendalaDialogProps) {
   // Mutations from server actions
   const addIsuKendala = useMutation(api.isuKendala.createIsuKendala);
@@ -69,7 +134,7 @@ export function IsuKendalaDialog({ open, onOpenChange, isuKendala, onSuccess }: 
   const [priority, setPriority] = useState<"Low" | "Medium" | "High" | "Critical">("Medium");
   const [tanggalKejadian, setTanggalKejadian] = useState("");
   const [tanggalSelesai, setTanggalSelesai] = useState("");
-  const [points, setPoints] = useState<string[]>([""]);
+  const [points, setPoints] = useState<Array<{ text: string; images?: string[] }>>([{ text: "", images: [] }]);
   const [isSaving, setIsSaving] = useState(false);
 
   // Reset form when isuKendala changes or dialog opens/closes
@@ -83,7 +148,7 @@ export function IsuKendalaDialog({ open, onOpenChange, isuKendala, onSuccess }: 
       setPriority(isuKendala.priority);
       setTanggalKejadian(isuKendala.tanggalKejadian || "");
       setTanggalSelesai(isuKendala.tanggalSelesai || "");
-      setPoints(isuKendala.points.length > 0 ? isuKendala.points : [""]);
+      setPoints(isuKendala.points.length > 0 ? isuKendala.points : [{ text: "", images: [] }]);
     } else {
       setTitle("");
       setMonth(new Date().getMonth() + 1);
@@ -93,7 +158,7 @@ export function IsuKendalaDialog({ open, onOpenChange, isuKendala, onSuccess }: 
       setPriority("Medium");
       setTanggalKejadian("");
       setTanggalSelesai("");
-      setPoints([""]);
+      setPoints([{ text: "", images: [] }]);
     }
   }, [isuKendala, open]);
 
@@ -102,7 +167,7 @@ export function IsuKendalaDialog({ open, onOpenChange, isuKendala, onSuccess }: 
   const yearOptions = Array.from({ length: 8 }, (_, i) => currentYear - 2 + i);
 
   const handleAddPoint = () => {
-    setPoints([...points, ""]);
+    setPoints([...points, { text: "", images: [] }]);
   };
 
   const handleRemovePoint = (index: number) => {
@@ -116,8 +181,112 @@ export function IsuKendalaDialog({ open, onOpenChange, isuKendala, onSuccess }: 
 
   const handlePointChange = (index: number, value: string) => {
     const newPoints = [...points];
-    newPoints[index] = value;
+    newPoints[index].text = value;
     setPoints(newPoints);
+  };
+
+  const handleImageUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      const base64Images: string[] = [];
+
+      // Hitung total size base64 yang sudah ada DI SEMUA POINTS (ukuran sebenarnya dari string)
+      const totalExistingImagesSize = points.reduce((total, point) => {
+        return total + (point.images || []).reduce((imgTotal, img) => {
+          // Base64 string length adalah ukuran sebenarnya dalam bytes
+          return imgTotal + img.length;
+        }, 0);
+      }, 0);
+
+      // Max absolute: 900KB (aman di bawah limit 1MB Convex, memberi ruang untuk teks)
+      // 1MB = 1,048,576 bytes, jadi 900KB = 921,600 bytes
+      const maxAbsoluteSize = 900 * 1024;
+
+      // Jika sudah melebihi limit, cegah upload baru
+      if (totalExistingImagesSize >= maxAbsoluteSize) {
+        const sizeKB = (totalExistingImagesSize / 1024).toFixed(0);
+        toast.error(`❌ Total gambar sudah ${sizeKB}KB. Sudah mencapai batas maksimum. Hapus beberapa gambar terlebih dahulu.`);
+        return;
+      }
+
+      // Max 5 gambar per point (ditingkatkan dari 3)
+      const currentPointImages = points[index].images || [];
+      if (currentPointImages.length >= 5) {
+        toast.error("❌ Maksimal 5 gambar per point. Hapus beberapa gambar terlebih dahulu.");
+        return;
+      }
+
+      const remainingSlots = 5 - currentPointImages.length;
+      const filesToProcess = Math.min(files.length, remainingSlots);
+
+      for (let i = 0; i < filesToProcess; i++) {
+        const file = files[i];
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          toast.error(`❌ File "${file.name}" bukan gambar`);
+          continue;
+        }
+
+        // Check file size (max 5MB before compression)
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`❌ File "${file.name}" terlalu besar. Maksimal 5MB`);
+          continue;
+        }
+
+        try {
+          // Kompress gambar dengan adaptive quality (seperti flyer)
+          const compressedBase64 = await compressImage(file);
+
+          // Hitung ukuran base64 sebenarnya
+          const compressedSize = compressedBase64.length;
+
+          // Hitung total size jika gambar ini ditambahkan
+          const currentBatchSize = base64Images.reduce((sum, img) => sum + img.length, 0);
+          const newTotalSize = totalExistingImagesSize + currentBatchSize + compressedSize;
+
+          if (newTotalSize > maxAbsoluteSize) {
+            const remainingKB = Math.round((maxAbsoluteSize - totalExistingImagesSize - currentBatchSize) / 1024);
+            toast.error(`❌ Gambar "${file.name}" akan melebihi limit total. Sisa space: ${remainingKB}KB`);
+            continue;
+          }
+
+          base64Images.push(compressedBase64);
+        } catch (error) {
+          console.error('Error compressing image:', error);
+          toast.error(`❌ Gagal memproses gambar "${file.name}"`);
+        }
+      }
+
+      if (base64Images.length > 0) {
+        const newPoints = [...points];
+        newPoints[index].images = [...(newPoints[index].images || []), ...base64Images];
+        setPoints(newPoints);
+
+        // Hitung total size baru (ukuran base64 sebenarnya)
+        const newTotalSize = points.reduce((total, point) => {
+          return total + (point.images || []).reduce((imgTotal, img) => {
+            return imgTotal + img.length;
+          }, 0);
+        }, 0) + base64Images.reduce((sum, img) => sum + img.length, 0);
+
+        const sizeKB = (newTotalSize / 1024).toFixed(0);
+        toast.success(`✅ ${base64Images.length} gambar berhasil ditambahkan. Total: ${sizeKB}KB / 900KB`);
+      }
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast.error('❌ Gagal mengupload gambar');
+    }
+  };
+
+  const handleRemoveImage = (pointIndex: number, imageIndex: number) => {
+    const newPoints = [...points];
+    if (newPoints[pointIndex].images) {
+      newPoints[pointIndex].images = newPoints[pointIndex].images!.filter((_, i) => i !== imageIndex);
+      setPoints(newPoints);
+    }
   };
 
   const handleSave = async () => {
@@ -127,9 +296,26 @@ export function IsuKendalaDialog({ open, onOpenChange, isuKendala, onSuccess }: 
       return;
     }
 
-    const validPoints = points.filter(p => p.trim() !== "");
+    const validPoints = points.filter(p => p.text.trim() !== "");
     if (validPoints.length === 0) {
       toast.error('❌ Minimal harus ada 1 point isu!');
+      return;
+    }
+
+    // Validasi total ukuran base64 sebelum save (ukuran sebenarnya)
+    const totalImageSize = validPoints.reduce((total, point) => {
+      return total + (point.images || []).reduce((imgTotal, img) => {
+        // Base64 string length adalah ukuran sebenarnya dalam bytes
+        return imgTotal + img.length;
+      }, 0);
+    }, 0);
+
+    // Max 900KB (aman di bawah limit 1MB Convex = 1,048,576 bytes)
+    const maxAbsoluteSize = 900 * 1024;
+    const totalSizeKB = totalImageSize / 1024;
+
+    if (totalImageSize > maxAbsoluteSize) {
+      toast.error(`❌ Total gambar terlalu besar: ${totalSizeKB.toFixed(0)}KB. Max: 900KB. Hapus beberapa gambar.`);
       return;
     }
 
@@ -249,35 +435,95 @@ export function IsuKendalaDialog({ open, onOpenChange, isuKendala, onSuccess }: 
                 Tambah Point
               </Button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {points.map((point, index) => (
-                <div key={index} className="flex gap-2">
-                  <div className="flex-1">
-                    <Input
-                      value={point}
-                      onChange={(e) => handlePointChange(index, e.target.value)}
-                      placeholder={`Point ${index + 1}`}
-                      disabled={isSaving}
-                      className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 h-9 text-sm"
-                    />
+                <div key={index} className="border border-slate-200 dark:border-slate-700 rounded-lg p-3 space-y-2">
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <Input
+                        value={point.text}
+                        onChange={(e) => handlePointChange(index, e.target.value)}
+                        placeholder={`Point ${index + 1}`}
+                        disabled={isSaving}
+                        className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 h-9 text-sm"
+                      />
+                    </div>
+                    {points.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemovePoint(index)}
+                        disabled={isSaving}
+                        className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-9 px-2"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
-                  {points.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemovePoint(index)}
-                      disabled={isSaving}
-                      className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-9 px-2"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
+
+                  {/* Image Upload */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                        📷 Gambar Pendukung ({point.images?.length || 0})
+                      </Label>
+                      <label className="cursor-pointer">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          onChange={(e) => handleImageUpload(index, e)}
+                          disabled={isSaving}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={isSaving}
+                          className="text-xs h-7 px-2 border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            (e.currentTarget.previousElementSibling as HTMLInputElement)?.click();
+                          }}
+                        >
+                          <ImageIcon className="w-3 h-3 mr-1" />
+                          Upload
+                        </Button>
+                      </label>
+                    </div>
+
+                    {/* Image Previews */}
+                    {point.images && point.images.length > 0 && (
+                      <div className="grid grid-cols-4 gap-2">
+                        {point.images.map((img, imgIdx) => (
+                          <div key={imgIdx} className="relative group">
+                            <img
+                              src={img}
+                              alt={`Point ${index + 1} - Gambar ${imgIdx + 1}`}
+                              className="w-full h-20 object-cover rounded-lg border border-slate-300"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleRemoveImage(index, imgIdx)}
+                              disabled={isSaving}
+                              className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400">
-              * Tekan Enter atau klik tombol "Tambah Point" untuk menambah point baru
+              * Tekan Enter atau klik tombol "Tambah Point" untuk menambah point baru. Gambar akan dikompres otomatis dengan kualitas tinggi. Max 5 gambar per point, max 900KB total.
             </p>
           </div>
 
