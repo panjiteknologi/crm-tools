@@ -57,6 +57,11 @@ const getNavigationItems = (role: string) => {
         icon: IconCalendarTime,
       },
       {
+        title: "Laporan Kunjungan",
+        url: "/dashboard-manager/laporan-kunjungan",
+        icon: IconChartBar,
+      },
+      {
         title: "CRM Data Management",
         url: "/dashboard-manager/crm-data",
         icon: IconTarget,
@@ -65,11 +70,6 @@ const getNavigationItems = (role: string) => {
         title: "Kunjungan Engagement Partnership",
         url: "/dashboard-manager/kunjungan-engagement-partnership",
         icon: IconUsers,
-      },
-      {
-        title: "Laporan Kunjungan",
-        url: "/dashboard-manager/laporan-kunjungan",
-        icon: IconChartBar,
       },
     ];
   }
@@ -85,6 +85,11 @@ const getNavigationItems = (role: string) => {
         title: "Dashboard Kunjungan",
         url: "/dashboard-manager/dashboard-kunjungan",
         icon: IconCalendarTime,
+      },
+      {
+        title: "Laporan Kunjungan",
+        url: "/dashboard-manager/laporan-kunjungan",
+        icon: IconChartBar,
       },
       {
         title: "CRM Data Management",
@@ -132,11 +137,6 @@ const getNavigationItems = (role: string) => {
         icon: IconUsers,
       },
       {
-        title: "Laporan Kunjungan",
-        url: "/dashboard-manager/laporan-kunjungan",
-        icon: IconChartBar,
-      },
-      {
         title: "Master Data",
         icon: IconArchive,
         items: [
@@ -166,6 +166,11 @@ const getNavigationItems = (role: string) => {
       title: "Dashboard Kunjungan",
       url: "/dashboard-manager/dashboard-kunjungan",
       icon: IconCalendarTime,
+    },
+   {
+      title: "Laporan Kunjungan",
+      url: "/dashboard-manager/laporan-kunjungan",
+      icon: IconChartBar,
     },
     {
       title: "Dashboard PRM",
@@ -211,11 +216,6 @@ const getNavigationItems = (role: string) => {
       title: "Kunjungan Engagement Partnership",
       url: "/dashboard-manager/kunjungan-engagement-partnership",
       icon: IconUsers,
-    },
-    {
-      title: "Laporan Kunjungan",
-      url: "/dashboard-manager/laporan-kunjungan",
-      icon: IconChartBar,
     },
     {
       title: "CRM Data Management",
