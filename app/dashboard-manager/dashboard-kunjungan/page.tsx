@@ -238,10 +238,8 @@ export default function DashboardKunjunganPage() {
     { value: '12', label: 'Desember' },
   ]
 
-  // Filter data
-  const filteredData = React.useMemo(() => {
-    // Debug: Log current filter values
-   
+  // Filter data for CARDS (without month filter)
+  const filteredDataForCards = React.useMemo(() => {
     return crmTargets.filter(target => {
       // Filter by PIC CRM
       if (filterPic !== "all" && target.picCrm !== filterPic) return false
@@ -254,28 +252,21 @@ export default function DashboardKunjunganPage() {
 
       // Filter by Status Kunjungan
       if (filterStatusKunjungan !== "all") {
-        // If filter is set, only show targets that match the filter
         if (target.statusKunjungan !== filterStatusKunjungan) return false
       }
 
-      // Filter by Provinsi (case-insensitive and trim)
+      // Filter by Provinsi
       if (filterProvinsi !== "all") {
         const targetProvinsi = (target.provinsi || "").trim().toLowerCase()
         const filterProvinsiLower = filterProvinsi.trim().toLowerCase()
-        if (targetProvinsi !== filterProvinsiLower) {
-          
-          return false
-        }
+        if (targetProvinsi !== filterProvinsiLower) return false
       }
 
-      // Filter by Kota (case-insensitive and trim)
+      // Filter by Kota
       if (filterKota !== "all") {
         const targetKota = (target.kota || "").trim().toLowerCase()
         const filterKotaLower = filterKota.trim().toLowerCase()
-        if (targetKota !== filterKotaLower) {
-          
-          return false
-        }
+        if (targetKota !== filterKotaLower) return false
       }
 
       // Filter by Category
@@ -294,6 +285,22 @@ export default function DashboardKunjunganPage() {
           target.provinsi?.toLowerCase().includes(query) ||
           target.produk?.toLowerCase().includes(query)
         )
+      }
+
+      return true
+    })
+  }, [crmTargets, filterPic, filterSales, filterStatusCrm, filterStatusKunjungan, filterProvinsi, filterKota, filterCategory, filterAlasan, searchQuery])
+
+  // Filter data for TABLE (with month filter)
+  const filteredData = React.useMemo(() => {
+    return filteredDataForCards.filter(target => {
+      // Filter by Month (tanggalKunjungan must match filterMonth)
+      if (filterMonth && target.tanggalKunjungan) {
+        const targetMonth = target.tanggalKunjungan.substring(0, 7) // Get "YYYY-MM" part
+        if (targetMonth !== filterMonth) return false
+      } else if (filterMonth && !target.tanggalKunjungan) {
+        // If filterMonth is set but target has no tanggalKunjungan, exclude it
+        return false
       }
 
       // Table search query
@@ -319,7 +326,7 @@ export default function DashboardKunjunganPage() {
       if (!b.tanggalKunjungan) return -1
       return new Date(a.tanggalKunjungan).getTime() - new Date(b.tanggalKunjungan).getTime()
     })
-  }, [crmTargets, filterPic, filterSales, filterStatusCrm, filterStatusKunjungan, filterProvinsi, filterKota, filterCategory, filterAlasan, searchQuery, tableSearchQuery])
+  }, [filteredDataForCards, filterMonth, tableSearchQuery])
 
   const currentMonth = currentDate.getMonth()
   const currentYear = currentDate.getFullYear()
@@ -400,6 +407,7 @@ export default function DashboardKunjunganPage() {
 
   const calendarDays = generateCalendarDays()
 
+  // Display tasks for TABLE (with month filter)
   const displayTasks = selectedDate
     ? filteredData.filter(task => {
         const year = selectedDate.getFullYear()
@@ -409,6 +417,17 @@ export default function DashboardKunjunganPage() {
         return task.tanggalKunjungan === selectedDateStr
       })
     : filteredData
+
+  // Display tasks for CARDS (without month filter)
+  const displayTasksForCards = selectedDate
+    ? filteredDataForCards.filter(task => {
+        const year = selectedDate.getFullYear()
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+        const day = String(selectedDate.getDate()).padStart(2, '0')
+        const selectedDateStr = `${year}-${month}-${day}`
+        return task.tanggalKunjungan === selectedDateStr
+      })
+    : filteredDataForCards
 
   // Debug: log data
   // React.useEffect(() => {
@@ -823,7 +842,7 @@ export default function DashboardKunjunganPage() {
               <div className="text-center">
                 <p className="text-[9px] sm:text-[10px] font-medium text-blue-600">Total Sertifikat</p>
                 <p className="text-lg sm:text-xl font-bold text-blue-700 leading-tight">
-                  {displayTasks.length}
+                  {displayTasksForCards.length}
                 </p>
               </div>
             </div>
@@ -840,7 +859,7 @@ export default function DashboardKunjunganPage() {
               <div className="text-center">
                 <p className="text-[9px] sm:text-[10px] font-medium text-purple-600">Total Perusahaan</p>
                 <p className="text-lg sm:text-xl font-bold text-purple-700 leading-tight">
-                  {new Set(displayTasks.map(t => t.namaPerusahaan)).size}
+                  {new Set(displayTasksForCards.map(t => t.namaPerusahaan)).size}
                 </p>
               </div>
             </div>
@@ -857,7 +876,7 @@ export default function DashboardKunjunganPage() {
               <div className="text-center">
                 <p className="text-[9px] sm:text-[10px] font-medium text-green-600">VISITED</p>
                 <p className="text-lg sm:text-xl font-bold text-green-700 leading-tight">
-                  {new Set(displayTasks.filter(t => t.statusKunjungan === 'VISITED').map(t => t.namaPerusahaan)).size}
+                  {new Set(displayTasksForCards.filter(t => t.statusKunjungan === 'VISITED').map(t => t.namaPerusahaan)).size}
                 </p>
               </div>
             </div>
@@ -874,7 +893,7 @@ export default function DashboardKunjunganPage() {
               <div className="text-center">
                 <p className="text-[9px] sm:text-[10px] font-medium text-orange-600">NOT YET</p>
                 <p className="text-lg sm:text-xl font-bold text-orange-700 leading-tight">
-                  {new Set(displayTasks.filter(t => t.statusKunjungan === 'NOT YET').map(t => t.namaPerusahaan)).size}
+                  {new Set(displayTasksForCards.filter(t => t.statusKunjungan === 'NOT YET').map(t => t.namaPerusahaan)).size}
                 </p>
               </div>
             </div>
@@ -908,8 +927,8 @@ export default function DashboardKunjunganPage() {
           }
 
           return picsToShow.map((picCrm) => {
-            // Filter data based on current display tasks (respecting all filters)
-            const picData = displayTasks.filter(t => t.picCrm === picCrm);
+            // Filter data based on displayTasksForCards (without month filter)
+            const picData = displayTasksForCards.filter(t => t.picCrm === picCrm);
             const picTotal = picData.length;
             const picLanjut = picData.filter(t => t.status === 'LANJUT' || t.status === 'DONE').length;
             const picLoss = picData.filter(t => t.status === 'LOSS').length;
@@ -917,7 +936,7 @@ export default function DashboardKunjunganPage() {
             const picProses = picData.filter(t => t.status === 'PROSES').length;
             const picWaiting = picData.filter(t => t.status === 'WAITING').length;
 
-            // Get unique companies from displayTasks
+            // Get unique companies from displayTasksForCards
             const picTotalCompanies = Math.round(new Set(picData.map(t => t.namaPerusahaan)).size / 2);
 
             // Get companies with at least one visited target

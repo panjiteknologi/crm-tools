@@ -369,14 +369,42 @@ export default function LaporanKunjunganPage() {
 
         {/* Total Data Info */}
         {flattenedTargets.length > 0 && (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
-            <div className="text-slate-600 dark:text-slate-400 text-center sm:text-left">
-              Total <span className="font-bold text-slate-900 dark:text-white mx-1">{sortedGroupedCompanies.length}</span> perusahaan
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
+            <div className="flex flex-wrap items-center gap-2 text-center sm:text-left">
+              {/* Total Perusahaan Badge */}
+              <Card className="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-2">
+                  <span className="text-blue-700 dark:text-blue-300 text-xs font-medium">Total:</span>
+                  <span className="text-blue-900 dark:text-blue-100 text-sm font-bold">{sortedGroupedCompanies.length}</span>
+                  <span className="text-blue-600 dark:text-blue-400 text-xs">perusahaan</span>
+                </div>
+              </Card>
+
+              {/* Bulan Badge */}
+              <Badge variant="outline" className="px-3 py-1.5 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 font-semibold">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span className="text-xs">{selectedMonth === 0 ? 'Semua Bulan' : MONTHS[selectedMonth]}</span>
+                  <span className="text-purple-500 dark:text-purple-400">•</span>
+                  <span className="text-xs font-bold">{selectedYear}</span>
+                </div>
+              </Badge>
+
+              {/* PIC Badge */}
+              <Badge variant="outline" className="px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 font-semibold">
+                <div className="flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5" />
+                  <span className="text-xs font-bold">{selectedPicCrm === "All" ? "Semua PIC" : selectedPicCrm}</span>
+                </div>
+              </Badge>
             </div>
+
             {viewMode === "table" && (
-              <div className="text-slate-600 dark:text-slate-400 text-center sm:text-right">
-                Menampilkan <span className="font-bold text-slate-900 dark:text-white mx-1">{startIndex + 1}-{Math.min(endIndex, flattenedTargets.length)}</span> dari <span className="font-bold text-slate-900 dark:text-white mx-1">{flattenedTargets.length}</span> data
-              </div>
+              <Card className="px-3 py-1.5 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 border-slate-200 dark:border-slate-700">
+                <div className="text-slate-600 dark:text-slate-400 text-center sm:text-right">
+                  Menampilkan <span className="font-bold text-slate-900 dark:text-white mx-1">{startIndex + 1}-{Math.min(endIndex, flattenedTargets.length)}</span> dari <span className="font-bold text-slate-900 dark:text-white mx-1">{flattenedTargets.length}</span> data
+                </div>
+              </Card>
             )}
           </div>
         )}
@@ -419,7 +447,7 @@ export default function LaporanKunjunganPage() {
                   {targets.length > 1 && (
                     <div className="absolute top-2 left-2 z-10">
                       <Badge variant="secondary" className="bg-blue-600 text-white text-xs px-2 py-1">
-                        {targets.length} kunjungan
+                        {targets.length} Standard
                       </Badge>
                     </div>
                   )}
