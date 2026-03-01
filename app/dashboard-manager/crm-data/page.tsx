@@ -1961,7 +1961,7 @@ export default function CrmDataManagementPage() {
 
   // Handle Excel export
   const handleExcelExport = () => {
-    if (!filteredCrmTargets || filteredCrmTargets.length === 0) {
+    if (!sortedTargets || sortedTargets.length === 0) {
       toast.error('No data to export');
       return;
     }
@@ -2024,7 +2024,7 @@ export default function CrmDataManagementPage() {
     // Convert data to Excel format
     const excelData = [
       headers,
-      ...filteredCrmTargets.map(target => [
+      ...sortedTargets.map(target => [
         target.tahun || '',
         target.bulanExpDate || '',
         target.produk || '',
