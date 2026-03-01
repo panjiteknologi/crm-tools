@@ -407,27 +407,29 @@ export default function DashboardKunjunganPage() {
 
   const calendarDays = generateCalendarDays()
 
-  // Display tasks for TABLE (with month filter)
-  const displayTasks = selectedDate
-    ? filteredData.filter(task => {
-        const year = selectedDate.getFullYear()
-        const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
-        const day = String(selectedDate.getDate()).padStart(2, '0')
-        const selectedDateStr = `${year}-${month}-${day}`
-        return task.tanggalKunjungan === selectedDateStr
-      })
-    : filteredData
+  // Display tasks for TABLE (with month filter) - memoized to prevent loops
+  const displayTasks = React.useMemo(() => {
+    if (!selectedDate) return filteredData
 
-  // Display tasks for CARDS (without month filter)
-  const displayTasksForCards = selectedDate
-    ? filteredDataForCards.filter(task => {
-        const year = selectedDate.getFullYear()
-        const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
-        const day = String(selectedDate.getDate()).padStart(2, '0')
-        const selectedDateStr = `${year}-${month}-${day}`
-        return task.tanggalKunjungan === selectedDateStr
-      })
-    : filteredDataForCards
+    const year = selectedDate.getFullYear()
+    const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+    const day = String(selectedDate.getDate()).padStart(2, '0')
+    const selectedDateStr = `${year}-${month}-${day}`
+
+    return filteredData.filter(task => task.tanggalKunjungan === selectedDateStr)
+  }, [filteredData, selectedDate])
+
+  // Display tasks for CARDS (without month filter) - memoized to prevent loops
+  const displayTasksForCards = React.useMemo(() => {
+    if (!selectedDate) return filteredDataForCards
+
+    const year = selectedDate.getFullYear()
+    const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+    const day = String(selectedDate.getDate()).padStart(2, '0')
+    const selectedDateStr = `${year}-${month}-${day}`
+
+    return filteredDataForCards.filter(task => task.tanggalKunjungan === selectedDateStr)
+  }, [filteredDataForCards, selectedDate])
 
   // Debug: log data
   // React.useEffect(() => {
@@ -545,12 +547,21 @@ export default function DashboardKunjunganPage() {
     }));
   }, [displayTasks]);
 
-  // Auto-expand all companies by default
+  // Auto-expand all companies by default (with guard to prevent loops)
   React.useEffect(() => {
     if (groupedByCompany.length > 0) {
-      setExpandedCompanies(new Set(groupedByCompany.map(g => g.companyName)));
+      const newCompanyNames = groupedByCompany.map(g => g.companyName)
+      const currentCompanyNames = Array.from(expandedCompanies)
+
+      // Only update if the companies are actually different
+      const hasChanged = newCompanyNames.length !== currentCompanyNames.length ||
+        newCompanyNames.some(name => !currentCompanyNames.includes(name))
+
+      if (hasChanged) {
+        setExpandedCompanies(new Set(newCompanyNames))
+      }
     }
-  }, [groupedByCompany]);
+  }, [groupedByCompany.length]); // Only depend on length, not the entire array
 
   // Pagination for grouped companies
   const totalPages = Math.ceil(groupedByCompany.length / itemsPerPage);
@@ -571,13 +582,6 @@ export default function DashboardKunjunganPage() {
       setFilterKota("all")
     }
   }, [filterProvinsi])
-
-  // Update calendar view when selectedDate changes
-  React.useEffect(() => {
-    if (selectedDate) {
-      setCurrentDate(selectedDate)
-    }
-  }, [selectedDate])
 
   // Update calendar view when filterMonth changes
   React.useEffect(() => {
@@ -1091,7 +1095,11 @@ export default function DashboardKunjunganPage() {
                             return (
                               <div
                                 key={index}
-                                onClick={() => day.isCurrentMonth && setSelectedDate(day.date)}
+                                onClick={() => {
+                                  if (day.isCurrentMonth) {
+                                    setSelectedDate(day.date)
+                                  }
+                                }}
                                 className={`
                                   relative aspect-square p-1 rounded text-center transition-all cursor-pointer
                                   ${day.isCurrentMonth
