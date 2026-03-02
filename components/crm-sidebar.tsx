@@ -77,7 +77,22 @@ const getNavigationItems = (role: string) => {
   if (role === 'manager') {
     return [
       {
-        title: "Dashboard Pencapaian",
+        title: "KPI",
+        url: "/dashboard-manager/kpi",
+        icon: IconAward,
+      },
+      {
+        title: "Struktur Divisi CRP",
+        url: "/dashboard-manager/struktur-divisi-crp",
+        icon: IconAward,
+      },
+      {
+        title: "Kolaborasi CRM",
+        url: "/dashboard-manager/kolaborasi-crm",
+        icon: IconAward,
+      },
+      {
+        title: "Pencapaian CRM",
         url: "/dashboard-manager/dashboard-data",
         icon: IconDatabase,
       },
@@ -92,28 +107,13 @@ const getNavigationItems = (role: string) => {
         icon: IconChartBar,
       },
       {
-        title: "CRM Data Management",
-        url: "/dashboard-manager/crm-data",
-        icon: IconTarget,
-      },
-      {
-        title: "Struktur Divisi CRP",
-        url: "/dashboard-manager/struktur-divisi-crp",
-        icon: IconAward,
-      },
-      {
-        title: "KPI",
-        url: "/dashboard-manager/kpi",
-        icon: IconAward,
+        title: "Kunjungan Engagement Partnership",
+        url: "/dashboard-manager/kunjungan-engagement-partnership",
+        icon: IconUsers,
       },
       {
         title: "NPS",
         url: "/dashboard-manager/nps",
-        icon: IconAward,
-      },
-      {
-        title: "Kolaborasi CRM",
-        url: "/dashboard-manager/kolaborasi-crm",
         icon: IconAward,
       },
       {
@@ -122,19 +122,19 @@ const getNavigationItems = (role: string) => {
         icon: IconPhoto,
       },
       {
-        title: "Isu & Kendala",
-        url: "/dashboard-manager/isu-kendala",
-        icon: IconPhoto,
-      },
-      {
         title: "Customer Complain",
         url: "/dashboard-manager/customer-complain",
         icon: IconAlertCircle,
       },
       {
-        title: "Kunjungan Engagement Partnership",
-        url: "/dashboard-manager/kunjungan-engagement-partnership",
-        icon: IconUsers,
+        title: "Isu & Kendala",
+        url: "/dashboard-manager/isu-kendala",
+        icon: IconPhoto,
+      },
+      {
+        title: "CRM Data Management",
+        url: "/dashboard-manager/crm-data",
+        icon: IconTarget,
       },
       {
         title: "Master Data",
@@ -158,38 +158,13 @@ const getNavigationItems = (role: string) => {
     //   icon: IconChartBar,
     // },
     {
-      title: "Dashboard Pencapaian",
-      url: "/dashboard-manager/dashboard-data",
-      icon: IconDatabase,
-    },
-    {
-      title: "Dashboard Kunjungan",
-      url: "/dashboard-manager/dashboard-kunjungan",
-      icon: IconCalendarTime,
-    },
-   {
-      title: "Laporan Kunjungan",
-      url: "/dashboard-manager/laporan-kunjungan",
-      icon: IconChartBar,
-    },
-    {
-      title: "Dashboard PRM",
-      url: "/dashboard-manager/dashboard-prm",
-      icon: IconCalendarTime,
-    },
-    {
-      title: "Struktur Divisi CRP",
-      url: "/dashboard-manager/struktur-divisi-crp",
-      icon: IconAward,
-    },
-    {
       title: "KPI",
       url: "/dashboard-manager/kpi",
       icon: IconAward,
     },
     {
-      title: "NPS",
-      url: "/dashboard-manager/nps",
+      title: "Struktur Divisi CRP",
+      url: "/dashboard-manager/struktur-divisi-crp",
       icon: IconAward,
     },
     {
@@ -198,13 +173,33 @@ const getNavigationItems = (role: string) => {
       icon: IconAward,
     },
     {
-      title: "Flyer",
-      url: "/dashboard-manager/flyer",
-      icon: IconPhoto,
+      title: "Pencapaian CRM",
+      url: "/dashboard-manager/dashboard-data",
+      icon: IconDatabase,
     },
     {
-      title: "Isu & Kendala",
-      url: "/dashboard-manager/isu-kendala",
+      title: "Dashboard Kunjungan",
+      url: "/dashboard-manager/dashboard-kunjungan",
+      icon: IconCalendarTime,
+    },
+    {
+      title: "Laporan Kunjungan",
+      url: "/dashboard-manager/laporan-kunjungan",
+      icon: IconChartBar,
+    },
+    {
+      title: "Kunjungan Engagement Partnership",
+      url: "/dashboard-manager/kunjungan-engagement-partnership",
+      icon: IconUsers,
+    },
+    {
+      title: "NPS",
+      url: "/dashboard-manager/nps",
+      icon: IconAward,
+    },
+    {
+      title: "Flyer",
+      url: "/dashboard-manager/flyer",
       icon: IconPhoto,
     },
     {
@@ -213,9 +208,14 @@ const getNavigationItems = (role: string) => {
       icon: IconAlertCircle,
     },
     {
-      title: "Kunjungan Engagement Partnership",
-      url: "/dashboard-manager/kunjungan-engagement-partnership",
-      icon: IconUsers,
+      title: "Isu & Kendala",
+      url: "/dashboard-manager/isu-kendala",
+      icon: IconPhoto,
+    },
+    {
+      title: "Dashboard PRM",
+      url: "/dashboard-manager/dashboard-prm",
+      icon: IconCalendarTime,
     },
     {
       title: "CRM Data Management",
@@ -232,7 +232,7 @@ const getNavigationItems = (role: string) => {
           icon: IconUsers,
         },
       ],
-    },
+    },    
     {
       title: "Settings",
       icon: IconSettings,

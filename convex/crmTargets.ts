@@ -276,6 +276,11 @@ export const updateCrmTarget = mutation({
     statusKunjungan: v.optional(v.union(v.string(), v.null())),
     catatanKunjungan: v.optional(v.union(v.string(), v.null())),
     fotoBuktiKunjungan: v.optional(v.union(v.string(), v.null())),
+    bulanAuditSebelumnyaSustain: v.optional(v.union(v.string(), v.null())),
+    bulanAudit: v.optional(v.union(v.string(), v.null())),
+    statusInvoice: v.optional(v.union(v.string(), v.null())),
+    statusPembayaran: v.optional(v.union(v.string(), v.null())),
+    statusKomisi: v.optional(v.union(v.string(), v.null())),
     updated_by: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
