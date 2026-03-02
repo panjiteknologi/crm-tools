@@ -47,6 +47,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
+  X,
 } from 'lucide-react';
 
 interface NewClient {
@@ -94,6 +95,7 @@ export function NewClientView() {
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState<'search' | 'date' | null>(null);
 
   // Generate year options (current year - 2 to current year + 5)
   const currentYear = new Date().getFullYear();
@@ -761,6 +763,203 @@ export function NewClientView() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border lg:hidden">
+        <div className="grid grid-cols-4 gap-1 p-2">
+          {/* Search Tab */}
+          <button
+            onClick={() => setMobileFilterOpen(mobileFilterOpen === 'search' ? null : 'search')}
+            className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors ${
+              mobileFilterOpen === 'search' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+            }`}
+          >
+            <Search className="h-5 w-5 mb-1" />
+            <span className="text-[10px] font-medium">Cari</span>
+          </button>
+
+          {/* Date Filter Tab */}
+          <button
+            onClick={() => setMobileFilterOpen(mobileFilterOpen === 'date' ? null : 'date')}
+            className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors ${
+              mobileFilterOpen === 'date' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+            }`}
+          >
+            <Calendar className="h-5 w-5 mb-1" />
+            <span className="text-[10px] font-medium">Filter</span>
+          </button>
+
+          {/* Add Button */}
+          <button
+            onClick={handleAdd}
+            className="flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md"
+          >
+            <Plus className="h-5 w-5 mb-1" />
+            <span className="text-[10px] font-medium">Tambah</span>
+          </button>
+
+          {/* Grid/Table Toggle */}
+          <button
+            onClick={() => setViewMode(viewMode === "grid" ? "table" : "grid")}
+            className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors ${
+              viewMode === "grid" ? 'bg-purple-100 hover:bg-purple-200 text-purple-700' : 'bg-blue-100 hover:bg-blue-200 text-blue-700'
+            }`}
+          >
+            {viewMode === "grid" ? (
+              <>
+                <TableIcon className="h-5 w-5 mb-1" />
+                <span className="text-[10px] font-medium">Table</span>
+              </>
+            ) : (
+              <>
+                <LayoutGrid className="h-5 w-5 mb-1" />
+                <span className="text-[10px] font-medium">Grid</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Filter Sheet Overlay */}
+      {mobileFilterOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setMobileFilterOpen(null)}
+          />
+
+          {/* Filter Sheet */}
+          <div className="fixed bottom-16 left-0 right-0 z-40 lg:hidden max-h-[70vh] overflow-y-auto bg-background rounded-t-2xl border-t border-border shadow-2xl animate-in slide-in-from-bottom-10">
+            {/* Handle bar */}
+            <div className="flex justify-center border-b p-3">
+              <div className="w-12 h-1.5 bg-muted rounded-full" />
+            </div>
+
+            {/* Filter Content */}
+            <div className="p-4 space-y-4">
+              {/* Search Filter */}
+              {mobileFilterOpen === 'search' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm">Cari New Client</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setMobileFilterOpen(null)}
+                      className="h-8 text-xs"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Cari client, PIC, atau TSI..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setMobileFilterOpen(null);
+                          }
+                        }}
+                      />
+                    </div>
+                    {searchQuery && (
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Ditemukan: {sortedClients.length} hasil</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSearchQuery('')}
+                          className="h-7 text-xs"
+                        >
+                          Hapus
+                        </Button>
+                      </div>
+                    )}
+                    <Button
+                      onClick={() => setMobileFilterOpen(null)}
+                      className="w-full"
+                    >
+                      OK
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Date Filter */}
+              {mobileFilterOpen === 'date' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm">Filter Tanggal</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setMobileFilterOpen(null)}
+                      className="h-8 text-xs"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="space-y-3">
+                    {/* Bulan */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Bulan</Label>
+                      <Select value={selectedMonth.toString()} onValueChange={(v) => setSelectedMonth(parseInt(v))}>
+                        <SelectTrigger className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500">
+                          <SelectValue placeholder="Pilih bulan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MONTHS.map((month, idx) => (
+                            <SelectItem key={idx} value={idx.toString()}>
+                              {month}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Tahun */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Tahun</Label>
+                      <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+                        <SelectTrigger className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500">
+                          <SelectValue placeholder="Pilih tahun" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {yearOptions.map((year) => (
+                            <SelectItem key={year} value={year.toString()}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Filter Info */}
+                    <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
+                      <p>📊 Menampilkan <span className="font-bold text-foreground">{sortedClients.length}</span> new client</p>
+                      <p className="mt-1">
+                        {selectedMonth === 0 ? 'Semua bulan' : MONTHS[selectedMonth]} {selectedYear}
+                      </p>
+                    </div>
+
+                    <Button
+                      onClick={() => setMobileFilterOpen(null)}
+                      className="w-full"
+                    >
+                      Terapkan
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

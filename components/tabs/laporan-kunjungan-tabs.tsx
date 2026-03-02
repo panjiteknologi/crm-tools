@@ -69,35 +69,38 @@ export function LaporanKunjunganTabs() {
     >
       <div className="flex-1 space-y-6 p-4 sm:p-8 pt-6">
         <Tabs defaultValue="existing" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 h-12 bg-slate-100 dark:bg-slate-900 p-1 rounded-lg">
-            <TabsTrigger
-              value="existing"
-              className="cursor-pointer relative gap-2 bg-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md transition-all"
-            >
-              <Building2 className="h-4 w-4" />
-              <span>Existing</span>
-              <Badge variant="secondary" className="ml-1 bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 data-[state=active]:bg-white data-[state=active]:text-purple-600">
-                {existingCount}
-              </Badge>
-            </TabsTrigger>
+          {/* Sticky Tab Header */}
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pb-4 pt-2">
+            <TabsList className="grid w-full max-w-md grid-cols-2 h-12 bg-slate-100 dark:bg-slate-900 p-1 rounded-lg shadow-md">
+              <TabsTrigger
+                value="existing"
+                className="cursor-pointer relative gap-2 bg-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md transition-all"
+              >
+                <Building2 className="h-4 w-4" />
+                <span>Existing</span>
+                <Badge variant="secondary" className="ml-1 bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 data-[state=active]:bg-white data-[state=active]:text-purple-600">
+                  {existingCount}
+                </Badge>
+              </TabsTrigger>
 
-            <TabsTrigger
-              value="new"
-              className="cursor-pointer relative gap-2 bg-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md transition-all"
-            >
-              <Sparkles className="h-4 w-4" />
-              <span>New</span>
-              <Badge variant="secondary" className="ml-1 bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 data-[state=active]:bg-white data-[state=active]:text-purple-600">
-                {newClientCount}
-              </Badge>
-            </TabsTrigger>
-          </TabsList>
+              <TabsTrigger
+                value="new"
+                className="cursor-pointer relative gap-2 bg-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md transition-all"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>New</span>
+                <Badge variant="secondary" className="ml-1 bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 data-[state=active]:bg-white data-[state=active]:text-purple-600">
+                  {newClientCount}
+                </Badge>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="existing" className="bg-purple-200">
+          <TabsContent value="existing" className="bg-purple-200 mt-4">
             <ExistingClientView />
           </TabsContent>
 
-          <TabsContent value="new" className="bg-purple-200">
+          <TabsContent value="new" className="bg-purple-200 mt-4">
             <NewClientView />
           </TabsContent>
         </Tabs>
