@@ -489,68 +489,28 @@ export default defineSchema({
 
   // Table CRM New Client (untuk new client visits, separated from existing crmTargets)
   crmNewClient: defineTable({
-    // Data dasar perusahaan (sama seperti crmTargets)
-    tahun: v.string(), // TAHUN
-    bulanExpDate: v.string(), // BULAN EXP DATE
-    produk: v.string(), // PRODUK (ISO, ISPO, dll)
-    picCrm: v.string(), // PIC CRM (DHA, MRC)
-    sales: v.string(), // SALES (NAC, ARH, BSC, dll)
-    namaAssociate: v.string(), // NAMA ASSOSIATE
-    directOrAssociate: v.optional(v.string()), // DIRECT OR ASSOCIATE
-    grup: v.optional(v.string()), // GRUP
-    namaPerusahaan: v.string(), // NAMA PERUSAHAAN
-    status: v.string(), // STATUS (WAITING, PROSES, SUSPEND, LOSS, DONE)
-    alasan: v.optional(v.string()), // ALASAN
-    category: v.optional(v.string()), // CATEGORY (GOLD, SILVER, BRONZE)
-    kuadran: v.optional(v.string()), // KUADRAN
-    luarKota: v.optional(v.string()), // LUAR KOTA
-    provinsi: v.string(), // PROVINSI
-    kota: v.string(), // KOTA
-    alamat: v.string(), // ALAMAT lengkap
-    akreditasi: v.optional(v.string()), // AKREDITASI (KAN, NON AKRE)
-    catAkre: v.optional(v.string()), // CAT AKRE
-    eaCode: v.optional(v.string()), // EA CODE
-    std: v.optional(v.string()), // STD (SMK3, HACCP, dll)
-    iaDate: v.optional(v.string()), // IA DATE
-    expDate: v.optional(v.string()), // EXP DATE
-    tahapAudit: v.optional(v.string()), // TAHAP AUDIT
-    hargaKontrak: v.optional(v.number()), // HARGA KONTRAK
-    bulanTtdNotif: v.optional(v.string()), // BULAN TTD NOTIF (Format: YYYY-MM-DD)
-    hargaTerupdate: v.optional(v.number()), // HARGA TERUPDATE
-    trimmingValue: v.optional(v.number()), // TRIMMING VALUE
-    lossValue: v.optional(v.number()), // LOSS VALUE
-    cashback: v.optional(v.number()), // CASHBACK
-    terminPembayaran: v.optional(v.string()), // TERMIN PEMBAYARAN
-    statusSertifikat: v.optional(v.string()), // STATUS SERTIFIKAT
-    tanggalKunjungan: v.optional(v.string()), // TANGGAL KUNJUNGAN
-    statusKunjungan: v.optional(v.string()), // STATUS KUNJUNGAN (VISITED, NOT YET)
-    catatanKunjungan: v.optional(v.string()), // CATATAN KUNJUNGAN
-    fotoBuktiKunjungan: v.optional(v.string()), // FOTO BUKTI KUNJUNGAN (URL gambar)
-    bulanAuditSebelumnyaSustain: v.optional(v.string()), // BULAN AUDIT SEBELUMNYA SUSTAIN (Format: YYYY-MM-DD)
-    bulanAudit: v.optional(v.string()), // BULAN AUDIT (Format: YYYY-MM-DD)
-    statusInvoice: v.optional(v.union(v.literal("Terbit"), v.literal("Belum Terbit"))), // STATUS INVOICE
-    statusPembayaran: v.optional(v.union(v.literal("Lunas"), v.literal("Belum Lunas"), v.literal("Sudah DP"))), // STATUS PEMBAYARAN
-    statusKomisi: v.optional(v.union(v.literal("Sudah Diajukan"), v.literal("Belum Diajukan"), v.literal("Tidak Ada"))), // STATUS KOMISI
-
-    // Additional fields for new client tracking
-    potentialStatus: v.optional(v.union(v.literal("PROSPECT"), v.literal("HOT LEAD"), v.literal("COLD"), v.literal("CONVERTED"))), // Status prospek client
-    potentialValue: v.optional(v.number()), // Estimasi nilai proyek
-    followUpDate: v.optional(v.string()), // Tanggal follow up (format: YYYY-MM-DD)
+    // Kunjungan Engagement Partnership fields (same as kunjunganEngagementPartnership)
+    namaClient: v.string(), // Nama Client
+    namaPicClient: v.string(), // Nama PIC Client
+    noHp: v.string(), // No HP
+    picTsi: v.string(), // PIC TSI
+    tglKunjungan: v.string(), // Tanggal Kunjungan (format: YYYY-MM-DD)
+    month: v.number(), // Bulan (1-12)
+    year: v.number(), // Tahun
+    catatan: v.optional(v.string()), // Catatan
+    tindakLanjut: v.optional(v.string()), // Tindak Lanjut
+    fotoBukti: v.optional(v.string()), // Foto bukti kunjungan
 
     // Audit fields
-    created_by: v.optional(v.id("users")), // CREATED BY - User yang membuat data
-    createdAt: v.number(), // CREATED AT - Timestamp pembuatan
-    updated_by: v.optional(v.id("users")), // UPDATED BY - User yang terakhir update
-    updatedAt: v.number(), // UPDATED AT - Timestamp update terakhir
+    created_by: v.optional(v.id("users")), // User yang membuat
+    updated_by: v.optional(v.id("users")), // User yang terakhir update
+    createdByName: v.string(), // Nama user yang membuat (denormalized for easier display)
+    updatedByName: v.optional(v.string()), // Nama user yang terakhir update
+    createdAt: v.number(),
+    updatedAt: v.number(),
   })
-    .index("by_picCrm", ["picCrm"])
-    .index("by_sales", ["sales"])
-    .index("by_status", ["status"])
-    .index("by_potentialStatus", ["potentialStatus"])
-    .index("by_category", ["category"])
-    .index("by_provinsi", ["provinsi"])
-    .index("by_kota", ["kota"])
-    .index("by_tanggalKunjungan", ["tanggalKunjungan"])
-    .index("by_created_by", ["created_by"])
-    .index("by_createdAt", ["createdAt"]),
+    .index("by_month_year", ["month", "year"])
+    .index("by_year", ["year"])
+    .index("by_tglKunjungan", ["tglKunjungan"])
+    .index("by_created_by", ["created_by"]),
 });

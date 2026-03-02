@@ -241,7 +241,7 @@ export function ExistingClientView() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Laporan Kunjungan</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Laporan Kunjungan Existing Client</h2>
             <p className="text-sm sm:text-base text-muted-foreground">
               Laporan kunjungan yang sudah dilakukan (VISITED)
             </p>
