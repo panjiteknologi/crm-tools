@@ -1452,7 +1452,7 @@ export function CrmDataTable({ data, canEdit = false, showExport = true, onEdit,
                         `}
                         onClick={() => {
                           if (isGrouped) { row.getToggleExpandedHandler()(); }
-                          else { setEditDialogTarget(row.original); setEditDialogOpen(true); }
+                          else if (canEdit) { setEditDialogTarget(row.original); setEditDialogOpen(true); }
                         }}
                       >
                         {row.getVisibleCells().map(cell => {
