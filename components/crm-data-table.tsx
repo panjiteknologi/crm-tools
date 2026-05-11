@@ -1506,7 +1506,7 @@ export function CrmDataTable({ data, canEdit = false, showExport = true, onEdit,
 
               {/* Footer totals */}
               {filteredRows.length > 0 && (
-                <tfoot className="bg-muted/50 border-t font-medium sticky bottom-0 z-10">
+                <tfoot className="bg-muted border-t font-medium sticky bottom-0 z-10">
                   <tr>
                     {table.getVisibleFlatColumns().map((column) => {
                       const isNumeric = column.columnDef.meta?.isNumeric;
@@ -1517,7 +1517,7 @@ export function CrmDataTable({ data, canEdit = false, showExport = true, onEdit,
                       if (column.id === "namaPerusahaan") {
                         return (
                           <td key={column.id} style={{ ...getPinStyles(column), width: column.getSize() }}
-                            className={`py-2 px-3 bg-muted/80 ${isPinned === "left" ? "border-r border-gray-200" : ""}`}>
+                            className={`py-2 px-3 bg-muted ${isPinned === "left" ? "border-r border-gray-200" : ""}`}>
                             <span className="text-[10px] font-bold text-muted-foreground">Total ({filteredRows.length} data)</span>
                           </td>
                         );
@@ -1525,13 +1525,13 @@ export function CrmDataTable({ data, canEdit = false, showExport = true, onEdit,
                       if (isNumeric) {
                         const val = totals[column.id as keyof typeof totals];
                         return (
-                          <td key={column.id} style={{ width: column.getSize() }} className="py-2 px-3 text-right">
+                          <td key={column.id} style={{ width: column.getSize() }} className="py-2 px-3 text-right bg-muted">
                             <span className={`text-xs font-bold tabular-nums ${colorClass}`}>{fmtCurrency(val)}</span>
                           </td>
                         );
                       }
                       return <td key={column.id} style={{ ...getPinStyles(column), width: column.getSize() }}
-                        className={`py-2 px-3 ${isPinned ? "bg-muted/80" : ""}`} />;
+                        className={`py-2 px-3 bg-muted`} />;
                     })}
                   </tr>
                 </tfoot>

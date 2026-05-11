@@ -1156,6 +1156,13 @@ export default function CrmDataManagementPage() {
                 return Boolean(!target.trimmingValue || target.trimmingValue === 0);
               }
               return true;
+            case 'lossValue':
+              if (value === 'ADA') {
+                return Boolean(target.lossValue && target.lossValue > 0);
+              } else if (value === 'KOSONG') {
+                return Boolean(!target.lossValue || target.lossValue === 0);
+              }
+              return true;
             default:
               return true;
           }
@@ -2217,27 +2224,27 @@ export default function CrmDataManagementPage() {
               </div>
             </div>
 
-            {/* Status Terbit */}
+            {/* Loss Value */}
             <div className="flex items-center">
-              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44 hidden lg:block">📜 Status Terbit:</span>
+              <span className="text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-44 hidden lg:block">📉 Loss Value:</span>
               <div className="flex-1 grid grid-cols-2 gap-1.5">
                 <div
-                  className={`bg-green-50 rounded px-2 py-1 border border-green-200 text-center cursor-pointer hover:ring-2 hover:ring-green-400 transition-all ${
-                    isQuickFilterActive('statusSertifikat', 'TERBIT') ? 'ring-2 ring-green-600' : ''
+                  className={`bg-red-50 rounded px-2 py-1 border border-red-200 text-center cursor-pointer hover:ring-2 hover:ring-red-400 transition-all ${
+                    isQuickFilterActive('lossValue', 'ADA') ? 'ring-2 ring-red-600' : ''
                   }`}
-                  onClick={() => handleQuickFilter('statusSertifikat', 'TERBIT')}
+                  onClick={() => handleQuickFilter('lossValue', 'ADA')}
                   title="Click to toggle filter"
                 >
-                  <p className="text-xs text-green-700 font-semibold">Terbit <span className="font-bold">({(filteredCrmTargets || []).filter(t => t.statusSertifikat && t.statusSertifikat.toUpperCase() === 'TERBIT').length})</span></p>
+                  <p className="text-xs text-red-700 font-semibold">Ada Value <span className="font-bold">({(filteredCrmTargets || []).filter(t => t.lossValue && t.lossValue > 0).length})</span></p>
                 </div>
                 <div
-                  className={`bg-red-50 rounded px-2 py-1 border border-red-200 text-center cursor-pointer hover:ring-2 hover:ring-red-400 transition-all ${
-                    isQuickFilterActive('statusSertifikat', 'BELUM') ? 'ring-2 ring-red-600' : ''
+                  className={`bg-slate-50 rounded px-2 py-1 border border-slate-200 text-center cursor-pointer hover:ring-2 hover:ring-slate-400 transition-all ${
+                    isQuickFilterActive('lossValue', 'KOSONG') ? 'ring-2 ring-slate-600' : ''
                   }`}
-                  onClick={() => handleQuickFilter('statusSertifikat', 'BELUM')}
+                  onClick={() => handleQuickFilter('lossValue', 'KOSONG')}
                   title="Click to toggle filter"
                 >
-                  <p className="text-xs text-red-700 font-semibold">Belum <span className="font-bold">({(filteredCrmTargets || []).filter(t => !t.statusSertifikat || t.statusSertifikat.toUpperCase().includes('BELUM')).length})</span></p>
+                  <p className="text-xs text-slate-700 font-semibold">Tidak Ada Value <span className="font-bold">({(filteredCrmTargets || []).filter(t => !t.lossValue || t.lossValue === 0).length})</span></p>
                 </div>
               </div>
             </div>
@@ -3362,20 +3369,20 @@ export default function CrmDataManagementPage() {
 
                     {/* Status Terbit */}
                     <div className="border rounded-lg p-3">
-                      <h4 className="text-xs font-bold text-gray-700 mb-2">📜 Status Terbit</h4>
+                      <h4 className="text-xs font-bold text-gray-700 mb-2">📉 Loss Value</h4>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          { key: 'TERBIT', label: 'Terbit', color: 'green' },
-                          { key: 'BELUM', label: 'Belum', color: 'red' },
+                          { key: 'ADA', label: 'Ada Value', color: 'red' },
+                          { key: 'KOSONG', label: 'Tidak Ada', color: 'slate' },
                         ].map((stat) => {
-                          const count = stat.key === 'TERBIT'
-                            ? (filteredCrmTargets || []).filter(t => t.statusSertifikat && t.statusSertifikat.toUpperCase() === 'TERBIT').length
-                            : (filteredCrmTargets || []).filter(t => !t.statusSertifikat || t.statusSertifikat.toUpperCase().includes('BELUM')).length;
-                          const isActive = isQuickFilterActive('statusSertifikat', stat.key);
+                          const count = stat.key === 'ADA'
+                            ? (filteredCrmTargets || []).filter(t => t.lossValue && t.lossValue > 0).length
+                            : (filteredCrmTargets || []).filter(t => !t.lossValue || t.lossValue === 0).length;
+                          const isActive = isQuickFilterActive('lossValue', stat.key);
                           return (
                             <div
                               key={stat.key}
-                              onClick={() => handleQuickFilter('statusSertifikat', stat.key)}
+                              onClick={() => handleQuickFilter('lossValue', stat.key)}
                               className={`bg-${stat.color}-100 border-2 border-${stat.color}-300 rounded-lg px-2 py-2 text-center cursor-pointer hover:shadow-md transition-all ${
                                 isActive ? `ring-2 ring-offset-1 ring-${stat.color}-500 shadow-md` : ''
                               }`}
