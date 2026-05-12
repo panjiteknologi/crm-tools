@@ -76,6 +76,7 @@ interface CrmTarget {
   statusPembayaran?: string;
   statusKomisi?: string;
   statusSertifikat?: string;
+  nomorSertifikat?: string;
   tanggalKunjungan?: string;
   statusKunjungan?: string;
   catatanKunjungan?: string;
@@ -123,6 +124,7 @@ interface CrmFormData {
   statusPembayaran?: string;
   statusKomisi?: string;
   statusSertifikat?: string;
+  nomorSertifikat?: string;
   tanggalKunjungan?: string;
   statusKunjungan?: string;
   catatanKunjungan?: string;
@@ -541,6 +543,15 @@ const FormDataRow = ({ row, index, onFieldChange, onRemove, totalRows, staffUser
           <option value="Belum Terbit">Belum Terbit</option>
         </select>
       </td>
+      <td className="border border-border p-1 min-w-[130px]">
+        <input
+          type="text"
+          defaultValue={row.nomorSertifikat}
+          onChange={(e) => handleChange('nomorSertifikat', e.target.value)}
+          placeholder="Nomor Sertifikat"
+          className="w-full px-2 py-1.5 text-xs border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-primary rounded"
+        />
+      </td>
       <td className="border border-border p-1 min-w-[120px]">
         <select
           defaultValue={row.bulanExpDate}
@@ -937,6 +948,7 @@ export default function CrmDataManagementPage() {
     cashback: '',
     terminPembayaran: '',
     statusSertifikat: '',
+    nomorSertifikat: '',
     tanggalKunjungan: '',
     statusKunjungan: '',
     bulanAuditSebelumnyaSustain: '',
@@ -1347,6 +1359,7 @@ export default function CrmDataManagementPage() {
       cashback: '',
       terminPembayaran: '',
       statusSertifikat: '',
+      nomorSertifikat: '',
       tanggalKunjungan: '',
       statusKunjungan: '',
     }]);
@@ -1427,6 +1440,7 @@ export default function CrmDataManagementPage() {
             cashback: row.cashback ? parseFloat(row.cashback) : undefined,
             terminPembayaran: row.terminPembayaran || undefined,
             statusSertifikat: row.statusSertifikat || undefined,
+            nomorSertifikat: row.nomorSertifikat || undefined,
             tanggalKunjungan: row.tanggalKunjungan || undefined,
             statusKunjungan: row.statusKunjungan || undefined,
             // @ts-ignore - Fields exist in schema but types not updated yet
@@ -1480,6 +1494,7 @@ export default function CrmDataManagementPage() {
         cashback: '',
         terminPembayaran: '',
         statusSertifikat: '',
+        nomorSertifikat: '',
         tanggalKunjungan: '',
         statusKunjungan: '',
       }]);
@@ -1557,7 +1572,7 @@ export default function CrmDataManagementPage() {
           'Trimming': 'trimmingValue', 'Loss': 'lossValue', 'Cashback': 'cashback',
           'Termin': 'terminPembayaran', 'Status Invoice': 'statusInvoice',
           'Status Pembayaran': 'statusPembayaran', 'Status Komisi': 'statusKomisi',
-          'Status Sertifikat': 'statusSertifikat', 'Tgl Kunjungan': 'tanggalKunjungan',
+          'Status Sertifikat': 'statusSertifikat', 'No Sertifikat': 'nomorSertifikat', 'Tgl Kunjungan': 'tanggalKunjungan',
           'Status Kunjungan': 'statusKunjungan', 'Foto Bukti': 'fotoBuktiKunjungan',
         };
         const headers = jsonData[0].map((h: any) => {
@@ -1614,6 +1629,7 @@ export default function CrmDataManagementPage() {
             cashback: parseCurrency(obj['cashback'] || obj['CASHBACK']),
             terminPembayaran: obj['terminPembayaran'] || obj['TERMIN PEMBAYARAN'] || undefined,
             statusSertifikat: obj['statusSertifikat'] || obj['STATUS SERTIFIKAT'] || undefined,
+            nomorSertifikat: obj['nomorSertifikat'] || obj['NO SERTIFIKAT'] || obj['NOMOR SERTIFIKAT'] || undefined,
             tanggalKunjungan: parseDate(obj['tanggalKunjungan'] || obj['TANGGAL KUNJUNGAN']),
             statusKunjungan: obj['statusKunjungan'] || obj['STATUS KUNJUNGAN'] || undefined,
             catatanKunjungan: obj['catatanKunjungan'] || obj['CATATAN KUNJUNGAN'] || undefined,
@@ -2644,6 +2660,7 @@ export default function CrmDataManagementPage() {
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[100px]">Cashback</th>
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[120px]">Termin</th>
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[120px]">Status Sertifikat</th>
+                      <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[130px]">No. Sertifikat</th>
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[120px]">Bulan Exp</th>
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[100px]">Tgl Kunjungan</th>
                       <th className="p-2 border border-border text-left font-medium text-xs whitespace-nowrap min-w-[100px]">Status Kunjungan</th>
@@ -2880,6 +2897,7 @@ export default function CrmDataManagementPage() {
                     cashback: '',
                     terminPembayaran: '',
                     statusSertifikat: '',
+                    nomorSertifikat: '',
                     tanggalKunjungan: '',
                     statusKunjungan: '',
                   }]);

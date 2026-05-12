@@ -144,6 +144,7 @@ const DEFAULT_COLUMN_VISIBILITY: VisibilityState = {
   namaKonsultan: false,
   noTelpKonsultan: false,
   emailKonsultan: false,
+  nomorSertifikat: false,
 };
 
 const DEFAULT_COLUMN_PINNING: ColumnPinningState = {
@@ -554,6 +555,7 @@ function DetailDrawer({ target, open, onClose, onEdit, canEdit, isMobile, onWaCl
     { label: "Status Bayar", value: target.statusPembayaran ? <Badge variant={target.statusPembayaran === "Lunas" ? "default" : "secondary"} className="text-[10px]">{target.statusPembayaran}</Badge> : "-" },
     { label: "Status Komisi", value: target.statusKomisi ? <Badge variant="outline" className="text-[10px]">{target.statusKomisi}</Badge> : "-" },
     { label: "Status Sertifikat", value: target.statusSertifikat ?? "-" },
+    { label: "Nomor Sertifikat", value: target.nomorSertifikat ?? "-" },
     { label: "Tgl Kunjungan", value: fmtDateFull(target.tanggalKunjungan) },
     { label: "Status Kunjungan", value: target.statusKunjungan ? <Badge variant="outline" className={`text-[10px] ${getStatusKunjunganBadgeStyle(target.statusKunjungan)}`}>{target.statusKunjungan}</Badge> : "-" },
     { label: "Catatan", value: target.catatanKunjungan ?? "-", span: true },
@@ -1011,6 +1013,7 @@ export function CrmDataTable({ data, canEdit = false, showExport = true, onEdit,
         <Badge variant="outline" className="text-[10px]">{String(v)}</Badge>
       ) : "-", { size: 110 }),
       mkCol("statusSertifikat", "Status Sertifikat", undefined, { size: 120 }),
+      mkCol("nomorSertifikat", "No. Sertifikat", undefined, { size: 140 }),
       mkCol("tanggalKunjungan", "Tgl Kunjungan", v => fmtDateFull(String(v ?? "")), {
         size: 110,
         getGroupingValue: (row: CrmTarget) => extractMonthYear(row.tanggalKunjungan),
@@ -1181,7 +1184,7 @@ export function CrmDataTable({ data, canEdit = false, showExport = true, onEdit,
         "Trimming": d.trimmingValue ?? 0, "Loss": d.lossValue ?? 0, "Cashback": d.cashback ?? 0,
         "Termin": d.terminPembayaran ?? "", "Status Invoice": d.statusInvoice ?? "",
         "Status Pembayaran": d.statusPembayaran ?? "", "Status Komisi": d.statusKomisi ?? "",
-        "Status Sertifikat": d.statusSertifikat ?? "", "Tgl Kunjungan": d.tanggalKunjungan ?? "",
+        "Status Sertifikat": d.statusSertifikat ?? "", "No Sertifikat": d.nomorSertifikat ?? "", "Tgl Kunjungan": d.tanggalKunjungan ?? "",
         "Status Kunjungan": d.statusKunjungan ?? "",
         "PIC Direct": d.picDirect ?? "", "No Telp": d.noTelp ?? "", "Email": d.email ?? "",
         "Konsultan": d.namaKonsultan ?? "", "Telp Konsultan": d.noTelpKonsultan ?? "", "Email Konsultan": d.emailKonsultan ?? "",

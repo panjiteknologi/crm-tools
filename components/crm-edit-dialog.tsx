@@ -62,6 +62,7 @@ interface CrmTarget {
   cashback?: number;
   terminPembayaran?: string;
   statusSertifikat?: string;
+  nomorSertifikat?: string;
   tanggalKunjungan?: string;
   statusKunjungan?: string;
   catatanKunjungan?: string;
@@ -120,6 +121,7 @@ interface FormData {
   cashback: string;
   terminPembayaran: string;
   statusSertifikat: string;
+  nomorSertifikat: string;
   tanggalKunjungan: string;
   statusKunjungan: string;
   catatanKunjungan: string;
@@ -172,6 +174,7 @@ const EditCrmDialog = React.memo(({ open, onOpenChange, target, staffUsers, onSu
     cashback: '',
     terminPembayaran: '',
     statusSertifikat: '',
+    nomorSertifikat: '',
     tanggalKunjungan: '',
     statusKunjungan: '',
     catatanKunjungan: '',
@@ -232,6 +235,7 @@ const EditCrmDialog = React.memo(({ open, onOpenChange, target, staffUsers, onSu
         cashback: target.cashback ? target.cashback.toLocaleString('id-ID') : '',
         terminPembayaran: target.terminPembayaran || '',
         statusSertifikat: normalizeForSelect(target.statusSertifikat, ['terbit', 'belum terbit']),
+        nomorSertifikat: target.nomorSertifikat || '',
         tanggalKunjungan: target.tanggalKunjungan || '',
         statusKunjungan: target.statusKunjungan || '',
         catatanKunjungan: target.catatanKunjungan || '',
@@ -378,6 +382,7 @@ const EditCrmDialog = React.memo(({ open, onOpenChange, target, staffUsers, onSu
         cashback: formData.cashback ? parseFloat(cleanNumber(formData.cashback)) : null,
         terminPembayaran: formData.terminPembayaran || null,
         statusSertifikat: formData.statusSertifikat || null,
+        nomorSertifikat: formData.nomorSertifikat || null,
         tanggalKunjungan: formData.tanggalKunjungan || null,
         statusKunjungan: formData.statusKunjungan || null,
         catatanKunjungan: formData.catatanKunjungan || null,
@@ -840,6 +845,16 @@ const EditCrmDialog = React.memo(({ open, onOpenChange, target, staffUsers, onSu
                         <SelectItem value="belum terbit">belum terbit</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nomor Sertifikat</Label>
+                    <Input
+                      value={formData.nomorSertifikat}
+                      onChange={(e) => updateFormField('nomorSertifikat', e.target.value)}
+                      placeholder="Nomor sertifikat"
+                      className="border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 h-9 text-sm"
+                    />
                   </div>
                 </div>
               </div>

@@ -39,6 +39,7 @@ export interface CrmTarget {
   statusPembayaran?: string;
   statusKomisi?: string;
   statusSertifikat?: string;
+  nomorSertifikat?: string;
   tanggalKunjungan?: string;
   statusKunjungan?: string;
   catatanKunjungan?: string;

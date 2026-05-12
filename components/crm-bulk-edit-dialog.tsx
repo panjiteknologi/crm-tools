@@ -46,7 +46,7 @@ type EditableField =
   | "iaDate" | "bulanAuditSebelumnyaSustain" | "expDate"
   | "bulanTtdNotif" | "bulanAudit" | "tanggalKunjungan"
   | "hargaKontrak" | "hargaTerupdate" | "cashback"
-  | "terminPembayaran" | "statusInvoice" | "statusPembayaran" | "statusKomisi" | "statusSertifikat"
+  | "terminPembayaran" | "statusInvoice" | "statusPembayaran" | "statusKomisi" | "statusSertifikat" | "nomorSertifikat"
   | "statusKunjungan" | "catatanKunjungan"
   | "picDirect" | "noTelp" | "email" | "namaKonsultan" | "noTelpKonsultan" | "emailKonsultan";
 
@@ -338,6 +338,7 @@ export function CrmBulkEditDialog({ open, onOpenChange, rows, onSaved }: CrmBulk
     { key:"statusPembayaran",  header:"Status Pembayaran",width:130, type:"combobox", options:STATUS_PEMBAYARAN_OPTIONS },
     { key:"statusKomisi",      header:"Status Komisi",    width:130, type:"combobox", options:STATUS_KOMISI_OPTIONS },
     { key:"statusSertifikat",  header:"Status Sertifikat",width:120, type:"combobox", options:STATUS_SERTIFIKAT_OPTIONS },
+    { key:"nomorSertifikat",   header:"No. Sertifikat",   width:140, type:"text" },
     // ── Kunjungan ─────────────────────────────────────────────────────────
     { key:"tanggalKunjungan",  header:"Tgl Kunjungan",    width:140, type:"date" },
     { key:"statusKunjungan",   header:"Status Kunjungan", width:120, type:"combobox", options:STATUS_KUNJUNGAN_OPTIONS },
@@ -524,6 +525,7 @@ export function CrmBulkEditDialog({ open, onOpenChange, rows, onSaved }: CrmBulk
           ...(e.statusPembayaran          !== undefined && { statusPembayaran:          s(e.statusPembayaran) }),
           ...(e.statusKomisi              !== undefined && { statusKomisi:              s(e.statusKomisi) }),
           ...(e.statusSertifikat          !== undefined && { statusSertifikat:          s(e.statusSertifikat) }),
+          ...(e.nomorSertifikat           !== undefined && { nomorSertifikat:           s(e.nomorSertifikat) }),
           ...(e.statusKunjungan           !== undefined && { statusKunjungan:           s(e.statusKunjungan) }),
           ...(e.catatanKunjungan          !== undefined && { catatanKunjungan:          s(e.catatanKunjungan) }),
           ...(e.picDirect                 !== undefined && { picDirect:                 s(e.picDirect) }),

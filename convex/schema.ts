@@ -168,6 +168,7 @@ export default defineSchema({
     statusInvoice: v.optional(v.union(v.literal("Terbit"), v.literal("Belum Terbit"))), // STATUS INVOICE
     statusPembayaran: v.optional(v.union(v.literal("Lunas"), v.literal("Belum Lunas"), v.literal("Sudah DP"))), // STATUS PEMBAYARAN
     statusKomisi: v.optional(v.union(v.literal("Sudah Diajukan"), v.literal("Belum Diajukan"), v.literal("Tidak Ada"))), // STATUS KOMISI
+    nomorSertifikat: v.optional(v.string()), // NOMOR SERTIFIKAT
     // Contact fields (tambahkan baru)
     noTelp: v.optional(v.string()), // No Telp Perusahaan
     email: v.optional(v.string()), // Email Perusahaan
