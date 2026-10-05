@@ -583,3 +583,72 @@ export const getVisitedTargets = action({
     return matches;
   },
 });
+
+const shiftYear = (date: string | undefined, diff: number) =>
+  date && /^\d{4}-\d{2}-\d{2}$/.test(date)
+    ? `${Number(date.slice(0, 4)) + diff}${date.slice(4)}`
+    : date;
+
+// Regenerate data: salin data tahun `fromYear` berstatus DONE menjadi data
+// tahun `toYear` berstatus WAITING. Satu halaman per panggilan (dipanggil
+// berulang dari client). Data yang sudah pernah di-regenerate dilewati.
+export const regenerateCrmTargets = mutation({
+  args: {
+    fromYear: v.string(),
+    toYear: v.string(),
+    cursor: v.union(v.string(), v.null()),
+    dryRun: v.optional(v.boolean()),
+    userId: v.optional(v.id("users")),
+  },
+  handler: async (ctx, args) => {
+    const diff = Number(args.toYear) - Number(args.fromYear);
+    const page = await ctx.db
+      .query("crmTargets")
+      .withIndex("by_tahun_status", (q) => q.eq("tahun", args.fromYear).eq("status", "DONE"))
+      .paginate({ numItems: 50, cursor: args.cursor });
+
+    let created = 0;
+    let skipped = 0;
+    const now = Date.now();
+    for (const src of page.page) {
+      const existing = await ctx.db
+        .query("crmTargets")
+        .withIndex("by_regeneratedFrom", (q) => q.eq("regeneratedFrom", src._id))
+        .first();
+      if (existing && existing.tahun === args.toYear) {
+        skipped++;
+        continue;
+      }
+      created++;
+      if (args.dryRun) continue;
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { _id, _creationTime, ...rest } = src;
+      await ctx.db.insert("crmTargets", {
+        ...rest,
+        tahun: args.toYear,
+        status: "WAITING",
+        expDate: shiftYear(src.expDate, diff),
+        bulanAudit: shiftYear(src.bulanAudit, diff),
+        bulanAuditSebelumnyaSustain: src.bulanAudit,
+        // reset field proses
+        alasan: undefined,
+        tanggalKunjungan: undefined,
+        statusKunjungan: undefined,
+        catatanKunjungan: undefined,
+        fotoBuktiKunjungan: undefined,
+        statusInvoice: undefined,
+        statusPembayaran: undefined,
+        statusKomisi: undefined,
+        nomorSertifikat: undefined,
+        lossValue: undefined,
+        regeneratedFrom: src._id,
+        created_by: args.userId,
+        updated_by: args.userId,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+    return { created, skipped, isDone: page.isDone, continueCursor: page.continueCursor };
+  },
+});

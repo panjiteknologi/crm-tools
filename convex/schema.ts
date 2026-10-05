@@ -169,6 +169,7 @@ export default defineSchema({
     statusPembayaran: v.optional(v.union(v.literal("Lunas"), v.literal("Belum Lunas"), v.literal("Sudah DP"))), // STATUS PEMBAYARAN
     statusKomisi: v.optional(v.union(v.literal("Sudah Diajukan"), v.literal("Belum Diajukan"), v.literal("Tidak Ada"))), // STATUS KOMISI
     nomorSertifikat: v.optional(v.string()), // NOMOR SERTIFIKAT
+    regeneratedFrom: v.optional(v.id("crmTargets")), // Sumber data hasil regenerate (cegah duplikat)
     // Contact fields (tambahkan baru)
     noTelp: v.optional(v.string()), // No Telp Perusahaan
     email: v.optional(v.string()), // Email Perusahaan
@@ -191,7 +192,8 @@ export default defineSchema({
     .index("by_tanggalKunjungan", ["tanggalKunjungan"])
     .index("by_created_by", ["created_by"])
     .index("by_createdAt", ["createdAt"])
-    .index("by_tahun_status", ["tahun", "status"]),
+    .index("by_tahun_status", ["tahun", "status"])
+    .index("by_regeneratedFrom", ["regeneratedFrom"]),
 
   // Table KPI Annual (1 KPI per tahun untuk divisi)
   kpiAnnual: defineTable({

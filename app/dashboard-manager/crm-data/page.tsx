@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -713,6 +713,43 @@ export default function CrmDataManagementPage() {
   const createTarget = useMutation(api.crmTargets.createCrmTarget);
   const updateTargetMutation = useMutation(api.crmTargets.updateCrmTarget);
   const deleteAllTargets = useMutation(api.crmTargets.deleteAllCrmTargets);
+  const regenerateMutation = useMutation(api.crmTargets.regenerateCrmTargets);
+  const [showRegenDialog, setShowRegenDialog] = React.useState(false);
+  const [regenFrom, setRegenFrom] = React.useState('2026');
+  const [regenTo, setRegenTo] = React.useState('2027');
+  const [regenRunning, setRegenRunning] = React.useState(false);
+  const [regenProgress, setRegenProgress] = React.useState<{ created: number; skipped: number } | null>(null);
+
+  const runRegenerate = async (dryRun: boolean) => {
+    if (regenFrom === regenTo) {
+      toast.error('Tahun sumber dan tujuan tidak boleh sama');
+      return;
+    }
+    setRegenRunning(true);
+    setRegenProgress({ created: 0, skipped: 0 });
+    let cursor: string | null = null;
+    let created = 0;
+    let skipped = 0;
+    try {
+      while (true) {
+        const res: { created: number; skipped: number; isDone: boolean; continueCursor: string } =
+          await regenerateMutation({ fromYear: regenFrom, toYear: regenTo, cursor, dryRun, userId: currentUser?._id });
+        created += res.created;
+        skipped += res.skipped;
+        setRegenProgress({ created, skipped });
+        if (res.isDone) break;
+        cursor = res.continueCursor;
+      }
+      toast.success(dryRun
+        ? `Preview: ${created} data akan dibuat, ${skipped} dilewati (sudah ada)`
+        : `Regenerate selesai: ${created} data dibuat, ${skipped} dilewati`);
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal regenerate data');
+    } finally {
+      setRegenRunning(false);
+    }
+  };
 
   // Loading state - show loading while any critical query is loading
   const isLoading = crmTargets === undefined || allUsers === undefined;
@@ -2046,6 +2083,12 @@ export default function CrmDataManagementPage() {
                   <Plus className="h-4 w-4" />
                   Tambah Data
                 </Button>
+                {currentUser?.role !== 'staff' && (
+                  <Button onClick={() => { setRegenProgress(null); setShowRegenDialog(true); }} size="sm" variant="outline" disabled={isImporting} className="h-9 gap-1.5 text-xs border-emerald-600 text-emerald-700 hover:bg-emerald-50 cursor-pointer">
+                    <Database className="h-4 w-4" />
+                    Regenerate
+                  </Button>
+                )}
               </>
             )}
           </div>
@@ -2584,6 +2627,50 @@ export default function CrmDataManagementPage() {
           // Optional: refresh data or show success message
         }}
       />
+
+      {/* Regenerate Dialog */}
+      <Dialog open={showRegenDialog} onOpenChange={(o) => !regenRunning && setShowRegenDialog(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Regenerate Data</DialogTitle>
+            <DialogDescription>
+              Salin data tahun sumber berstatus DONE menjadi data tahun tujuan berstatus WAITING. Field proses
+              (alasan, kunjungan, invoice, pembayaran, komisi, no. sertifikat, loss value) dikosongkan; EXP DATE
+              dan BULAN AUDIT digeser mengikuti selisih tahun. Data yang sudah pernah di-regenerate dilewati.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-3">
+            <Select value={regenFrom} onValueChange={setRegenFrom} disabled={regenRunning}>
+              <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 8 }, (_, i) => (2023 + i).toString()).map((y) => (
+                  <SelectItem key={y} value={y}>{y}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span>→</span>
+            <Select value={regenTo} onValueChange={setRegenTo} disabled={regenRunning}>
+              <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 8 }, (_, i) => (2023 + i).toString()).map((y) => (
+                  <SelectItem key={y} value={y}>{y}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {regenProgress && (
+            <p className="text-sm text-muted-foreground">
+              Diproses: {regenProgress.created} dibuat/akan dibuat, {regenProgress.skipped} dilewati
+            </p>
+          )}
+          <DialogFooter>
+            <Button variant="outline" className="cursor-pointer" disabled={regenRunning} onClick={() => runRegenerate(true)}>Preview</Button>
+            <Button className="cursor-pointer bg-emerald-700 hover:bg-emerald-800" disabled={regenRunning} onClick={() => runRegenerate(false)}>
+              {regenRunning ? 'Memproses...' : 'Regenerate'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
