@@ -345,13 +345,23 @@ const multiSelectFilter: FilterFn<CrmTarget> = (row, columnId, filterValue: stri
 multiSelectFilter.autoRemove = (v: string[]) => !v?.length;
 
 const EXCLUDED_KEYS = new Set(["_id", "createdAt", "updatedAt"]);
+// Cache teks pencarian per baris agar tidak dihitung ulang di setiap pencarian
+const searchTextCache = new WeakMap<object, string>();
+const getSearchText = (original: CrmTarget): string => {
+  let text = searchTextCache.get(original);
+  if (text === undefined) {
+    text = Object.entries(original)
+      .filter(([key]) => !EXCLUDED_KEYS.has(key))
+      .map(([, val]) => String(val ?? "").toLowerCase())
+      .join("\u0001");
+    searchTextCache.set(original, text);
+  }
+  return text;
+};
 const globalSearchFilter: FilterFn<CrmTarget> = (row, _columnId, filterValue) => {
   const search = String(filterValue ?? "").toLowerCase().trim();
   if (!search) return true;
-  return Object.entries(row.original).some(([key, val]) => {
-    if (EXCLUDED_KEYS.has(key)) return false;
-    return String(val ?? "").toLowerCase().includes(search);
-  });
+  return getSearchText(row.original).includes(search);
 };
 globalSearchFilter.autoRemove = (v: string) => !v?.trim();
 
@@ -703,6 +713,11 @@ export function CrmDataTable({ data, canEdit = false, showExport = true, onEdit,
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setGlobalFilter(searchInput), 300);
+    return () => clearTimeout(t);
+  }, [searchInput]);
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -1252,8 +1267,8 @@ export function CrmDataTable({ data, canEdit = false, showExport = true, onEdit,
             <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Cari data..."
-              value={globalFilter}
-              onChange={e => setGlobalFilter(e.target.value)}
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
               className="pl-8 h-8 text-xs w-full"
             />
           </div>
@@ -1297,7 +1312,7 @@ export function CrmDataTable({ data, canEdit = false, showExport = true, onEdit,
             </span>
             {hasActiveFilters && (
               <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs cursor-pointer border-destructive text-destructive hover:bg-destructive/10"
-                onClick={() => { setColumnFilters([]); setGlobalFilter(""); setDateRange(undefined); }}>
+                onClick={() => { setColumnFilters([]); setGlobalFilter(""); setSearchInput(""); setDateRange(undefined); }}>
                 <IconFilterOff className="h-3.5 w-3.5" />Reset Filter
               </Button>
             )}
@@ -1342,7 +1357,7 @@ export function CrmDataTable({ data, canEdit = false, showExport = true, onEdit,
           <div className="flex sm:hidden items-center gap-1 ml-auto">
             {hasActiveFilters && (
               <Button variant="outline" size="icon" className="h-8 w-8 cursor-pointer border-destructive text-destructive hover:bg-destructive/10"
-                title="Reset Filter" onClick={() => { setColumnFilters([]); setGlobalFilter(""); setDateRange(undefined); }}>
+                title="Reset Filter" onClick={() => { setColumnFilters([]); setGlobalFilter(""); setSearchInput(""); setDateRange(undefined); }}>
                 <IconFilterOff className="h-3.5 w-3.5" />
               </Button>
             )}

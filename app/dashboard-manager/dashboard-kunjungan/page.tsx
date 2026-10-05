@@ -169,6 +169,11 @@ export default function DashboardKunjunganPage() {
   const [filterAlasan, setFilterAlasan] = React.useState<string>("all")
   const [searchQuery, setSearchQuery] = React.useState<string>("")
   const [tableSearchQuery, setTableSearchQuery] = React.useState<string>("")
+  const [tableSearchInput, setTableSearchInput] = React.useState<string>("")
+  React.useEffect(() => {
+    const t = setTimeout(() => setTableSearchQuery(tableSearchInput), 300)
+    return () => clearTimeout(t)
+  }, [tableSearchInput])
   const [currentDate, setCurrentDate] = React.useState(new Date())
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null)
   const [selectedTask, setSelectedTask] = React.useState<CrmTarget | null>(null)
@@ -1200,8 +1205,8 @@ export default function DashboardKunjunganPage() {
                   <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Cari perusahaan, PIC, sales..."
-                    value={tableSearchQuery}
-                    onChange={(e) => setTableSearchQuery(e.target.value)}
+                    value={tableSearchInput}
+                    onChange={(e) => setTableSearchInput(e.target.value)}
                     className="pl-10"
                   />
                 </div>
